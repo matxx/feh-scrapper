@@ -231,6 +231,23 @@ module Scrappers
           { can_not_use: }
         end
       end
+
+      def sanitize_weapon_type(skill)
+        return unless skill['Scategory'] == self.class::WEAPON
+
+        can_use = skill['CanUseWeapon'].split(/,[[:space:]]*/)
+        can_use.uniq!
+
+        return WEAPON_A_BO if (ALL_BOWS - can_use).empty?
+        return WEAPON_A_DA if (ALL_DAGGERS - can_use).empty?
+        return WEAPON_A_TO if (ALL_TOMES - can_use).empty?
+        return WEAPON_A_BR if (ALL_BREATHES - can_use).empty?
+        return WEAPON_A_BE if (ALL_BEASTS - can_use).empty?
+
+        return can_use[0] if can_use.size == 1
+
+        errors[:not_sanitizable_weapon_type] << skill
+      end
     end
   end
 end

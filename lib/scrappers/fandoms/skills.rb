@@ -3,6 +3,7 @@
 module Scrappers
   module Fandoms
     module Skills
+      WEAPON = 'weapon'
       SACRED_SEAL = 'sacredseal'
 
       # as long as "all_skills_by_name" is only used for seals
@@ -195,6 +196,7 @@ module Scrappers
           name: skill['Name'],
           group_name: skill['GroupName'],
           category: skill['Scategory'],
+          weapon_type: sanitize_weapon_type(skill),
 
           image_url: skill[:image_url],
 
