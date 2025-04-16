@@ -13,7 +13,7 @@ module Scrappers
       # that are not yet in the units list page yet
       # to extract them anyway
       PAGE_IDS_OF_NEW_UNITS = {
-        KIND_UNIT => nil,
+        KIND_UNIT => ['513845', '513846', '513847', '513848'],
       }.freeze
 
       def extract_list_units(dom)

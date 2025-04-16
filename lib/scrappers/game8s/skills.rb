@@ -20,14 +20,14 @@ module Scrappers
       # that are not yet in the skills lists page yet
       # to extract them anyway
       PAGE_IDS_OF_NEW_SKILLS = {
-        skills_weapon: nil,
+        skills_weapon: ['513851', '513852', '513853', '513854', '513850'],
         skills_assist: nil,
-        skills_special: nil,
-        skills_a: ['512297', '512298', '512296'],
-        skills_b: nil,
-        skills_c: nil,
+        skills_special: ['513855'],
+        skills_a: ['512297', '512298', '512296', '513856'],
+        skills_b: ['513857', '513858'],
+        skills_c: ['513859', '513860'],
         skills_s: nil,
-        skills_x: nil,
+        skills_x: ['513861'],
       }.freeze
 
       EXTRACT = {
