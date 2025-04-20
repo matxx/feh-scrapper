@@ -161,7 +161,7 @@ module Scrappers
         nil
       end
 
-      def export_skills_units(dirs = ['data/fandom', '../feh-data'])
+      def export_skills_units(dirs = ['data/fandom', '../feh-data/data'])
         string = JSON.pretty_generate(units_skills_as_json)
         dirs.each do |dir|
           file_name = "#{dir}/skills_units.json"

@@ -30,23 +30,25 @@ module Scrappers
       end
 
       def compute_all_seals
+        return if all_seals
+
         @all_seals = seals_from_skills
-        @all_seals += sacred_seals_from_costs_table
+        @all_seals += seals_from_costs_table
 
         nil
       end
 
-      def export_seals(dirs = ['data/fandom', '../feh-data'])
-        string = JSON.pretty_generate(sacred_seals_as_json)
+      def export_seals(dirs = ['data/fandom', '../feh-data/data'])
+        string = JSON.pretty_generate(seals_as_json)
         dirs.each do |dir|
-          file_name = "#{dir}/sacred_seals.json"
+          file_name = "#{dir}/seals.json"
           FileUtils.mkdir_p File.dirname(file_name)
           File.write(file_name, string)
         end
 
-        string = JSON.pretty_generate(sacred_seals_descriptions_as_json)
+        string = JSON.pretty_generate(seals_descriptions_as_json)
         dirs.each do |dir|
-          file_name = "#{dir}/sacred_seals-descriptions.json"
+          file_name = "#{dir}/seals-descriptions.json"
           FileUtils.mkdir_p File.dirname(file_name)
           File.write(file_name, string)
         end
@@ -56,7 +58,7 @@ module Scrappers
 
       private
 
-      def sacred_seals_from_costs_table
+      def seals_from_costs_table
         all_sacred_seal_costs.map do |x|
           name = x['Skill']
           next if seals_from_skills_by_name[name]
@@ -71,11 +73,11 @@ module Scrappers
         end.compact
       end
 
-      def sacred_seals_as_json
-        all_seals.map { |seal| sacred_seal_as_json(seal) }
+      def seals_as_json
+        all_seals.map { |seal| seal_as_json(seal) }
       end
 
-      def sacred_seal_as_json(seal)
+      def seal_as_json(seal)
         {
           id: seal['TagID'],
           game8_id: seal[:game8_id],
@@ -92,11 +94,11 @@ module Scrappers
         }
       end
 
-      def sacred_seals_descriptions_as_json
-        all_seals.map { |seal| sacred_seal_description_as_json(seal) }
+      def seals_descriptions_as_json
+        all_seals.map { |seal| seal_description_as_json(seal) }
       end
 
-      def sacred_seal_description_as_json(seal)
+      def seal_description_as_json(seal)
         {
           id: seal['TagID'],
           description: sanitize_description(seal['Description']),

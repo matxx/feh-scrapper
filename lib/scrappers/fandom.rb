@@ -8,6 +8,7 @@ require 'scrappers/fandoms/duo_heroes'
 require 'scrappers/fandoms/images'
 require 'scrappers/fandoms/legendary_heroes'
 require 'scrappers/fandoms/mythic_heroes'
+require 'scrappers/fandoms/resplendent_heroes'
 require 'scrappers/fandoms/sacred_seal_costs'
 require 'scrappers/fandoms/skills'
 require 'scrappers/fandoms/skills_weapons'
@@ -31,6 +32,7 @@ module Scrappers
     include Scrappers::Fandoms::Images
     include Scrappers::Fandoms::LegendaryHeroes
     include Scrappers::Fandoms::MythicHeroes
+    include Scrappers::Fandoms::ResplendentHeroes
     include Scrappers::Fandoms::SacredSealCosts
     include Scrappers::Fandoms::Skills
     include Scrappers::Fandoms::SkillsWeapons
@@ -77,6 +79,7 @@ module Scrappers
       log_and_launch(:scrap_skills)
       log_and_launch(:scrap_sacred_seal_costs)
       log_and_launch(:scrap_duo_heroes)
+      # log_and_launch(:scrap_resplendent_heroes)
       log_and_launch(:scrap_legendary_heroes)
       log_and_launch(:scrap_mythic_heroes)
       log_and_launch(:scrap_generic_summon_pool)
@@ -126,7 +129,7 @@ module Scrappers
       "<#{self.class} @now=#{now}>"
     end
 
-    def export_accents(dirs = ['data/fandom', '../feh-data'])
+    def export_accents(dirs = ['data/fandom', '../feh-data/data'])
       string = JSON.pretty_generate(accents_table)
       dirs.each do |dir|
         file_name = "#{dir}/accents.json"
@@ -137,7 +140,8 @@ module Scrappers
       nil
     end
 
-    def export_constants(dirs = ['data/fandom', '../feh-data'])
+    def export_constants(dirs = ['data/fandom', '../feh-data/data'])
+      constants.transform_values! { |v| v.is_a?(Array) ? v.sort : v }
       string = JSON.pretty_generate(constants)
       dirs.each do |dir|
         file_name = "#{dir}/constants.json"

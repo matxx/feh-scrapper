@@ -15,8 +15,8 @@ a = Scrappers::All.new
 # a = Scrappers::All.new(level: Logger::WARN)
 # a = Scrappers::All.new(level: Logger::INFO)
 # a = Scrappers::All.new(level: Logger::DEBUG)
-# a.game8.reset_index_files
-# a.game8.reset_json_files
+a.game8.reset_index_files
+a.game8.reset_json_files
 a.handle_everything
 
 # 3.2.2 :024 > a.fandom.errors[:skills_with_same_name]
@@ -53,7 +53,7 @@ a.errors[:game8_skill_not_found].map { |x| x['Name'] }
 a.fandom.all_skills.select { |x| x['Scategory'] == 'sacredseal' }.count
 # => 292
 
-a.game8.all_skills.select{|x|x['category']=='skills_s'&&!x['game8_name'].include?('Squad')}.size
+a.game8.all_skills.select { |x| x['category'] == 'skills_s' && !x['game8_name'].include?('Squad') }.size
 # => 243
-a.fandom.all_skills.select{|x|x['Scategory']=='sacredseal'&&!x['Name'].include?('Squad')}.size
+a.fandom.all_skills.select { |x| x['Scategory'] == 'sacredseal' && !x['Name'].include?('Squad') }.size
 # => 56

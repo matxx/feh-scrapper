@@ -72,22 +72,6 @@ module Scrappers
         UNIT_PROPERTY_BY_KIND
         .select { |k, _| FIVE_STAR_FOCUS_ONLY_UNIT_KINDS.include?(k) }
         .values
-      UNIT_TRAITS_PROPERTIES =
-        UNIT_PROPERTY_BY_KIND
-        .select { |k, _| UNIT_TRAITS.include?(k) }
-        .values
-
-      # h.book = 6
-      # if h.intID < 190:
-      #     h.book = 1
-      # elif h.intID < 317:
-      #     h.book = 2
-      # elif h.intID < 454:
-      #     h.book = 3
-      # elif h.intID < 594:
-      #     h.book = 4
-      # elif h.intID < 738:
-      #     h.book = 5
 
       # https://feheroes.fandom.com/wiki/Special:CargoTables/Units
       # more details on properties
@@ -168,16 +152,6 @@ module Scrappers
           elsif unit[:properties].include?('tempest')
             unit[:is_in][:heroic_grails] = true
             unit[:lowest_rarity][:heroic_grails] = 4
-          end
-
-          traits = unit[:properties] & UNIT_TRAITS_PROPERTIES
-          case traits.size
-          when 0
-            nil # nothing to do
-          when 1
-            unit[:trait] = traits.first
-          else
-            errors[:units_with_more_than_one_trait] << unit['WikiName']
           end
         end
 
@@ -354,7 +328,7 @@ module Scrappers
         end
       end
 
-      def export_units(dirs = ['data/fandom', '../feh-data'])
+      def export_units(dirs = ['data/fandom', '../feh-data/data'])
         string = JSON.pretty_generate(units_as_json)
         dirs.each do |dir|
           file_name = "#{dir}/units.json"
@@ -395,7 +369,6 @@ module Scrappers
         relevant_units.map { |unit| unit_as_json(unit) }
       end
 
-      # https://static.wikia.nocookie.net/feheroes_gamepedia_en/images/e/eb/Lucina_Future_Witness_Face_FC.webp/revision/latest/scale-to-width-down/90?cb=20190920194531
       def unit_as_json(unit)
         {
           id: unit['TagID'],
@@ -406,10 +379,15 @@ module Scrappers
           gender: unit['Gender'],
           move_type: unit['MoveType'],
           weapon_type: unit['WeaponType'],
-          game_titles: (unit['Origin'] || '').split(','),
-          trait: unit[:trait],
+          games: (unit['Origin'] || '').split(','),
 
-          has_resplendent_attire: unit[:properties].include?('resplendent'),
+          # game_sort: unit['GameSort'],
+          # char_sort: unit['CharSort'],
+          origin: "#{unit['GameSort'].to_s.rjust(2, '0')}#{unit['CharSort'].to_s.rjust(10, '0')}",
+          book: unit_book(unit),
+
+          # has_resplendent: !all_resplendent_heroes_by_pagename[unit['Page']].nil?,
+          has_respl: unit[:properties].include?('resplendent'),
 
           is_brave:  unit[:properties].include?('brave'),
           is_fallen: unit[:properties].include?('fallen'),
@@ -447,6 +425,21 @@ module Scrappers
             :max_score,
           ),
         )
+        # ).compact
+      end
+
+      def unit_book(unit)
+        id = unit['IntID'].to_i
+        return 9 if id >= 1174 # Rune: Source of Wisdom
+        return 8 if id >= 1029 # Ratatoskr: Mending Hand
+        return 7 if id >= 882 # Seiðr: Goddess of Hope
+        return 6 if id >= 738 # Ash: Retainer to Askr
+        return 5 if id >= 594 # Reginn: Bearing Hope
+        return 4 if id >= 454 # Peony: Sweet Dream
+        return 3 if id >= 317 # Eir: Merciful Death
+        return 2 if id >= 191 # Fjorm: Princess of Ice
+
+        1
       end
 
       def unit_availabilities_as_json

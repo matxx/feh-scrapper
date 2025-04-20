@@ -195,7 +195,7 @@ module Scrappers
       nil
     end
 
-    def export_game8_skill_ratings(dirs = ['data', '../feh-data'])
+    def export_game8_skill_ratings(dirs = ['data', '../feh-data/data'])
       string = JSON.pretty_generate(all_skills)
       dirs.each do |dir|
         file_name = "#{dir}/skills-ratings-game8.json"
@@ -204,16 +204,16 @@ module Scrappers
       end
     end
 
-    def export_game8_seal_ratings(dirs = ['data', '../feh-data'])
+    def export_game8_seal_ratings(dirs = ['data', '../feh-data/data'])
       string = JSON.pretty_generate(all_seals)
       dirs.each do |dir|
-        file_name = "#{dir}/sacred_seals-ratings-game8.json"
+        file_name = "#{dir}/seals-ratings-game8.json"
         FileUtils.mkdir_p File.dirname(file_name)
         File.write(file_name, string)
       end
     end
 
-    def export_game8_unit_ratings(dirs = ['data', '../feh-data'])
+    def export_game8_unit_ratings(dirs = ['data', '../feh-data/data'])
       string = JSON.pretty_generate(all_units)
       dirs.each do |dir|
         file_name = "#{dir}/units-ratings-game8.json"
