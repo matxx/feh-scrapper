@@ -6,29 +6,30 @@ module Scrappers
       SKILLS_S = 'skills_s'
 
       PAGE_ID_SKILLS = {
-        skills_weapon: '265412',
-        skills_assist: '265413',
-        skills_special: '265414',
-        skills_a: '265416',
-        skills_b: '265417',
-        skills_c: '265418',
-        skills_s: '267543',
-        skills_x: '430372',
+        skills_weapon:  '265412', # https://game8.co/games/fire-emblem-heroes/archives/265412
+        skills_assist:  '265413', # https://game8.co/games/fire-emblem-heroes/archives/265413
+        skills_special: '265414', # https://game8.co/games/fire-emblem-heroes/archives/265414
+        skills_a: '265416', # https://game8.co/games/fire-emblem-heroes/archives/265416
+        skills_b: '265417', # https://game8.co/games/fire-emblem-heroes/archives/265417
+        skills_c: '265418', # https://game8.co/games/fire-emblem-heroes/archives/265418
+        skills_s: '267543', # https://game8.co/games/fire-emblem-heroes/archives/267543
+        skills_x: '430372', # https://game8.co/games/fire-emblem-heroes/archives/430372
       }.freeze
 
       # add page IDs of new skills
       # that are not yet in the skills lists page yet
       # to extract them anyway
       PAGE_IDS_OF_NEW_SKILLS = {
-        skills_weapon: ['513851', '513852', '513853', '513854', '513850'],
-        skills_assist: nil,
-        skills_special: ['513855'],
-        skills_a: ['512297', '512298', '512296', '513856'],
-        skills_b: ['513857', '513858'],
-        skills_c: ['513859', '513860'],
-        skills_s: nil,
-        skills_x: ['513861'],
+        skills_weapon: [],
+        skills_assist: [],
+        skills_special: [],
+        skills_a: [],
+        skills_b: [],
+        skills_c: [],
+        skills_s: [],
+        skills_x: [],
       }.freeze
+      # missing : Atk/Spd Tidings ; Primordial Boost ; Trample
 
       EXTRACT = {
         skills_assist: [

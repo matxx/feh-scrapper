@@ -6,14 +6,14 @@ module Scrappers
       KIND_UNIT = :units
 
       PAGE_ID_UNITS = {
-        KIND_UNIT => '242267',
+        KIND_UNIT => '242267', # https://game8.co/games/fire-emblem-heroes/archives/242267
       }.freeze
 
       # add page IDs of new units
       # that are not yet in the units list page yet
       # to extract them anyway
       PAGE_IDS_OF_NEW_UNITS = {
-        KIND_UNIT => ['513845', '513846', '513847', '513848'],
+        KIND_UNIT => [],
       }.freeze
 
       def extract_list_units(dom)
