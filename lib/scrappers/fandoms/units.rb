@@ -414,6 +414,7 @@ module Scrappers
         }.merge(
           unit.slice(
             :game8_id,
+            :game8_name,
 
             :image_url_for_portrait,
             :image_url_for_icon_legendary,

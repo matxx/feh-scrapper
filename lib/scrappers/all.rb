@@ -196,7 +196,7 @@ module Scrappers
     end
 
     def export_game8_skill_ratings(dirs = ['data', '../feh-data/data'])
-      string = JSON.pretty_generate(all_skills)
+      string = JSON.pretty_generate(exclude_game8_keys(all_skills))
       dirs.each do |dir|
         file_name = "#{dir}/skills-ratings-game8.json"
         FileUtils.mkdir_p File.dirname(file_name)
@@ -205,7 +205,7 @@ module Scrappers
     end
 
     def export_game8_seal_ratings(dirs = ['data', '../feh-data/data'])
-      string = JSON.pretty_generate(all_seals)
+      string = JSON.pretty_generate(exclude_game8_keys(all_seals))
       dirs.each do |dir|
         file_name = "#{dir}/seals-ratings-game8.json"
         FileUtils.mkdir_p File.dirname(file_name)
@@ -214,12 +214,16 @@ module Scrappers
     end
 
     def export_game8_unit_ratings(dirs = ['data', '../feh-data/data'])
-      string = JSON.pretty_generate(all_units)
+      string = JSON.pretty_generate(exclude_game8_keys(all_units))
       dirs.each do |dir|
         file_name = "#{dir}/units-ratings-game8.json"
         FileUtils.mkdir_p File.dirname(file_name)
         File.write(file_name, string)
       end
+    end
+
+    def exclude_game8_keys(items)
+      items.map { |item| item.except(:game8_id, :game8_name) }
     end
 
     def inspect
@@ -265,6 +269,7 @@ module Scrappers
       res = {
         id:,
         game8_id: g_skill['game8_id'],
+        game8_name: g_skill['game8_name'],
       }
       if with_rating
         res.merge!(
@@ -289,9 +294,10 @@ module Scrappers
     def store_unit(id, g_unit)
       all_units << {
         id:,
+        game8_id: g_unit['game8_id'],
+        game8_name: g_unit['game8_name'],
       }.merge(
         g_unit.slice(
-          'game8_id',
           'game8_rating',
           'recommended_boon',
           'recommended_bane',
@@ -307,7 +313,8 @@ module Scrappers
         a_unit = all_units_by_id[f_unit['TagID']]
         next (errors[:game8_unit_not_found] << f_unit) if a_unit.nil?
 
-        f_unit[:game8_id] = a_unit['game8_id']
+        f_unit[:game8_id] = a_unit[:game8_id]
+        f_unit[:game8_name] = a_unit[:game8_name]
       end
     end
 
@@ -367,6 +374,7 @@ module Scrappers
         next (errors[:game8_skill_not_found] << f_skill) if a_skill.nil?
 
         f_skill[:game8_id] = a_skill[:game8_id]
+        f_skill[:game8_name] = a_skill[:game8_name]
       end
     end
 
@@ -389,6 +397,7 @@ module Scrappers
         end
 
         f_seal[:game8_id] = a_seal[:game8_id]
+        f_seal[:game8_name] = a_seal[:game8_name]
       end
     end
   end

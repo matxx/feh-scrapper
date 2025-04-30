@@ -69,7 +69,7 @@ module Scrappers
             next
           end
 
-          skill.merge('Scategory' => self.class::SACRED_SEAL)
+          skill.except(:game8_id).merge('Scategory' => self.class::SACRED_SEAL)
         end.compact
       end
 
