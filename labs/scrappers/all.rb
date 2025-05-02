@@ -15,8 +15,8 @@ a = Scrappers::All.new
 # a = Scrappers::All.new(level: Logger::WARN)
 # a = Scrappers::All.new(level: Logger::INFO)
 # a = Scrappers::All.new(level: Logger::DEBUG)
-a.game8.reset_index_files
-a.game8.reset_json_files
+# a.game8.reset_index_files
+# a.game8.reset_json_files
 a.handle_everything
 
 # 3.2.2 :024 > a.fandom.errors[:skills_with_same_name]

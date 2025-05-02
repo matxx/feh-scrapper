@@ -383,6 +383,7 @@ module Scrappers
 
           # game_sort: unit['GameSort'],
           # char_sort: unit['CharSort'],
+          id_int: unit['IntID'].to_i,
           origin: "#{unit['GameSort'].to_s.rjust(2, '0')}#{unit['CharSort'].to_s.rjust(10, '0')}",
           book: unit_book(unit),
 
