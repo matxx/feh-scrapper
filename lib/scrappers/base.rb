@@ -2,6 +2,8 @@
 
 module Scrappers
   class Base
+    EXPORT_DIRS = ['data/fandom', '../feh-data/data'].freeze
+
     def initialize(*); end
 
     private

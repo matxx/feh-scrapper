@@ -328,7 +328,7 @@ module Scrappers
         end
       end
 
-      def export_units(dirs = ['data/fandom', '../feh-data/data'])
+      def export_units(dirs = self.class::EXPORT_DIRS)
         string = JSON.pretty_generate(units_as_json)
         dirs.each do |dir|
           file_name = "#{dir}/units.json"

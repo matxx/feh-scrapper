@@ -3,6 +3,8 @@
 require 'mediawiki_api'
 
 require 'scrappers/base'
+require 'scrappers/fandoms/banner_focuses'
+require 'scrappers/fandoms/distributions'
 require 'scrappers/fandoms/divine_codes'
 require 'scrappers/fandoms/duo_heroes'
 require 'scrappers/fandoms/images'
@@ -27,6 +29,8 @@ module Scrappers
   # - `unit['Properties']` comes from fandom (and is a string with comma-separated values ; ex: 'aided,aide')
   # - `unit[:properties]` has been added by this repo (and is an array of strings ; ex: ['aided', 'aide'])
   class Fandom < Base
+    include Scrappers::Fandoms::BannerFocuses
+    include Scrappers::Fandoms::Distributions
     include Scrappers::Fandoms::DivineCodes
     include Scrappers::Fandoms::DuoHeroes
     include Scrappers::Fandoms::Images
@@ -85,6 +89,8 @@ module Scrappers
       log_and_launch(:scrap_generic_summon_pool)
       log_and_launch(:scrap_special_summon_pool)
       log_and_launch(:scrap_divine_codes)
+      log_and_launch(:scrap_banner_focuses)
+      log_and_launch(:scrap_distributions)
 
       log_and_launch(:compute_all_seals)
 
@@ -116,6 +122,8 @@ module Scrappers
 
     def export_everything
       log_and_launch(:export_accents)
+      log_and_launch(:export_banners)
+      log_and_launch(:export_distributions)
       log_and_launch(:export_units)
       log_and_launch(:export_skills)
       log_and_launch(:export_skills_units)
@@ -129,7 +137,7 @@ module Scrappers
       "<#{self.class} @now=#{now}>"
     end
 
-    def export_accents(dirs = ['data/fandom', '../feh-data/data'])
+    def export_accents(dirs = self.class::EXPORT_DIRS)
       string = JSON.pretty_generate(accents_table)
       dirs.each do |dir|
         file_name = "#{dir}/accents.json"
@@ -140,7 +148,7 @@ module Scrappers
       nil
     end
 
-    def export_constants(dirs = ['data/fandom', '../feh-data/data'])
+    def export_constants(dirs = self.class::EXPORT_DIRS)
       constants.transform_values! { |v| v.is_a?(Array) ? v.sort : v }
       string = JSON.pretty_generate(constants)
       dirs.each do |dir|

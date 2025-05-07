@@ -38,7 +38,7 @@ module Scrappers
         nil
       end
 
-      def export_seals(dirs = ['data/fandom', '../feh-data/data'])
+      def export_seals(dirs = self.class::EXPORT_DIRS)
         string = JSON.pretty_generate(seals_as_json)
         dirs.each do |dir|
           file_name = "#{dir}/seals.json"

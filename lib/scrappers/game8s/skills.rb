@@ -23,13 +23,12 @@ module Scrappers
         skills_weapon: [],
         skills_assist: [],
         skills_special: [],
-        skills_a: [],
+        skills_a: ['512297', '512298', '512296'], # Atk/Spd Tidings | Primordial Boost | Trample
         skills_b: [],
         skills_c: [],
         skills_s: [],
         skills_x: [],
       }.freeze
-      # missing : Atk/Spd Tidings ; Primordial Boost ; Trample
 
       EXTRACT = {
         skills_assist: [
