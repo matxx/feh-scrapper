@@ -45,7 +45,9 @@ module Scrappers
       private
 
       def relevant_heroic_grails
-        all_distributions.select { |d| d['Type'] == 'Heroic Grails' }
+        all_distributions
+          .select { |d| d['Type'] == 'Heroic Grails' }
+          .sort_by { |d| d['StartTime'] }
       end
 
       def heroic_grails_as_json

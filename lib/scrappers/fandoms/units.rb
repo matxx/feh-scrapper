@@ -412,6 +412,9 @@ module Scrappers
           is_aided:      unit[:properties].include?('aided'),
 
           is_refresher:  unit[:properties].include?('refresher'),
+
+          addition_date: unit['AdditionDate'],
+          release_date: unit['ReleaseDate'],
         }.merge(
           unit.slice(
             :game8_id,

@@ -44,8 +44,8 @@ module Scrappers
     end
 
     def handle_everything
-      fandom.handle_everything
       game8.handle_everything
+      fandom.handle_everything
 
       log_and_launch(:retrieve_game8_unit_ratings)
       log_and_launch(:retrieve_game8_skill_ratings)

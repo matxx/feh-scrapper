@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'uri'
+
 module Scrappers
   module Game8s
     module Skills
@@ -74,9 +76,10 @@ module Scrappers
 
       def export_list_skill_weapon(node)
         link = node.at('a').attr('href')
+        uri = URI.parse(link)
         tds = node.children.select { |child| child.name == 'td' }
         {
-          'game8_id' => link.split('/').last,
+          'game8_id' => uri.path.split('/').last,
           'game8_name' => tds[0].text.strip,
           'kind' => node.at('img').attr('alt').gsub(/ Icon\Z/, ''),
           'mt' => tds[1].text.strip,
@@ -98,6 +101,7 @@ module Scrappers
 
       def export_list_skill(kind, subkind, node)
         link = node.at('a').attr('href')
+        uri = URI.parse(link)
         tds = node.children.select { |child| child.name == 'td' }
         EXTRACT[kind]
           .each_with_object({}).with_index do |(key, hash), index|
@@ -105,7 +109,7 @@ module Scrappers
             hash[key] = nil if key == 'game8_rating' && ['', '-'].include?(hash[key])
           end
           .merge(
-            'game8_id' => link.split('/').last,
+            'game8_id' => uri.path.split('/').last,
             'kind' => subkind,
           )
       end
@@ -120,9 +124,10 @@ module Scrappers
 
       def export_list_skill_x(node)
         link = node.at('a').attr('href')
+        uri = URI.parse(link)
         tds = node.children.select { |child| child.name == 'td' }
         {
-          'game8_id' => link.split('/').last,
+          'game8_id' => uri.path.split('/').last,
           'game8_name' => tds[0].text.strip,
           'effect' => tds[1].text.strip,
         }
@@ -136,6 +141,8 @@ module Scrappers
 
       def export_list_sacred_seal(node)
         link = node.at('a').attr('href')
+        uri = URI.parse(link)
+
         tds = node.children.select { |child| child.name == 'td' }
 
         name = tds[0].text.strip
@@ -159,7 +166,7 @@ module Scrappers
           end
 
         {
-          'game8_id' => link.split('/').last,
+          'game8_id' => uri.path.split('/').last,
           'game8_name' => name,
           'game8_grade' => tds[1].text.strip,
           'how_to_obtain' => how_to_obtain,

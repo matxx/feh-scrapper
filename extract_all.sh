@@ -7,5 +7,5 @@ require 'scrappers/all'
 
 a = Scrappers::All.new
 a.game8.reset_index_files
-a.game8.reset_json_files
+# a.game8.reset_json_files # comment this to not parse again pages already parsed
 a.handle_everything

@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'uri'
+
 module Scrappers
   module Game8s
     module Units
@@ -24,8 +26,9 @@ module Scrappers
 
       def export_list_unit(node)
         link = node.at('a').attr('href')
+        uri = URI.parse(link)
         {
-          'game8_id' => link.split('/').last,
+          'game8_id' => uri.path.split('/').last,
           'game8_name' => node.at('td:first-child').text.strip,
           'game8_rating' => node.at('td:last-child').text.strip,
         }
@@ -54,14 +57,14 @@ module Scrappers
         raise_with_item 'rating TH not found' if th.nil?
         rating = th.next_element.at('span').text
         if rating && item['game8_rating'] && rating != item['game8_rating']
-          # @errors[:unit_mismatch_in_ratings] << [item['game8_id'], rating, item['game8_rating']]
-          raise_with_item "mismatch in ratings : #{rating} VS #{item['game8_rating']}"
+          @errors[:unit_mismatch_in_ratings] << [item['game8_id'], rating, item['game8_rating']]
+          # raise_with_item "mismatch in ratings : #{rating} VS #{item['game8_rating']}"
         end
 
         base = item.merge(
           'name' => names[1],
           'title' => names[3],
-          'game8_rating' => rating,
+          'game8_rating' => rating, # prioritize the rating on "show" page
           # 'game8_rating' => item['game8_rating'] || rating, # prioritize the rating on "index" page
         )
 

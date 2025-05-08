@@ -46,7 +46,7 @@ module Scrappers
       def banners_as_json
         all_banner_focuses_by_pagename.map do |name, rows|
           {
-            name:,
+            name: name.gsub('&quot;', '"').gsub('&amp;', '&'),
             unit_ids: rows.map do |row|
               unit = all_units_by_wikiname[row['Unit']]
               if unit.nil?
