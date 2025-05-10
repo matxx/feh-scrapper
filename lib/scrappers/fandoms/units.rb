@@ -375,6 +375,7 @@ module Scrappers
           name: unit['Name'],
           title: unit['Title'],
           full_name: unit['Page'],
+          abbreviated_name: abbreviated_name(unit),
 
           gender: unit['Gender'],
           move_type: unit['MoveType'],
@@ -507,6 +508,61 @@ module Scrappers
             :iv_res,
           ),
         )
+      end
+
+      def abbreviated_name(unit)
+        name = unit['Name']
+        name = "#{name}(M)" if unit[:game8_name]&.end_with?(' (M)')
+        name = "#{name}(F)" if unit[:game8_name]&.end_with?(' (F)')
+
+        # seasonals
+
+        return "NY!#{name}" if unit[:game8_name]&.start_with?('New Year')
+        # deserts
+        return "D!#{name}" if unit[:game8_name]&.start_with?('Plegian') # 2021
+        return "D!#{name}" if unit[:game8_name]&.start_with?('Hatari') # 2022
+        return "D!#{name}" if unit[:game8_name]&.start_with?('Sage') # 2023
+        return "D!#{name}" if unit[:game8_name]&.start_with?('Nabata') # 2024
+        return "D!#{name}" if unit[:game8_name]&.start_with?('Jehanna') # 2025
+        # / deserts
+        return "V!#{name}" if unit[:game8_name]&.start_with?('Valentine')
+        return "Sp!#{name}" if unit[:game8_name]&.start_with?('Spring')
+        return "Y!#{name}" if unit[:game8_name]&.start_with?('Young')
+        return "Br!#{name}" if unit[:game8_name]&.start_with?('Bridal')
+        return "Br!#{name}" if unit[:game8_name]&.start_with?('Groom')
+        return "Su!#{name}" if unit[:game8_name]&.start_with?('Summer')
+        # tribes (september)
+        return "FT!#{name}" if unit[:game8_name]&.start_with?('Flame Tribe') # 2022
+        return "WT!#{name}" if unit[:game8_name]&.start_with?('Wind Tribe') # 2023
+        return "IT!#{name}" if unit[:game8_name]&.start_with?('Ice Tribe') # 2024
+        # / tribes
+        return "H!#{name}" if unit[:game8_name]&.start_with?('Halloween')
+        return "N!#{name}" if unit[:game8_name]&.start_with?('Ninja')
+        return "W!#{name}" if unit[:game8_name]&.start_with?('Winter ')
+
+        return "HS!#{name}" if unit[:game8_name]&.start_with?('Hoshidan Summer')
+        return "P!#{name}" if unit[:game8_name]&.start_with?('Pirate')
+
+        # others
+
+        return "Ai!#{name}" if unit[:properties].include?('aided')
+        return "As!#{name}" if unit[:properties].include?('ascended')
+        return "At!#{name}" if unit[:properties].include?('attuned')
+        return "E!#{name}" if unit[:properties].include?('emblem')
+        return "R!#{name}" if unit[:properties].include?('rearmed')
+
+        return "B!#{name}" if unit[:properties].include?('brave')
+        return "F!#{name}" if unit[:properties].include?('fallen')
+
+        return "L!#{name}" if unit[:properties].include?('legendary')
+        return "M!#{name}" if unit[:properties].include?('mythic')
+
+        # return "D!#{name}" if unit[:properties].include?('duo')
+        # return "H!#{name}" if unit[:properties].include?('harmonized')
+
+        # TODO: handle Tiki Young/Adult
+
+        unit[:game8_name] || name
       end
     end
   end
