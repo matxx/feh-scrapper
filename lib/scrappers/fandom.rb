@@ -102,6 +102,7 @@ module Scrappers
     def fill_everything
       log_and_launch(:fill_units_with_availabilities)
 
+      log_and_launch(:fill_skills_with_base_id)
       log_and_launch(:fill_skills_with_genealogy)
       log_and_launch(:fill_skills_with_availabilities)
       log_and_launch(:fill_skills_with_prefodder)

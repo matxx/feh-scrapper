@@ -106,6 +106,21 @@ module Scrappers
         nil
       end
 
+      def fill_skills_with_base_id
+        all_skills.each do |skill|
+          next if skill['RefinePath'].nil?
+
+          # 3 letter with refine path are concatenated to the ID :
+          # https://feheroes.fandom.com/wiki/Template:Weapon_Infobox?action=edit
+          # (line ~50)
+          # or weird caracters for skill refines
+          # Obsidian Lance: "SID_黒曜の槍_一"
+          # Bull Blade: "SID_猛牛の剣_連"
+          # Taguel Fang: "SID_タグエルの爪牙2_一"
+          skill[:base_id] = skill['TagID'].gsub(/_[A-Z]{3}\Z/, '').gsub(/2?_[^_]\Z/, '')
+        end
+      end
+
       def fill_skills_with_genealogy
         all_skills.each do |skill|
           next if skill['Required'].nil?
@@ -192,6 +207,7 @@ module Scrappers
       def skill_as_json(skill)
         res = {
           id: skill['TagID'],
+          base_id: skill[:base_id],
           game8_id: skill[:game8_id],
           name: skill['Name'],
           group_name: skill['GroupName'],
@@ -228,8 +244,7 @@ module Scrappers
           end.compact
         end
 
-        res
-        # res.compact
+        res.compact
       end
 
       MOVE_I = 'Infantry'

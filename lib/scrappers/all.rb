@@ -356,20 +356,7 @@ module Scrappers
         next if GAME8_MISSING_SKILL_NAMES.include?(f_skill['Name']) # TODO: need update
         next if f_skill[:fodder_details]&.all? { |desc| desc['WikiName'].include?('ENEMY') }
 
-        f_id =
-          if f_skill['RefinePath']
-            # 3 letter with refine path are concatenated to the ID :
-            # https://feheroes.fandom.com/wiki/Template:Weapon_Infobox?action=edit
-            # (line ~50)
-            # or weird caracters for skill refines
-            # Obsidian Lance: "SID_黒曜の槍_一"
-            # Bull Blade: "SID_猛牛の剣_連"
-            # Taguel Fang: "SID_タグエルの爪牙2_一"
-            f_skill['TagID'].gsub(/_[A-Z]{3}\Z/, '').gsub(/2?_[^_]\Z/, '')
-          else
-            f_skill['TagID']
-          end
-
+        f_id = f_skill[:base_id] || f_skill['TagID']
         a_skill = all_skills_by_id[f_id]
         next (errors[:game8_skill_not_found] << f_skill) if a_skill.nil?
 
