@@ -34,6 +34,9 @@ a.errors.keys
 a.errors[:skill_approximations].size
 ap a.errors[:skill_approximations].to_h
 
+a.errors[:skill_not_found].size
+a.errors[:skill_not_found]
+
 a.errors[:unit_approximations].size
 ap a.errors[:unit_approximations].to_h
 a.errors[:fandom_unit_not_found].reject { |x| x['WikiName'].include?('ENEMY') }.size

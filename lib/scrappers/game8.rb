@@ -95,6 +95,13 @@ module Scrappers
 
           logger.warn "-- fetching : #{kind} - #{item['game8_id']} - #{item['game8_name']}"
           response = HTTP.get(game8_url(item['game8_id']))
+          # new units/skills
+          # not yet released by game8
+          if response.status.not_found?
+            logger.warn "-- skipping save because unit/skill not released : #{html_path}"
+            next
+          end
+
           html = response.body.to_s
           File.write(html_path, html)
         end
@@ -130,6 +137,11 @@ module Scrappers
 
         items = list.map do |item|
           html_path = "#{data_html_path}/#{kind}/#{item['game8_id']}.html"
+          unless File.exist?(html_path)
+            logger.warn "-- skipping extract because file does not exist : #{html_path}"
+            next
+          end
+
           html = File.read(html_path)
 
           json_path = "#{data_json_path}/#{kind}/#{item['game8_id']}.json"
@@ -142,7 +154,7 @@ module Scrappers
             File.write(json_path, JSON.pretty_generate(json))
             json
           end
-        end
+        end.compact
 
         logger.info "-- exporting to : #{final_file_name}"
         File.write(final_file_name, JSON.pretty_generate(items))

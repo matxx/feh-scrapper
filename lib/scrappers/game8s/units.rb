@@ -49,6 +49,8 @@ module Scrappers
             # error in title
             [nil, 'Yarne', nil, 'Hoppy New Year']
           else
+            raise_with_item 'para not found' if para.nil?
+
             # ex : with double point - https://game8.co/games/fire-emblem-heroes/archives/470386
             para.text.match(/This is a ranking page for the hero (.+)( -|:) (.+) from the game/)
           end

@@ -68,8 +68,8 @@ module Scrappers
           'CanUseWeapon',
           # 'Might',
           # 'StatModifiers',
-          # 'Cooldown',
-          # 'WeaponEffectiveness',
+          'Cooldown',
+          'WeaponEffectiveness',
           # 'SkillBuildCost',
           # 'Properties',
         ]
@@ -109,6 +109,7 @@ module Scrappers
       def fill_skills_with_base_id
         all_skills.each do |skill|
           next if skill['RefinePath'].nil?
+          next (errors[:skill_without_tag_id] << skill) if skill['TagID'].nil?
 
           # 3 letter with refine path are concatenated to the ID :
           # https://feheroes.fandom.com/wiki/Template:Weapon_Infobox?action=edit
@@ -220,6 +221,9 @@ module Scrappers
           sp: skill['SP'].to_i,
           tier: skill[:tier],
           refine: skill['RefinePath'],
+
+          cd: skill['Cooldown'] == '-1' ? nil : skill['Cooldown'].to_i,
+          eff: skill['WeaponEffectiveness'],
 
           restrictions: {
             moves: sanitize_move_restriction(skill),

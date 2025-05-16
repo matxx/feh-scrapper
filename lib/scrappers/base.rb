@@ -2,11 +2,9 @@
 
 module Scrappers
   class Base
-    EXPORT_DIRS = ['data/fandom', '../feh-data/data'].freeze
+    EXPORT_DIRS = ['../feh-data/data'].freeze
 
     def initialize(*); end
-
-    private
 
     def log_and_launch(method)
       logger.error "[#{self.class}] #{method}"

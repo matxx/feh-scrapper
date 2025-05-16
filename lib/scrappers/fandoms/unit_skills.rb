@@ -180,9 +180,17 @@ module Scrappers
 
       def unit_skill_as_json(unit_skill)
         unit = all_units_by_wikiname[unit_skill['WikiName']]
+        if unit.nil?
+          errors[:unit_skill_without_unit] << unit_skill
+          return
+        end
         return unless relevant_unit?(unit)
 
         skill = all_skills_by_wikiname[unit_skill['skill']]
+        if skill.nil?
+          errors[:unit_skill_without_skill] << unit_skill
+          return
+        end
         return unless relevant_skill?(skill)
 
         {
