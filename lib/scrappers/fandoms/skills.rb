@@ -223,7 +223,7 @@ module Scrappers
           refine: skill['RefinePath'],
 
           cd: skill['Cooldown'] == '-1' ? nil : skill['Cooldown'].to_i,
-          eff: skill['WeaponEffectiveness'],
+          eff: skill['WeaponEffectiveness']&.split(','),
 
           restrictions: {
             moves: sanitize_move_restriction(skill),
