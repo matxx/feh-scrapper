@@ -6,15 +6,15 @@ Extract data from Fandom and Game8 and export it as JSONs
 
 ### Features
 
-1. automatic updates every night for fandom
-1. trigger game8 update on website
+1. export units themes : https://feheroes.fandom.com/wiki/Module:SpecialHeroList#L-8
+1. export units dragonflowers : https://feheroes.fandom.com/wiki/Module:MaxStatsTable#L-61
+1. save game8 files on s3
+1. automatic updates every night
 1. unit tests
 1. get all images from sprites
 
 ### Fixes
 
-1. populate refined weapon with game8 IDs of the same weapon name
-1. game8 IDs for T3 skills & seals are mixed up (ex: A/R Push 3)
 1. remove(?) "4.5", pass everything as BigDecimal ? (comparison to 4.5 (float) can be incorrect)
 
 ## Log levels

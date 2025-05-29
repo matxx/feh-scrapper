@@ -83,7 +83,7 @@ module Scrappers
       log_and_launch(:scrap_skills)
       log_and_launch(:scrap_sacred_seal_costs)
       log_and_launch(:scrap_duo_heroes)
-      # log_and_launch(:scrap_resplendent_heroes)
+      # log_and_launch(:scrap_resplendent_heroes) # available in unit properties
       log_and_launch(:scrap_legendary_heroes)
       log_and_launch(:scrap_mythic_heroes)
       log_and_launch(:scrap_generic_summon_pool)
@@ -129,6 +129,8 @@ module Scrappers
       log_and_launch(:export_skills)
       log_and_launch(:export_skills_units)
       log_and_launch(:export_seals)
+
+      # must be exported after skills
       log_and_launch(:export_constants)
 
       nil
@@ -165,7 +167,11 @@ module Scrappers
 
     def boot
       @errors = empty_errors
-      @constants = {}
+      @constants = {
+        skills_max_tier: 0,
+        skills_max_sp: 0,
+        skills_max_cd: 0,
+      }
     end
 
     def empty_errors

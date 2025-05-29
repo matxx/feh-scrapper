@@ -173,9 +173,14 @@ module Scrappers
       end
 
       def relevant_skill?(skill)
+        # do not export captain skills
         return false if skill['Scategory'] == 'captain'
+        # do not export enemy only skills
         return false if skill[:fodder_details]&.all? { |desc| desc['WikiName'].include?('ENEMY') }
+        # only export refines with effect
         return false unless [nil, 'skill1', 'skill2'].include?(skill['RefinePath'])
+        # do not export "Røkkr Sieges" skills
+        return false if skill[:fodder_details].nil? && skill[:base_id].nil? && skill['Required'].nil?
 
         true
       end
@@ -206,6 +211,14 @@ module Scrappers
       end
 
       def skill_as_json(skill)
+        tier = skill[:tier]
+        sp = skill['SP'].to_i
+        cd = skill['Cooldown'] == '-1' ? nil : skill['Cooldown'].to_i
+
+        constants[:skills_max_tier] = tier if constants[:skills_max_tier] < tier
+        constants[:skills_max_sp] = sp if constants[:skills_max_sp] < sp
+        constants[:skills_max_cd] = cd if cd && constants[:skills_max_cd] < cd
+
         res = {
           id: skill['TagID'],
           base_id: skill[:base_id],
@@ -218,11 +231,11 @@ module Scrappers
           image_url: skill[:image_url],
 
           is_prf: skill['Exclusive'] == '1',
-          sp: skill['SP'].to_i,
-          tier: skill[:tier],
+          sp:,
+          tier:,
           refine: skill['RefinePath'],
 
-          cd: skill['Cooldown'] == '-1' ? nil : skill['Cooldown'].to_i,
+          cd:,
           eff: skill['WeaponEffectiveness']&.split(','),
 
           restrictions: {
