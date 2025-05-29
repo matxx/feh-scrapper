@@ -272,9 +272,13 @@ module Scrappers
         game8_name: g_skill['game8_name'],
       }
       if with_rating
+        if g_skill.key?('game8_rating')
+          res.merge!(
+            game8_rating: g_skill['game8_rating'] == '-' ? nil : g_skill['game8_rating'],
+          )
+        end
         res.merge!(
           g_skill.slice(
-            'game8_rating',
             'game8_grade',
           ),
         )
@@ -297,8 +301,9 @@ module Scrappers
         game8_id: g_unit['game8_id'],
         game8_name: g_unit['game8_name'],
       }.merge(
+        game8_rating: g_unit['game8_rating'] == '-' ? nil : g_unit['game8_rating'],
+      ).merge(
         g_unit.slice(
-          'game8_rating',
           'recommended_boon',
           'recommended_bane',
           'recommended_plus10',
