@@ -261,7 +261,8 @@ module Scrappers
         )
       end
 
-      def sanitize_iv(iv)
+      def sanitize_iv(stat)
+        iv = stat.strip
         return if iv.nil?
         return iv if ['HP', 'Atk', 'Spd', 'Def', 'Res', 'none'].include?(iv)
         return 'HP' if iv == 'Hp'
