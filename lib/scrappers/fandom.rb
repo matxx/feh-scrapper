@@ -111,6 +111,7 @@ module Scrappers
       log_and_launch(:fill_units_with_legendary_duel_scores)
       log_and_launch(:fill_units_with_skills)
       log_and_launch(:fill_units_with_stats)
+      log_and_launch(:fill_units_with_themes)
 
       log_and_launch(:fill_skills_with_images)
       log_and_launch(:fill_seals_with_images)
@@ -197,6 +198,14 @@ module Scrappers
         offset += limit
       end
       pages
+    end
+
+    def sanitize_name(str)
+      return if str.nil?
+
+      str
+        .gsub('&quot;', '"')
+        .gsub('&amp;', '&')
     end
   end
 end

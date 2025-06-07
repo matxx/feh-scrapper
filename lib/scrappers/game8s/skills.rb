@@ -25,7 +25,8 @@ module Scrappers
         skills_weapon: [],
         skills_assist: [],
         skills_special: [],
-        skills_a: ['512297', '520603', '512298', '512296'], # Atk/Spd Tidings | Atk/Res Tidings | Primordial Boost | Trample
+        # Atk/Spd Tidings | Atk/Res Tidings | Trample | Distant A/D Form
+        skills_a: ['512297', '520603', '512296', '524039'],
         skills_b: [],
         skills_c: [],
         skills_s: [],

@@ -37,7 +37,7 @@ module Scrappers
           if skill[:upgrades_wikinames]
             next_tier_skills += skill[:upgrades_wikinames].map do |name|
               upgrade = all_skills_by_wikiname[name]
-              next (errors[:units_fodder_without_upgrade] << [skill, name]) if upgrade.nil?
+              next (errors[:units_fodder_without_upgrade] << [skill['WikiName'], name]) if upgrade.nil?
 
               upgrade
             end.compact
@@ -45,7 +45,7 @@ module Scrappers
           if skill[:downgrades_wikinames]
             downgrades = skill[:downgrades_wikinames].map do |name|
               downgrade = all_skills_by_wikiname[name]
-              next (errors[:units_fodder_without_downgrade] << [skill, name]) if downgrade.nil?
+              next (errors[:units_fodder_without_downgrade] << [skill['WikiName'], name]) if downgrade.nil?
 
               downgrade
             end.compact
@@ -79,7 +79,7 @@ module Scrappers
                   downgrades_prefodder(skill, downgrades, MODE_GENERIC_POOL_45) + 1
                 end
             else
-              errors[:skill_fodder_with_generic_weird_rarity] << [skill, :rarity]
+              errors[:skill_fodder_with_generic_weird_rarity] << [skill['WikiName'], :rarity]
             end
           else
             skill[:prefodder_one_mode][MODE_GENERIC_POOL_34] =
@@ -104,7 +104,7 @@ module Scrappers
                   downgrades_prefodder(skill, downgrades, MODE_SPECIAL_POOL_45) + 1
                 end
             else
-              errors[:skill_fodder_with_special_weird_rarity] << [skill, rarity]
+              errors[:skill_fodder_with_special_weird_rarity] << [skill['WikiName'], rarity]
             end
           else
             skill[:prefodder_one_mode][MODE_SPECIAL_POOL_4] =
@@ -131,12 +131,12 @@ module Scrappers
         downgrades.map do |downgrade|
           hash = downgrade[:prefodder_one_mode]
           if hash.nil?
-            errors[:downgrade_without_prefodder] << [skill, downgrade]
+            errors[:downgrade_without_prefodder] << [skill['WikiName'], downgrade]
             next 25
           end
 
           if downgrade[:prefodder_one_mode][mode].nil?
-            errors[:downgrade_without_prefodder_mode] << [skill, downgrade, mode]
+            errors[:downgrade_without_prefodder_mode] << [skill['WikiName'], downgrade, mode]
             next 30
           end
 

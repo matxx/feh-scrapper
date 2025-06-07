@@ -291,7 +291,7 @@ module Scrappers
         all_units.each do |unit|
           total_skill_sp = unit[:skills_max_sp]
           if total_skill_sp.nil?
-            errors[:units_without_skills2] << unit unless unit['Properties']&.include?('enemy')
+            errors[:units_without_skills2] << unit['WikiName'] unless unit['Properties']&.include?('enemy')
             next
           end
 
@@ -325,6 +325,67 @@ module Scrappers
           logger.debug "max_score : #{(team_base_score + max_score) * 2}"
 
           unit[:max_score] = (team_base_score + max_score) * 2
+        end
+      end
+
+      THEME_NEW_YEAR = :new_year
+      THEME_DESERT = :desert
+      THEME_DOD = :dod # day of devotion / valentines
+      THEME_SPRING = :spring
+      THEME_KIDS = :kids
+      THEME_WEDDING = :wedding
+      THEME_SUMMER = :summer
+      THEME_HALLOWEEN = :halloween
+      THEME_NINJAS = :ninjas
+      THEME_WINTER = :winter
+      THEME_HOSHIDAN_SUMMER = :hs
+      THEME_PIRATES = :pirates
+      THEME_DANCE = :dance
+      THEME_TRIBES = :tribes
+
+      # https://feheroes.fandom.com/wiki/Module:SpecialHeroList#L-8
+      def fill_units_with_themes
+        all_units.each do |unit|
+          next unless unit[:properties].include?('special')
+
+          if unit['ReleaseDate'].nil?
+            errors[:units_without_release_date] << unit['WikiName'] unless unit['Properties']&.include?('enemy')
+            next
+          end
+
+          year, month, day = unit['ReleaseDate'].split('-').map(&:to_i)
+          unit[:theme] =
+            # recurring
+            if (month == 12 && day >= 25) || (month == 1 && day <= 5)
+              THEME_NEW_YEAR
+            elsif year >= 2021 && month == 1 && day > 5
+              THEME_DESERT
+            elsif month == 2
+              THEME_DOD
+            elsif month == 3
+              THEME_SPRING
+            elsif year >= 2020 && month == 4
+              THEME_KIDS
+            elsif month == 5
+              THEME_WEDDING
+            elsif [6, 7].include?(month)
+              THEME_SUMMER
+            elsif month == 10
+              THEME_HALLOWEEN
+            elsif year >= 2020 && month == 11
+              THEME_NINJAS
+            elsif month == 12 && day < 25
+              THEME_WINTER
+            # other
+            elsif [2018, 2024].include?(year) && month == 8
+              THEME_HOSHIDAN_SUMMER
+            elsif [2020, 2021].include?(year) && month == 8
+              THEME_PIRATES
+            elsif [2017, 2019, 2020].include?(year) && month == 9
+              THEME_DANCE
+            elsif year == 2021 && month == 9
+              THEME_TRIBES
+            end
         end
       end
 
@@ -369,13 +430,16 @@ module Scrappers
         relevant_units.map { |unit| unit_as_json(unit) }
       end
 
+      DRAGONFLOWERS_MULTIPLICATOR = 5
+
       def unit_as_json(unit)
         {
           id: unit['TagID'],
-          name: unit['Name'],
-          title: unit['Title'],
-          full_name: unit['Page'],
+          name: sanitize_name(unit['Name']),
+          title: sanitize_name(unit['Title']),
+          full_name: sanitize_name(unit['Page']),
           abbreviated_name: abbreviated_name(unit),
+          theme: unit[:theme],
 
           gender: unit['Gender'],
           move_type: unit['MoveType'],
@@ -387,6 +451,7 @@ module Scrappers
           id_int: unit['IntID'].to_i,
           origin: "#{unit['GameSort'].to_s.rjust(2, '0')}#{unit['CharSort'].to_s.rjust(10, '0')}",
           book: unit_book(unit),
+          max_df: DRAGONFLOWERS_MULTIPLICATOR * max_dragonflowers(unit),
 
           # has_resplendent: !all_resplendent_heroes_by_pagename[unit['Page']].nil?,
           has_respl: unit[:properties].include?('resplendent'),
@@ -460,7 +525,7 @@ module Scrappers
           lowest_rarity: obfuscate_keys(unit[:lowest_rarity].compact),
           skill_ids: unit[:all_unit_skills].map do |desc|
             skill = all_skills_by_wikiname[desc['skill']]
-            next (errors[:units_skills_without_skill] << [unit, desc]) if skill.nil?
+            next (errors[:units_skills_without_skill] << [unit['WikiName'], desc]) if skill.nil?
 
             skill['TagID']
           end.compact.sort,
@@ -512,36 +577,45 @@ module Scrappers
 
       def abbreviated_name(unit)
         name = unit['Name']
-        name = "#{name}(M)" if unit[:game8_name]&.end_with?(' (M)')
-        name = "#{name}(F)" if unit[:game8_name]&.end_with?(' (F)')
+        name = "#{name} (M)" if unit[:game8_name]&.end_with?(' (M)')
+        name = "#{name} (F)" if unit[:game8_name]&.end_with?(' (F)')
 
         # seasonals
 
-        return "NY!#{name}" if unit[:game8_name]&.start_with?('New Year')
-        # deserts
-        return "D!#{name}" if unit[:game8_name]&.start_with?('Plegian') # 2021
-        return "D!#{name}" if unit[:game8_name]&.start_with?('Hatari') # 2022
-        return "D!#{name}" if unit[:game8_name]&.start_with?('Sage') # 2023
-        return "D!#{name}" if unit[:game8_name]&.start_with?('Nabata') # 2024
-        return "D!#{name}" if unit[:game8_name]&.start_with?('Jehanna') # 2025
-        # / deserts
-        return "V!#{name}" if unit[:game8_name]&.start_with?('Valentine')
-        return "Sp!#{name}" if unit[:game8_name]&.start_with?('Spring')
-        return "Y!#{name}" if unit[:game8_name]&.start_with?('Young')
-        return "Br!#{name}" if unit[:game8_name]&.start_with?('Bridal')
-        return "Br!#{name}" if unit[:game8_name]&.start_with?('Groom')
-        return "Su!#{name}" if unit[:game8_name]&.start_with?('Summer')
-        # tribes (september)
-        return "FT!#{name}" if unit[:game8_name]&.start_with?('Flame Tribe') # 2022
-        return "WT!#{name}" if unit[:game8_name]&.start_with?('Wind Tribe') # 2023
-        return "IT!#{name}" if unit[:game8_name]&.start_with?('Ice Tribe') # 2024
-        # / tribes
-        return "H!#{name}" if unit[:game8_name]&.start_with?('Halloween')
-        return "N!#{name}" if unit[:game8_name]&.start_with?('Ninja')
-        return "W!#{name}" if unit[:game8_name]&.start_with?('Winter ')
-
-        return "HS!#{name}" if unit[:game8_name]&.start_with?('Hoshidan Summer')
-        return "P!#{name}" if unit[:game8_name]&.start_with?('Pirate')
+        case unit[:theme]
+        # recurring
+        when THEME_NEW_YEAR
+          return "NY!#{name}"
+        when THEME_DESERT
+          return "De!#{name}"
+        when THEME_DOD
+          return "V!#{name}"
+        when THEME_SPRING
+          return "Sp!#{name}"
+        when THEME_KIDS
+          return "Y!#{name}"
+        when THEME_WEDDING
+          return "We!#{name}"
+        when THEME_SUMMER
+          return "Su!#{name}"
+        when THEME_HALLOWEEN
+          return "H!#{name}"
+        when THEME_NINJAS
+          return "N!#{name}"
+        when THEME_WINTER
+          return "W!#{name}"
+        # other
+        when THEME_HOSHIDAN_SUMMER
+          return "HS!#{name}"
+        when THEME_PIRATES
+          return "P!#{name}"
+        when THEME_DANCE
+          return "Da!#{name}"
+        when THEME_TRIBES
+          return "FT!#{name}" if unit['ReleaseDate']&.start_with?('2022')
+          return "WT!#{name}" if unit['ReleaseDate']&.start_with?('2023')
+          return "IT!#{name}" if unit['ReleaseDate']&.start_with?('2024')
+        end
 
         # others
 
@@ -563,6 +637,28 @@ module Scrappers
         # TODO: handle Tiki Young/Adult
 
         unit[:game8_name] || name
+      end
+
+      # B!Eirika & P!Hinoka have same version 5.8 but different max DF
+      # => diff between release dates (and not versions)
+      # https://feheroes.fandom.com/wiki/Module:MaxStatsTable#L-61
+      def max_dragonflowers(unit)
+        # version 3.2
+        if unit['ReleaseDate'] < '2019-02-07' && unit['MoveType'] == self.class::MOVE_I
+          7
+        elsif unit['ReleaseDate'] < '2020-08-18' # CYL4
+          6
+        elsif unit['ReleaseDate'] < '2021-08-17' # CYL5
+          5
+        elsif unit['ReleaseDate'] < '2022-08-17' # CYL6
+          4
+        elsif unit['ReleaseDate'] < '2023-08-16' # CYL7
+          3
+        elsif unit['ReleaseDate'] < '2024-08-16' # CYL8
+          2
+        else
+          1
+        end
       end
     end
   end

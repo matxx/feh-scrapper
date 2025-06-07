@@ -45,7 +45,7 @@ module Scrappers
       def fill_units_with_legendary_duel_scores
         all_legendary_heroes.each do |hero|
           unit = all_units_by_pagename[hero['Page']]
-          next (errors[:unknown_legendary_hero] << hero) if unit.nil?
+          next (errors[:unknown_legendary_hero] << hero['Page']) if unit.nil?
 
           score = hero['Duel'].to_i
           next if score.zero?

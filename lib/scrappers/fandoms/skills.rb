@@ -109,7 +109,7 @@ module Scrappers
       def fill_skills_with_base_id
         all_skills.each do |skill|
           next if skill['RefinePath'].nil?
-          next (errors[:skill_without_tag_id] << skill) if skill['TagID'].nil?
+          next (errors[:skill_without_tag_id] << skill['WikiName']) if skill['TagID'].nil?
 
           # 3 letter with refine path are concatenated to the ID :
           # https://feheroes.fandom.com/wiki/Template:Weapon_Infobox?action=edit
@@ -223,8 +223,8 @@ module Scrappers
           id: skill['TagID'],
           base_id: skill[:base_id],
           game8_id: skill[:game8_id],
-          name: skill['Name'],
-          group_name: skill['GroupName'],
+          name: sanitize_name(skill['Name']),
+          group_name: sanitize_name(skill['GroupName']),
           category: skill['Scategory'],
           weapon_type: sanitize_weapon_type(skill),
 
@@ -247,7 +247,7 @@ module Scrappers
         if skill[:upgrades_wikinames]
           res[:upgrade_ids] = skill[:upgrades_wikinames].map do |name|
             upgrade = all_skills_by_wikiname[name]
-            next (errors[:skills_upgrades_without_skill] << [skill, name]) if upgrade.nil?
+            next (errors[:skills_upgrades_without_skill] << [skill['WikiName'], name]) if upgrade.nil?
 
             upgrade['TagID']
           end.compact
@@ -255,7 +255,7 @@ module Scrappers
         if skill[:downgrades_wikinames]
           res[:downgrade_ids] = skill[:downgrades_wikinames].map do |name|
             downgrade = all_skills_by_wikiname[name]
-            next (errors[:skills_downgrades_without_skill] << [skill, name]) if downgrade.nil?
+            next (errors[:skills_downgrades_without_skill] << [skill['WikiName'], name]) if downgrade.nil?
 
             downgrade['TagID']
           end.compact
@@ -279,7 +279,7 @@ module Scrappers
         can_use = skill['CanUseMove'].split(/,[[:space:]]*/)
         can_use.uniq!
 
-        errors[:"#{prefix}_with_unknown_move_restrictions"] << skill if (can_use - ALL_MOVES).any?
+        errors[:"#{prefix}_with_unknown_move_restrictions"] << skill['WikiName'] if (can_use - ALL_MOVES).any?
 
         case can_use.length
         when 1, 2
@@ -289,7 +289,7 @@ module Scrappers
         when 4
           { none: true }
         else
-          errors[:"#{prefix}_with_weird_move_restrictions"] << skill
+          errors[:"#{prefix}_with_weird_move_restrictions"] << skill['WikiName']
           {}
         end
       end

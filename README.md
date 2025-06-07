@@ -6,8 +6,6 @@ Extract data from Fandom and Game8 and export it as JSONs
 
 ### Features
 
-1. export units themes : https://feheroes.fandom.com/wiki/Module:SpecialHeroList#L-8
-1. export units dragonflowers : https://feheroes.fandom.com/wiki/Module:MaxStatsTable#L-61
 1. save game8 files on s3
 1. automatic updates every night
 1. unit tests

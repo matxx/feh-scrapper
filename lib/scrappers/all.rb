@@ -100,6 +100,8 @@ module Scrappers
       'Red Tome Valor 3' => 'R Tome Valor 3',
       'Time is Light' => 'Time Is Light',
       'Yearling (Armored)' => 'Yearling (Arm.)',
+      'Full Light ＆ Dark' => 'Full Light &amp; Dark',
+      'Blood ＆ Thunder' => 'Blood &amp; Thunder',
     }.freeze
 
     GAME8_ENEMY_SKILLS = [
@@ -169,6 +171,7 @@ module Scrappers
       'Leila: Rose Amid Fangs' => 'Leila: Rose amid Fangs',
       'Rennac: Rich Merchant' => 'Rennac: Rich &quot;Merchant&quot;',
       'Tharja: Normal Girl' => 'Tharja: &quot;Normal Girl&quot;',
+      "Excellus: Conqueror's Wile" => 'Excellus: Conqueror’s Wile',
     }.freeze
 
     def retrieve_game8_unit_ratings
@@ -316,7 +319,7 @@ module Scrappers
         next if f_unit[:properties].include?('enemy')
 
         a_unit = all_units_by_id[f_unit['TagID']]
-        next (errors[:game8_unit_not_found] << f_unit) if a_unit.nil?
+        next (errors[:game8_unit_not_found] << f_unit['WikiName']) if a_unit.nil?
 
         f_unit[:game8_id] = a_unit[:game8_id]
         f_unit[:game8_name] = a_unit[:game8_name]
@@ -363,7 +366,7 @@ module Scrappers
 
         f_id = f_skill[:base_id] || f_skill['TagID']
         a_skill = all_skills_by_id[f_id]
-        next (errors[:game8_skill_not_found] << f_skill) if a_skill.nil?
+        next (errors[:game8_skill_not_found] << f_skill['WikiName']) if a_skill.nil?
 
         f_skill[:game8_id] = a_skill[:game8_id]
         f_skill[:game8_name] = a_skill[:game8_name]
@@ -384,7 +387,7 @@ module Scrappers
           # next if f_seal['SP'] == '0' # sacred seals reducing dmg to 0
           next if f_seal['Name'].include?('Squad Ace')
 
-          # errors[:game8_seal_not_found] << f_seal
+          # errors[:game8_seal_not_found] << f_seal['WikiName']
           next
         end
 

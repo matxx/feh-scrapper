@@ -59,7 +59,7 @@ module Scrappers
       def fill_units_with_stats
         all_unit_stats.each do |unit_stat|
           unit = all_units_by_wikiname[unit_stat['WikiName']]
-          next (errors[:unit_stats_without_unit] << unit_stat) if unit.nil?
+          next (errors[:unit_stats_without_unit] << unit_stat['WikiName']) if unit.nil?
 
           unit[:level1_hp]  = unit_stat['Lv1HP5'].to_i
           unit[:level1_atk] = unit_stat['Lv1Atk5'].to_i

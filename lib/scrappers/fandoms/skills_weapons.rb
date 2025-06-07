@@ -162,7 +162,7 @@ module Scrappers
         tmp_can_use = skill['CanUseWeapon'].split(/,[[:space:]]*/)
         tmp_can_use.uniq!
 
-        errors[:"#{prefix}_with_unknown_weapon_restrictions"] << skill if (tmp_can_use - ALL_WEAPONS).any?
+        errors[:"#{prefix}_with_unknown_weapon_restrictions"] << skill['WikiName'] if (tmp_can_use - ALL_WEAPONS).any?
 
         return { none: true } if tmp_can_use.length == WEAPONS_COUNT
         return { can_not_use: [WEAPON_C_ST] } if (ALL_WEAPONS - tmp_can_use) == [WEAPON_C_ST]
@@ -221,7 +221,7 @@ module Scrappers
           elsif !array.intersect?(tmp_can_use)
             can_not_use << elem
           elsif !skill['Name'].include?('Cancel Affinity')
-            errors[:"#{prefix}_with_weird_weapon_restrictions"] << [skill, array, elem]
+            errors[:"#{prefix}_with_weird_weapon_restrictions"] << [skill['WikiName'], array, elem]
           end
         end
 
@@ -246,7 +246,7 @@ module Scrappers
 
         return can_use[0] if can_use.size == 1
 
-        errors[:not_sanitizable_weapon_type] << skill
+        errors[:not_sanitizable_weapon_type] << skill['WikiName']
       end
     end
   end

@@ -87,10 +87,11 @@ module Scrappers
             'recommended_bane' => 'Spd',
             'recommended_plus10' => 'Def',
           )
-        when '488074', '488073'
+        when '488074', '488073', '526831'
           # TODO: handle several recommended "no merge" and "+10" builds...
           # https://game8.co/games/fire-emblem-heroes/archives/488074#hl_2
           # https://game8.co/games/fire-emblem-heroes/archives/488073#hl_2
+          # https://game8.co/games/fire-emblem-heroes/archives/526831
           return base.merge(
             'recommended_boon' => nil,
             'recommended_bane' => nil,

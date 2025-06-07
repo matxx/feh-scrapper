@@ -58,7 +58,7 @@ module Scrappers
         all_units.each do |unit|
           unit[:all_unit_skills] = all_unit_skills_by_unit_wikiname[unit['WikiName']]
           if unit[:all_unit_skills].nil?
-            errors[:units_without_skills] << unit unless unit['Properties']&.include?('enemy')
+            errors[:units_without_skills] << unit['WikiName'] unless unit['Properties']&.include?('enemy')
             next
           end
 
@@ -181,14 +181,14 @@ module Scrappers
       def unit_skill_as_json(unit_skill)
         unit = all_units_by_wikiname[unit_skill['WikiName']]
         if unit.nil?
-          errors[:unit_skill_without_unit] << unit_skill
+          errors[:unit_skill_without_unit] << unit_skill['WikiName']
           return
         end
         return unless relevant_unit?(unit)
 
         skill = all_skills_by_wikiname[unit_skill['skill']]
         if skill.nil?
-          errors[:unit_skill_without_skill] << unit_skill
+          errors[:unit_skill_without_skill] << unit_skill['WikiName']
           return
         end
         return unless relevant_skill?(skill)
