@@ -490,7 +490,7 @@ module Scrappers
           id_int: unit[:int_id],
           origin: "#{unit['GameSort'].to_s.rjust(2, '0')}#{unit['CharSort'].to_s.rjust(10, '0')}",
           book: unit_book(unit),
-          # max_df: DRAGONFLOWERS_MULTIPLICATOR * max_dragonflowers(unit),
+          max_df: DRAGONFLOWERS_MULTIPLICATOR * max_dragonflowers(unit),
 
           # has_resplendent: !all_resplendent_heroes_by_pagename[unit['Page']].nil?,
           has_respl: unit[:properties].include?('resplendent'),
