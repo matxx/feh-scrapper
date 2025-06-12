@@ -338,22 +338,57 @@ module Scrappers
       THEME_HALLOWEEN = :halloween
       THEME_NINJAS = :ninjas
       THEME_WINTER = :winter
-      THEME_HOSHIDAN_SUMMER = :hs
-      THEME_PIRATES = :pirates
       THEME_DANCE = :dance
+      THEME_HOSHIDAN_SUMMER = :hs
+      THEME_HOSTILE_SPRING = :hostile_spring
+      THEME_PICNIC = :picnic
+      THEME_PIRATES = :pirates
       THEME_TRIBES = :tribes
+
+      ANNIVERSARY_MARTH_INT_ID = 1235
+      INT_ID_NY_CORRIN = 200
+
+      INT_ID_MARISA = 212
+      INT_ID_GEROME = 228
+      INT_ID_FINN = 238
+      INT_ID_CANAS = 258
+      INT_ID_ETHLYN = 288
+      INT_ID_AZURA_YOUNG = 312
+      INT_ID_SIGRUN = 415
+      INT_ID_BRUNNYA = 452
+      INT_ID_ITSUKI = 480
+      INT_IDS_OF_TT_UNITS_WITHOUT_THEMED = [
+        INT_ID_MARISA,
+        INT_ID_GEROME,
+        INT_ID_FINN,
+        INT_ID_CANAS,
+        INT_ID_ETHLYN,
+        INT_ID_AZURA_YOUNG,
+        INT_ID_SIGRUN,
+        INT_ID_BRUNNYA,
+        INT_ID_ITSUKI,
+      ].freeze
 
       # https://feheroes.fandom.com/wiki/Module:SpecialHeroList#L-8
       def fill_units_with_themes
         all_units.each do |unit|
-          next unless unit[:properties].include?('special')
+          unit[:int_id] = unit['IntID'].to_i
+          next (unit[:theme] = THEME_NEW_YEAR) if unit[:int_id] == INT_ID_NY_CORRIN
+
+          next if !unit[:properties].include?('special') && !unit[:properties].include?('tempest')
 
           if unit['ReleaseDate'].nil?
             errors[:units_without_release_date] << unit['WikiName'] unless unit['Properties']&.include?('enemy')
             next
           end
 
+          unit[:theme] = nil
+          next if unit[:int_id] == ANNIVERSARY_MARTH_INT_ID
+          next if unit[:properties].include?('tempest') && unit['ReleaseDate'] < '2018-01'
+          next if INT_IDS_OF_TT_UNITS_WITHOUT_THEMED.include?(unit[:int_id])
+
           year, month, day = unit['ReleaseDate'].split('-').map(&:to_i)
+
           unit[:theme] =
             # recurring
             if (month == 12 && day >= 25) || (month == 1 && day <= 5)
@@ -377,13 +412,17 @@ module Scrappers
             elsif month == 12 && day < 25
               THEME_WINTER
             # other
-            elsif [2018, 2024].include?(year) && month == 8
-              THEME_HOSHIDAN_SUMMER
-            elsif [2020, 2021].include?(year) && month == 8
-              THEME_PIRATES
             elsif [2017, 2019, 2020].include?(year) && month == 9
               THEME_DANCE
-            elsif year == 2021 && month == 9
+            elsif [2018, 2024].include?(year) && month == 8
+              THEME_HOSHIDAN_SUMMER
+            elsif year == 2019 && month == 1 && day > 5
+              THEME_HOSTILE_SPRING
+            elsif year == 2019 && month == 4
+              THEME_PICNIC
+            elsif [2020, 2021].include?(year) && month == 8
+              THEME_PIRATES
+            elsif year >= 2021 && month == 9
               THEME_TRIBES
             end
         end
@@ -439,7 +478,7 @@ module Scrappers
           title: sanitize_name(unit['Title']),
           full_name: sanitize_name(unit['Page']),
           abbreviated_name: abbreviated_name(unit),
-          theme: unit[:theme],
+          # theme: unit[:theme],
 
           gender: unit['Gender'],
           move_type: unit['MoveType'],
@@ -448,10 +487,10 @@ module Scrappers
 
           # game_sort: unit['GameSort'],
           # char_sort: unit['CharSort'],
-          id_int: unit['IntID'].to_i,
+          id_int: unit[:int_id],
           origin: "#{unit['GameSort'].to_s.rjust(2, '0')}#{unit['CharSort'].to_s.rjust(10, '0')}",
           book: unit_book(unit),
-          max_df: DRAGONFLOWERS_MULTIPLICATOR * max_dragonflowers(unit),
+          # max_df: DRAGONFLOWERS_MULTIPLICATOR * max_dragonflowers(unit),
 
           # has_resplendent: !all_resplendent_heroes_by_pagename[unit['Page']].nil?,
           has_respl: unit[:properties].include?('resplendent'),
@@ -495,8 +534,7 @@ module Scrappers
             :visible_bst,
             :max_score,
           ),
-        )
-        # ).compact
+        ).compact
       end
 
       def unit_book(unit)
@@ -533,13 +571,14 @@ module Scrappers
           unit.slice(
             :divine_codes,
           ),
-        )
+        ).compact
       end
 
       def unit_stats_as_json
         relevant_units.map { |unit| unit_stat_as_json(unit) }
       end
 
+      # do not compact
       def unit_stat_as_json(unit)
         {
           id: unit['TagID'],
@@ -576,9 +615,13 @@ module Scrappers
       end
 
       def abbreviated_name(unit)
+        return '35!Marth' if unit[:int_id] == ANNIVERSARY_MARTH_INT_ID
+        return 'Azura (Young)' if unit[:int_id] == INT_ID_AZURA_YOUNG
+
         name = unit['Name']
-        name = "#{name} (M)" if unit[:game8_name]&.end_with?(' (M)')
-        name = "#{name} (F)" if unit[:game8_name]&.end_with?(' (F)')
+        name = 'BK' if name == 'Black Knight'
+        name = "#{name}(M)" if unit[:game8_name]&.end_with?(' (M)')
+        name = "#{name}(F)" if unit[:game8_name]&.end_with?(' (F)')
 
         # seasonals
 
@@ -587,7 +630,8 @@ module Scrappers
         when THEME_NEW_YEAR
           return "NY!#{name}"
         when THEME_DESERT
-          return "De!#{name}"
+          # return "De!#{name}"
+          return "D!#{name}"
         when THEME_DOD
           return "V!#{name}"
         when THEME_SPRING
@@ -595,7 +639,8 @@ module Scrappers
         when THEME_KIDS
           return "Y!#{name}"
         when THEME_WEDDING
-          return "We!#{name}"
+          return "Br!#{name}"
+          # return "We!#{name}"
         when THEME_SUMMER
           return "Su!#{name}"
         when THEME_HALLOWEEN
@@ -605,12 +650,16 @@ module Scrappers
         when THEME_WINTER
           return "W!#{name}"
         # other
-        when THEME_HOSHIDAN_SUMMER
-          return "HS!#{name}"
-        when THEME_PIRATES
-          return "P!#{name}"
         when THEME_DANCE
           return "Da!#{name}"
+        when THEME_HOSHIDAN_SUMMER
+          return "HSu!#{name}"
+        when THEME_HOSTILE_SPRING
+          return "HSp!#{name}"
+        when THEME_PICNIC
+          return "Pic!#{name}"
+        when THEME_PIRATES
+          return "P!#{name}"
         when THEME_TRIBES
           return "FT!#{name}" if unit['ReleaseDate']&.start_with?('2022')
           return "WT!#{name}" if unit['ReleaseDate']&.start_with?('2023')
