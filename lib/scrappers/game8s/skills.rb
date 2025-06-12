@@ -22,7 +22,8 @@ module Scrappers
       # that are not yet in the skills lists page yet
       # to extract them anyway
       PAGE_IDS_OF_NEW_SKILLS = {
-        skills_weapon: [],
+        # Desert-Tiger Axe | Father's-Son Axe
+        skills_weapon: ['417545', '417548'],
         skills_assist: [],
         skills_special: [],
         # Atk/Spd Tidings | Atk/Res Tidings | Trample | Distant A/D Form
