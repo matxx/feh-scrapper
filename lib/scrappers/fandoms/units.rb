@@ -478,7 +478,7 @@ module Scrappers
           title: sanitize_name(unit['Title']),
           full_name: sanitize_name(unit['Page']),
           abbreviated_name: abbreviated_name(unit),
-          # theme: unit[:theme],
+          theme: unit[:theme],
 
           gender: unit['Gender'],
           move_type: unit['MoveType'],
