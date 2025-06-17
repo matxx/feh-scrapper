@@ -76,7 +76,19 @@ module Scrappers
             JSON.parse(File.read(json_path))
           else
             logger.info "-- extracting : #{page_id} - #{kind}"
-            json = extract_list(kind, html)
+            json =
+              begin
+                extract_list(kind, html)
+              rescue StandardError => e
+                errors[:extract_list] << {
+                  kind:,
+                  page_id:,
+                  class: e.class.name,
+                  error: e.message,
+                  backtrace: e.backtrace,
+                }
+                next
+              end
             File.write(json_path, JSON.pretty_generate(json))
             json
           end
@@ -131,6 +143,8 @@ module Scrappers
 
         file_name = "#{page_id}.#{kind}"
         json_path = "#{data_json_path}/#{file_name}.json"
+        next unless File.exist?(json_path)
+
         list = JSON.parse(File.read(json_path))
         ids = list.map { |item| item['game8_id'] }
         list += (missing_page_ids[kind] - ids).map { |id| { 'game8_id' => id } } if missing_page_ids[kind]
@@ -150,7 +164,19 @@ module Scrappers
           else
             logger.info "-- extracting : #{kind} - #{item['game8_id']} - #{item['game8_name']}"
             @current_item = item['game8_id']
-            json = extract_item(kind, html, item)
+            json =
+              begin
+                extract_item(kind, html, item)
+              rescue StandardError => e
+                errors[:extract_item] << {
+                  kind:,
+                  page_id: item['game8_id'],
+                  class: e.class.name,
+                  error: e.message,
+                  backtrace: e.backtrace,
+                }
+                next
+              end
             File.write(json_path, JSON.pretty_generate(json))
             json
           end

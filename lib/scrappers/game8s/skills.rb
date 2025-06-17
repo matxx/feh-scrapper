@@ -142,8 +142,11 @@ module Scrappers
       end
 
       def export_list_sacred_seal(node)
-        link = node.at('a').attr('href')
-        uri = URI.parse(link)
+        if (link = node.at('a'))
+          url = link.attr('href')
+          uri = URI.parse(url)
+          game8_id = uri.path.split('/').last
+        end
 
         tds = node.children.select { |child| child.name == 'td' }
 
@@ -168,7 +171,7 @@ module Scrappers
           end
 
         {
-          'game8_id' => uri.path.split('/').last,
+          'game8_id' => game8_id,
           'game8_name' => name,
           'game8_grade' => tds[1].text.strip,
           'how_to_obtain' => how_to_obtain,
