@@ -639,8 +639,10 @@ module Scrappers
         when THEME_KIDS
           return "Y!#{name}"
         when THEME_WEDDING
-          return "Br!#{name}"
-          # return "We!#{name}"
+          return "Gr!#{name}" if unit['Gender'].start_with?('M')
+          return "Br!#{name}" if unit['Gender'].start_with?('F')
+
+          return "We!#{name}"
         when THEME_SUMMER
           return "Su!#{name}"
         when THEME_HALLOWEEN
