@@ -31,15 +31,10 @@ module Scrappers
         nil
       end
 
-      def export_distributions(dirs = self.class::EXPORT_DIRS)
-        string = JSON.pretty_generate(heroic_grails_as_json)
-        dirs.each do |dir|
-          file_name = "#{dir}/units-heroic_grails.json"
-          FileUtils.mkdir_p File.dirname(file_name)
-          File.write(file_name, string)
-        end
-
-        nil
+      def export_distributions
+        export_files(
+          'units-heroic_grails.json' => :heroic_grails_as_json,
+        )
       end
 
       private

@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'awesome_print'
+
 require 'scrappers/base'
 require 'scrappers/fandom'
 require 'scrappers/game8'
@@ -31,6 +33,7 @@ module Scrappers
       @game8  = Scrappers::Game8.new(level:, **game8)
 
       boot
+      setup_s3
 
       super
     end
@@ -44,8 +47,8 @@ module Scrappers
     end
 
     def handle_everything
-      game8.handle_everything
-      fandom.handle_everything
+      game8.log_and_launch(:handle_everything)
+      fandom.log_and_launch(:handle_everything)
 
       log_and_launch(:retrieve_game8_unit_ratings)
       log_and_launch(:retrieve_game8_skill_ratings)
@@ -62,7 +65,9 @@ module Scrappers
       log_and_launch(:export_game8_skill_ratings)
       log_and_launch(:export_game8_seal_ratings)
 
-      fandom.export_everything
+      fandom.log_and_launch(:export_everything)
+
+      log_and_launch(:export_errors)
 
       nil
     end
@@ -198,31 +203,28 @@ module Scrappers
       nil
     end
 
-    def export_game8_skill_ratings(dirs = ['data', '../feh-data/data'])
-      string = JSON.pretty_generate(exclude_game8_keys(all_skills))
-      dirs.each do |dir|
-        file_name = "#{dir}/skills-ratings-game8.json"
-        FileUtils.mkdir_p File.dirname(file_name)
-        File.write(file_name, string)
-      end
+    def export_game8_skill_ratings
+      export_files(
+        'skills-ratings-game8.json' => -> { exclude_game8_keys(all_skills) },
+      )
     end
 
-    def export_game8_seal_ratings(dirs = ['data', '../feh-data/data'])
-      string = JSON.pretty_generate(exclude_game8_keys(all_seals))
-      dirs.each do |dir|
-        file_name = "#{dir}/seals-ratings-game8.json"
-        FileUtils.mkdir_p File.dirname(file_name)
-        File.write(file_name, string)
-      end
+    def export_game8_seal_ratings
+      export_files(
+        'seals-ratings-game8.json' => -> { exclude_game8_keys(all_seals) },
+      )
     end
 
-    def export_game8_unit_ratings(dirs = ['data', '../feh-data/data'])
-      string = JSON.pretty_generate(exclude_game8_keys(all_units))
-      dirs.each do |dir|
-        file_name = "#{dir}/units-ratings-game8.json"
-        FileUtils.mkdir_p File.dirname(file_name)
-        File.write(file_name, string)
-      end
+    def export_game8_unit_ratings
+      export_files(
+        'units-ratings-game8.json' => -> { exclude_game8_keys(all_units) },
+      )
+    end
+
+    def export_errors
+      export_files(
+        'errors.json' => :errors_report,
+      )
     end
 
     def exclude_game8_keys(items)
@@ -247,6 +249,14 @@ module Scrappers
 
     def empty_errors
       Hash.new { |h, k| h[k] = [] }
+    end
+
+    def errors_report
+      {
+        all: errors,
+        game8: game8.errors,
+        fandom: fandom.errors,
+      }
     end
 
     # https://stackoverflow.com/a/50891978

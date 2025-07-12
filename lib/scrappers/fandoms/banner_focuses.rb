@@ -30,15 +30,10 @@ module Scrappers
         nil
       end
 
-      def export_banners(dirs = self.class::EXPORT_DIRS)
-        string = JSON.pretty_generate(banners_as_json)
-        dirs.each do |dir|
-          file_name = "#{dir}/banners.json"
-          FileUtils.mkdir_p File.dirname(file_name)
-          File.write(file_name, string)
-        end
-
-        nil
+      def export_banners
+        export_files(
+          'banners.json' => :banners_as_json,
+        )
       end
 
       private

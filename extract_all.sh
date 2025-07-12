@@ -8,11 +8,8 @@ require 'awesome_print'
 
 a = Scrappers::All.new
 a.game8.log_and_launch(:reset_index_files)
-# a.game8.log_and_launch(:reset_json_files) # comment this to not parse again pages already parsed
+# a.game8.log_and_launch(:reset_html_files) # this line will force downloading of all pages again
+# a.game8.log_and_launch(:reset_json_files) # this line will force parsing of all pages again
 a.handle_everything
 
-ap(
-  all: a.errors,
-  game8: a.game8.errors,
-  fandom: a.fandom.errors,
-)
+ap(a.errors_report)

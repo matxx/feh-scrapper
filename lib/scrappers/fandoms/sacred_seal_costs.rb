@@ -38,22 +38,11 @@ module Scrappers
         nil
       end
 
-      def export_seals(dirs = self.class::EXPORT_DIRS)
-        string = JSON.pretty_generate(seals_as_json)
-        dirs.each do |dir|
-          file_name = "#{dir}/seals.json"
-          FileUtils.mkdir_p File.dirname(file_name)
-          File.write(file_name, string)
-        end
-
-        string = JSON.pretty_generate(seals_descriptions_as_json)
-        dirs.each do |dir|
-          file_name = "#{dir}/seals-descriptions.json"
-          FileUtils.mkdir_p File.dirname(file_name)
-          File.write(file_name, string)
-        end
-
-        nil
+      def export_seals
+        export_files(
+          'seals.json' => :seals_as_json,
+          'seals-descriptions.json' => :seals_descriptions_as_json,
+        )
       end
 
       private

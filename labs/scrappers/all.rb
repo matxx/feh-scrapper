@@ -7,16 +7,17 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
 require 'scrappers/all'
 
-a = Scrappers::All.new
+# a = Scrappers::All.new
 # a = Scrappers::All.new(game8: { force_extraction: true })
 # a = Scrappers::All.new(level: Logger::UNKNOWN)
 # a = Scrappers::All.new(level: Logger::FATAL)
 # a = Scrappers::All.new(level: Logger::ERROR)
 # a = Scrappers::All.new(level: Logger::WARN)
-# a = Scrappers::All.new(level: Logger::INFO)
+a = Scrappers::All.new(level: Logger::INFO)
 # a = Scrappers::All.new(level: Logger::DEBUG)
-# a.game8.reset_index_files
-# a.game8.reset_json_files
+a.game8.log_and_launch(:reset_index_files)
+# a.game8.log_and_launch(:reset_html_files)
+# a.game8.log_and_launch(:reset_json_files)
 a.handle_everything
 
 # 3.2.2 :024 > a.fandom.errors[:skills_with_same_name]

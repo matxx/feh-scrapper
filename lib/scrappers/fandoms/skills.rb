@@ -147,29 +147,12 @@ module Scrappers
         nil
       end
 
-      def export_skills(dirs = self.class::EXPORT_DIRS)
-        string = JSON.pretty_generate(skills_as_json)
-        dirs.each do |dir|
-          file_name = "#{dir}/skills.json"
-          FileUtils.mkdir_p File.dirname(file_name)
-          File.write(file_name, string)
-        end
-
-        string = JSON.pretty_generate(skill_descriptions_as_json)
-        dirs.each do |dir|
-          file_name = "#{dir}/skills-descriptions.json"
-          FileUtils.mkdir_p File.dirname(file_name)
-          File.write(file_name, string)
-        end
-
-        string = JSON.pretty_generate(skill_availabilities_as_json)
-        dirs.each do |dir|
-          file_name = "#{dir}/skills-availabilities.json"
-          FileUtils.mkdir_p File.dirname(file_name)
-          File.write(file_name, string)
-        end
-
-        nil
+      def export_skills
+        export_files(
+          'skills.json' => :skills_as_json,
+          'skills-descriptions.json' => :skill_descriptions_as_json,
+          'skills-availabilities.json' => :skill_availabilities_as_json,
+        )
       end
 
       def relevant_skill?(skill)

@@ -27,9 +27,8 @@ module Scrappers
     )
 
     def initialize(level: Logger::ERROR, force_extraction: false)
-      ENV['DIR_DATA'] ||= 'data'
-      @data_html_path = "#{ENV.fetch('DIR_DATA')}/game8/html"
-      @data_json_path = "#{ENV.fetch('DIR_DATA')}/game8/json"
+      @data_html_path = 'game8/html'
+      @data_json_path = 'game8/json'
       @force_extraction = force_extraction
 
       @now = Time.now
@@ -53,54 +52,50 @@ module Scrappers
     end
 
     def fetch_everything
-      FileUtils.mkdir_p data_html_path
-      FileUtils.mkdir_p data_json_path
-
       page_ids.each do |kind, page_id|
         file_name = "#{page_id}.#{kind}"
-        html_path = "#{data_html_path}/#{file_name}.html"
-        if File.exist?(html_path)
+        html_path = "#{data_html_path}/index/#{file_name}.html"
+        if file_exist?(html_path)
           logger.warn "-- skipping fetch because file exists : #{file_name}"
-          html = File.read(html_path)
+          html = file_read(html_path)
         else
           logger.warn "-- fetching : #{page_id} - #{kind}"
           response = HTTP.get(game8_url(page_id))
           html = response.body.to_s
-          File.write(html_path, html)
+          file_write(html_path, html)
         end
 
-        json_path = "#{data_json_path}/#{file_name}.json"
+        json_path = "#{data_json_path}/index/#{file_name}.json"
         list =
-          if File.exist?(json_path) && !force_extraction
+          if file_exist?(json_path) && !force_extraction
             logger.info "-- skipping extract because file exists : #{json_path}"
-            JSON.parse(File.read(json_path))
+            JSON.parse(file_read(json_path))
           else
             logger.info "-- extracting : #{page_id} - #{kind}"
             json =
               begin
                 extract_list(kind, html)
               rescue StandardError => e
+                logger.error "---- error in extraction : #{e.message}"
                 errors[:extract_list] << {
                   kind:,
                   page_id:,
+                  url: game8_url(page_id),
                   class: e.class.name,
                   error: e.message,
                   backtrace: e.backtrace,
                 }
                 next
               end
-            File.write(json_path, JSON.pretty_generate(json))
+            file_write(json_path, JSON.pretty_generate(json))
             json
           end
         ids = list.map { |item| item['game8_id'] }
         list += (missing_page_ids[kind] - ids).map { |id| { 'game8_id' => id } } if missing_page_ids[kind]
 
-        FileUtils.mkdir_p "#{data_html_path}/#{kind}"
-        FileUtils.mkdir_p "#{data_json_path}/#{kind}"
-
         list.each do |item|
           html_path = "#{data_html_path}/#{kind}/#{item['game8_id']}.html"
-          if File.exist?(html_path)
+          if file_exist?(html_path)
             logger.warn "-- skipping fetch because file exists : #{html_path}"
             next
           end
@@ -115,7 +110,7 @@ module Scrappers
           end
 
           html = response.body.to_s
-          File.write(html_path, html)
+          file_write(html_path, html)
         end
       end
 
@@ -123,14 +118,12 @@ module Scrappers
     end
 
     def export_everything
-      FileUtils.mkdir_p "#{data_json_path}/detailed"
-
       page_ids.each do |kind, page_id|
         final_file_name = "#{data_json_path}/detailed/#{kind}.json"
-        if File.exist?(final_file_name) && !force_extraction
+        if file_exist?(final_file_name) && !force_extraction
           logger.info "-- skipping export because file exists : #{final_file_name}"
 
-          items = JSON.parse(File.read(final_file_name))
+          items = JSON.parse(file_read(final_file_name))
           case kind
           when self.class::KIND_UNIT
             @all_units += items
@@ -142,25 +135,25 @@ module Scrappers
         end
 
         file_name = "#{page_id}.#{kind}"
-        json_path = "#{data_json_path}/#{file_name}.json"
-        next unless File.exist?(json_path)
+        json_path = "#{data_json_path}/index/#{file_name}.json"
+        next unless file_exist?(json_path)
 
-        list = JSON.parse(File.read(json_path))
+        list = JSON.parse(file_read(json_path))
         ids = list.map { |item| item['game8_id'] }
         list += (missing_page_ids[kind] - ids).map { |id| { 'game8_id' => id } } if missing_page_ids[kind]
 
         items = list.map do |item|
           html_path = "#{data_html_path}/#{kind}/#{item['game8_id']}.html"
-          unless File.exist?(html_path)
+          unless file_exist?(html_path)
             logger.warn "-- skipping extract because file does not exist : #{html_path}"
             next
           end
 
-          html = File.read(html_path)
+          html = file_read(html_path)
 
           json_path = "#{data_json_path}/#{kind}/#{item['game8_id']}.json"
-          if File.exist?(json_path) && !force_extraction
-            JSON.parse(File.read(json_path))
+          if file_exist?(json_path) && !force_extraction
+            JSON.parse(file_read(json_path))
           else
             logger.info "-- extracting : #{kind} - #{item['game8_id']} - #{item['game8_name']}"
             @current_item = item['game8_id']
@@ -168,22 +161,24 @@ module Scrappers
               begin
                 extract_item(kind, html, item)
               rescue StandardError => e
+                logger.error "---- error in extraction : #{e.message}"
                 errors[:extract_item] << {
                   kind:,
                   page_id: item['game8_id'],
+                  url: game8_url(item['game8_id']),
                   class: e.class.name,
                   error: e.message,
                   backtrace: e.backtrace,
                 }
                 next
               end
-            File.write(json_path, JSON.pretty_generate(json))
+            file_write(json_path, JSON.pretty_generate(json))
             json
           end
         end.compact
 
         logger.info "-- exporting to : #{final_file_name}"
-        File.write(final_file_name, JSON.pretty_generate(items))
+        file_write(final_file_name, JSON.pretty_generate(items))
 
         case kind
         when self.class::KIND_UNIT
@@ -201,20 +196,21 @@ module Scrappers
     end
 
     def reset_index_files
-      Dir['data/game8/html/*.html'].each do |file|
-        File.delete(file)
-      end
-      Dir['data/game8/json/*.json', 'data/game8/json/detailed/*.json'].each do |file|
-        File.delete(file)
-      end
+      delete_files_in("#{data_html_path}/index")
+      delete_files_in("#{data_json_path}/index")
+      delete_files_in("#{data_json_path}/detailed")
+
+      nil
+    end
+
+    def reset_html_files
+      delete_files_in(data_html_path)
 
       nil
     end
 
     def reset_json_files
-      Dir['data/game8/json/**/*.json'].each do |file|
-        File.delete(file)
-      end
+      delete_files_in(data_json_path)
 
       nil
     end

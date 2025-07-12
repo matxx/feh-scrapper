@@ -69,9 +69,9 @@ module Scrappers
     end
 
     def handle_everything
-      scrap_everything
-      fill_everything
-      # export_everything
+      log_and_launch(:scrap_everything)
+      log_and_launch(:fill_everything)
+      # log_and_launch(:export_everything)
 
       nil
     end
@@ -141,27 +141,17 @@ module Scrappers
       "<#{self.class} @now=#{now}>"
     end
 
-    def export_accents(dirs = self.class::EXPORT_DIRS)
-      string = JSON.pretty_generate(accents_table)
-      dirs.each do |dir|
-        file_name = "#{dir}/accents.json"
-        FileUtils.mkdir_p File.dirname(file_name)
-        File.write(file_name, string)
-      end
-
-      nil
+    def export_accents
+      export_files(
+        'accents.json' => :accents_table,
+      )
     end
 
-    def export_constants(dirs = self.class::EXPORT_DIRS)
+    def export_constants
       constants.transform_values! { |v| v.is_a?(Array) ? v.sort : v }
-      string = JSON.pretty_generate(constants)
-      dirs.each do |dir|
-        file_name = "#{dir}/constants.json"
-        FileUtils.mkdir_p File.dirname(file_name)
-        File.write(file_name, string)
-      end
-
-      nil
+      export_files(
+        'constants.json' => constants,
+      )
     end
 
     private

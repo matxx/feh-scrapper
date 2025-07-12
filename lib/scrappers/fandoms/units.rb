@@ -428,29 +428,12 @@ module Scrappers
         end
       end
 
-      def export_units(dirs = self.class::EXPORT_DIRS)
-        string = JSON.pretty_generate(units_as_json)
-        dirs.each do |dir|
-          file_name = "#{dir}/units.json"
-          FileUtils.mkdir_p File.dirname(file_name)
-          File.write(file_name, string)
-        end
-
-        string = JSON.pretty_generate(unit_availabilities_as_json)
-        dirs.each do |dir|
-          file_name = "#{dir}/units-availabilities.json"
-          FileUtils.mkdir_p File.dirname(file_name)
-          File.write(file_name, string)
-        end
-
-        string = JSON.pretty_generate(unit_stats_as_json)
-        dirs.each do |dir|
-          file_name = "#{dir}/units-stats.json"
-          FileUtils.mkdir_p File.dirname(file_name)
-          File.write(file_name, string)
-        end
-
-        nil
+      def export_units
+        export_files(
+          'units.json' => :units_as_json,
+          'units-availabilities.json' => :unit_availabilities_as_json,
+          'units-stats.json' => :unit_stats_as_json,
+        )
       end
 
       def relevant_unit?(unit)

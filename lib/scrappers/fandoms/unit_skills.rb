@@ -161,15 +161,10 @@ module Scrappers
         nil
       end
 
-      def export_skills_units(dirs = self.class::EXPORT_DIRS)
-        string = JSON.pretty_generate(units_skills_as_json)
-        dirs.each do |dir|
-          file_name = "#{dir}/skills_units.json"
-          FileUtils.mkdir_p File.dirname(file_name)
-          File.write(file_name, string)
-        end
-
-        nil
+      def export_skills_units
+        export_files(
+          'skills_units.json' => :units_skills_as_json,
+        )
       end
 
       private

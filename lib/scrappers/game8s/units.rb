@@ -19,7 +19,7 @@ module Scrappers
       }.freeze
 
       def extract_list_units(dom)
-        node = dom.at('h2:contains("All Hero Ratings")')
+        node = dom.at('h2:contains("List of All Heroes")')
         node = node.next_element until node.name == 'table'
         node.search('tbody tr').map { |tr| export_list_unit(tr) }
       end
@@ -95,6 +95,14 @@ module Scrappers
           return base.merge(
             'recommended_boon' => nil,
             'recommended_bane' => nil,
+            'recommended_plus10' => nil,
+          )
+        when '534611'
+          # TODO: handle several recommended "no merge" and "+10" builds...
+          # https://game8.co/games/fire-emblem-heroes/archives/534611
+          return base.merge(
+            'recommended_boon' => nil,
+            'recommended_bane' => 'Spd',
             'recommended_plus10' => nil,
           )
         when '267183', '356374'
