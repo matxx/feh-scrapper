@@ -94,7 +94,7 @@ module Scrappers
         list += (missing_page_ids[kind] - ids).map { |id| { 'game8_id' => id } } if missing_page_ids[kind]
 
         list.each do |item|
-          html_path = "#{data_html_path}/#{kind}/#{item['game8_id']}.html"
+          html_path = page_html_key(kind, item['game8_id'])
           if file_exist?(html_path)
             logger.warn "-- skipping fetch because file exists : #{html_path}"
             next
@@ -143,7 +143,7 @@ module Scrappers
         list += (missing_page_ids[kind] - ids).map { |id| { 'game8_id' => id } } if missing_page_ids[kind]
 
         items = list.map do |item|
-          html_path = "#{data_html_path}/#{kind}/#{item['game8_id']}.html"
+          html_path = page_html_key(kind, item['game8_id'])
           unless file_exist?(html_path)
             logger.warn "-- skipping extract because file does not exist : #{html_path}"
             next
@@ -151,7 +151,7 @@ module Scrappers
 
           html = file_read(html_path)
 
-          json_path = "#{data_json_path}/#{kind}/#{item['game8_id']}.json"
+          json_path = page_json_key(kind, item['game8_id'])
           if file_exist?(json_path) && !force_extraction
             JSON.parse(file_read(json_path))
           else
@@ -213,6 +213,27 @@ module Scrappers
       delete_files_in(data_json_path)
 
       nil
+    end
+
+    def page_html_key(kind, page_id)
+      "#{data_html_path}/#{kind}/#{page_id}.html"
+    end
+
+    def page_json_key(kind, page_id)
+      "#{data_json_path}/#{kind}/#{page_id}.json"
+    end
+
+    def delete_page_html_file(kind, page_id)
+      log_and_file_delete(page_html_key(kind, page_id))
+    end
+
+    def delete_page_json_file(kind, page_id)
+      log_and_file_delete(page_json_key(kind, page_id))
+    end
+
+    def delete_page_files(kind, page_id)
+      delete_page_html_file(kind, page_id)
+      delete_page_json_file(kind, page_id)
     end
 
     private

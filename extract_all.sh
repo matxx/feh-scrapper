@@ -11,5 +11,3 @@ a.game8.log_and_launch(:reset_index_files)
 # a.game8.log_and_launch(:reset_html_files) # this line will force downloading of all pages again
 # a.game8.log_and_launch(:reset_json_files) # this line will force parsing of all pages again
 a.handle_everything
-
-ap(a.errors_report)

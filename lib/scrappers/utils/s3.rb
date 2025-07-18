@@ -54,10 +54,14 @@ module Scrappers
         )
       end
 
+      def log_and_file_delete(file_path, message_prefix: '')
+        logger.info "#{message_prefix}deleting file : #{file_path}"
+        file_delete(file_path)
+      end
+
       def delete_files_in(prefix)
         s3_files_in(prefix).each do |obj|
-          logger.info "-- deleting file : #{obj.key}"
-          file_delete(obj.key)
+          log_and_file_delete(obj.key, message_prefix: '-- ')
         end
       end
     end

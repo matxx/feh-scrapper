@@ -52,7 +52,7 @@ module Scrappers
             raise_with_item 'para not found' if para.nil?
 
             # ex : with double point - https://game8.co/games/fire-emblem-heroes/archives/470386
-            para.text.match(/This is a ranking page for the hero (.+)( -|:) (.+) from the game/)
+            para.text.match(/This is a ranking page for the hero (.+?)( ?-|:) (.+) from the game/)
           end
 
         th = dom.at('th:contains("Overall Rating")')
@@ -105,6 +105,14 @@ module Scrappers
             'recommended_bane' => 'Spd',
             'recommended_plus10' => nil,
           )
+        when '267455'
+          # TODO: handle several recommended "no merge" builds...
+          # https://game8.co/games/fire-emblem-heroes/archives/267455#hl_2
+          return base.merge(
+            'recommended_boon' => nil,
+            'recommended_bane' => nil,
+            'recommended_plus10' => 'Atk',
+          )
         when '267183', '356374'
           # TODO: handle several recommended "no merge" builds...
           # https://game8.co/games/fire-emblem-heroes/archives/267183#hl_2
@@ -114,13 +122,13 @@ module Scrappers
             'recommended_bane' => nil,
             'recommended_plus10' => 'Spd',
           )
-        when '267455'
+        when '537827'
           # TODO: handle several recommended "no merge" builds...
-          # https://game8.co/games/fire-emblem-heroes/archives/267455#hl_2
+          # https://game8.co/games/fire-emblem-heroes/archives/537827
           return base.merge(
             'recommended_boon' => nil,
             'recommended_bane' => nil,
-            'recommended_plus10' => 'Atk',
+            'recommended_plus10' => 'Res',
           )
         when '376961'
           # TODO: handle several recommended "+10" builds...
