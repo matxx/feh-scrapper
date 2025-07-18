@@ -121,7 +121,7 @@ module Scrappers
       WEAPON_G = 'Green'
       WEAPON_C = 'Colorless'
 
-      ALL_BLUES = [
+      ALL_REDS = [
         WEAPON_R_SW,
         WEAPON_R_BO,
         WEAPON_R_DA,
@@ -130,7 +130,7 @@ module Scrappers
         WEAPON_R_BE,
       ].freeze
 
-      ALL_REDS = [
+      ALL_BLUES = [
         WEAPON_B_LA,
         WEAPON_B_BO,
         WEAPON_B_DA,
@@ -168,12 +168,12 @@ module Scrappers
         return { can_not_use: [WEAPON_C_ST] } if (ALL_WEAPONS - tmp_can_use) == [WEAPON_C_ST]
 
         {
-          ALL_BLUES => WEAPON_R,
-          ALL_REDS => WEAPON_B,
+          ALL_REDS => WEAPON_R,
+          ALL_BLUES => WEAPON_B,
           ALL_GREENS => WEAPON_G,
           ALL_COLORLESS => WEAPON_C,
         }.each do |array, elem|
-          return { can_use: [elem] } if tmp_can_use.length == array.length
+          return { can_use: [elem] } if tmp_can_use.sort == array.sort
 
           if !array.intersect?(tmp_can_use) && (tmp_can_use + array).length == WEAPONS_COUNT
             return { can_not_use: [elem] }
