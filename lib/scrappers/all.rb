@@ -342,7 +342,7 @@ module Scrappers
       'Atlas+',
       'Falchion', # Falchion in on multiple pages (with suffixes) on fandom
       # assists
-      "Maiden's Solace",
+      # "Maiden's Solace",
       # A skills
       'Spd/Res Solo 1',
       'Spd/Res Solo 2',
@@ -363,10 +363,10 @@ module Scrappers
       'Spd/Res Oath 3',
 
       # Røkkr Sieges exclusive Special
-      'Umbra Blast',
-      'Umbra Burst',
-      'Umbra Calamity',
-      'Umbra Eruption',
+      # 'Umbra Blast',
+      # 'Umbra Burst',
+      # 'Umbra Calamity',
+      # 'Umbra Eruption',
     ].freeze
 
     def fill_fandom_skills_with_game8_data

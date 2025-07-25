@@ -24,6 +24,7 @@ module Scrappers
       :all_units,
       :all_skills,
       :current_item,
+      :s3_files
     )
 
     def initialize(level: Logger::ERROR, force_extraction: false)
@@ -36,6 +37,7 @@ module Scrappers
       logger.level = level
 
       boot
+      setup_s3
 
       super
     end
@@ -45,10 +47,23 @@ module Scrappers
     end
 
     def handle_everything
+      log_and_launch(:list_existing_files)
       log_and_launch(:fetch_everything)
       log_and_launch(:export_everything)
 
       nil
+    end
+
+    def list_existing_files
+      [data_html_path, data_json_path].each do |prefix|
+        s3_files_in(prefix).each do |obj|
+          s3_files << obj.key
+        end
+      end
+    end
+
+    def file_exist?(path)
+      s3_files.include?(path)
     end
 
     def fetch_everything
@@ -244,6 +259,7 @@ module Scrappers
       @all_skills = []
       @page_ids = nil
       @current_item = nil
+      @s3_files = []
     end
 
     def empty_errors

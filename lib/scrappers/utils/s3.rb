@@ -11,6 +11,11 @@ module Scrappers
           ENV.fetch('FEH_S3_ACCESS_KEY_ID'),
           ENV.fetch('FEH_S3_SECRET_ACCESS_KEY'),
         )
+        @debug_s3 = ENV.fetch('S3_DEBUG', nil) == 'enabled'
+      end
+
+      def debug_s3?
+        @debug_s3
       end
 
       def s3_bucket
@@ -26,14 +31,17 @@ module Scrappers
       end
 
       def file_exist?(file_path)
+        logger.debug "[S3] obj.exists? #{file_path}" if debug_s3?
         s3_file(file_path).exists?
       end
 
       def file_delete(file_path)
+        logger.debug "[S3] obj.delete #{file_path}" if debug_s3?
         s3_file(file_path).delete
       end
 
       def file_read(file_path)
+        logger.debug "[S3] obj.get.body.read #{file_path}" if debug_s3?
         s3_file(file_path).get.body.read
       end
 
@@ -48,6 +56,7 @@ module Scrappers
             raise "extension not handled : #{File.extname(file_path)}"
           end
 
+        logger.debug "[S3] obj.put #{file_path}" if debug_s3?
         s3_file(file_path).put(
           body: string,
           content_type:,

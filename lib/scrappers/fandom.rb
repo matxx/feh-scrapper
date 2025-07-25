@@ -60,6 +60,7 @@ module Scrappers
       setup_accents_table
 
       boot
+      setup_s3
 
       super
     end
