@@ -66,6 +66,16 @@ module Scrappers
       s3_files.include?(path)
     end
 
+    def file_write(file_path, string)
+      s3_files << file_path
+      super
+    end
+
+    def file_delete(file_path)
+      s3_files.delete file_path
+      super
+    end
+
     def fetch_everything
       page_ids.each do |kind, page_id|
         file_name = "#{page_id}.#{kind}"
@@ -133,34 +143,48 @@ module Scrappers
     end
 
     def export_everything
+      data_by_page_id = {}
+
       page_ids.each do |kind, page_id|
         final_file_name = "#{data_json_path}/detailed/#{kind}.json"
-        if file_exist?(final_file_name) && !force_extraction
-          logger.info "-- skipping export because file exists : #{final_file_name}"
+        list =
+          if file_exist?(final_file_name) && !force_extraction
+            logger.info "-- file exists, retrieving previously extracted pages : #{final_file_name}"
 
-          items = JSON.parse(file_read(final_file_name))
-          case kind
-          when self.class::KIND_UNIT
-            @all_units += items
+            items = JSON.parse(file_read(final_file_name))
+
+            items.each do |item|
+              data_by_page_id[item['game8_id']] = item
+            end
+
+            items
           else
-            @all_skills += items
+            file_name = "#{page_id}.#{kind}"
+            json_path = "#{data_json_path}/index/#{file_name}.json"
+            unless file_exist?(json_path)
+              errors[:missing_index_file] << json_path
+              logger.error "-- extract failed because file does not exist : #{json_path}"
+              next
+            end
+
+            JSON.parse(file_read(json_path))
           end
 
-          next
-        end
-
-        file_name = "#{page_id}.#{kind}"
-        json_path = "#{data_json_path}/index/#{file_name}.json"
-        next unless file_exist?(json_path)
-
-        list = JSON.parse(file_read(json_path))
         ids = list.map { |item| item['game8_id'] }
         list += (missing_page_ids[kind] - ids).map { |id| { 'game8_id' => id } } if missing_page_ids[kind]
 
         items = list.map do |item|
+          suffix = "#{kind} - #{item['game8_id']} - #{item['game8_name']}"
+
+          if data_by_page_id[item['game8_id']]
+            logger.info "-- skipping extract because already extracted : #{suffix}"
+            next data_by_page_id[item['game8_id']]
+          end
+
           html_path = page_html_key(kind, item['game8_id'])
           unless file_exist?(html_path)
-            logger.warn "-- skipping extract because file does not exist : #{html_path}"
+            errors[:missing_page_file] << html_path
+            logger.error "-- skipping extract because file does not exist : #{suffix} (#{html_path})"
             next
           end
 
@@ -168,9 +192,10 @@ module Scrappers
 
           json_path = page_json_key(kind, item['game8_id'])
           if file_exist?(json_path) && !force_extraction
+            logger.info "-- skipping extract because already done : #{suffix}"
             JSON.parse(file_read(json_path))
           else
-            logger.info "-- extracting : #{kind} - #{item['game8_id']} - #{item['game8_name']}"
+            logger.info "-- extracting : #{suffix}"
             @current_item = item['game8_id']
             json =
               begin
@@ -210,10 +235,15 @@ module Scrappers
       "<#{self.class} @now=#{now}>"
     end
 
+    def reset_detailed_files
+      delete_files_in("#{data_json_path}/detailed")
+
+      nil
+    end
+
     def reset_index_files
       delete_files_in("#{data_html_path}/index")
       delete_files_in("#{data_json_path}/index")
-      delete_files_in("#{data_json_path}/detailed")
 
       nil
     end

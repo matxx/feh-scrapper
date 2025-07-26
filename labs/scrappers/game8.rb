@@ -9,14 +9,17 @@ require 'scrappers/game8'
 
 y = Scrappers::Game8.new
 # y = Scrappers::Game8.new(level: Logger::DEBUG)
-y.handle_everything
+# y.log_and_launch(:reset_index_files) # this line will force downloading & parsing of all index pages
+# y.log_and_launch(:reset_html_files) # this line will force downloading of all pages again
+# y.log_and_launch(:reset_json_files) # this line will force parsing of all pages again
+y.log_and_launch(:handle_everything)
 
 # after code update
 
 Dir['lib/scrappers/**/*.rb'].each { |file| load(file) }
 # y = Scrappers::Game8.new(level: Logger::DEBUG)
-y.reset!
-y.handle_everything
+y.log_and_launch(:reset!)
+y.log_and_launch(:handle_everything)
 
 # scrap test
 

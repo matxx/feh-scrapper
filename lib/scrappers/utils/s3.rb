@@ -23,6 +23,7 @@ module Scrappers
       end
 
       def s3_files_in(prefix, &)
+        logger.debug "[S3] obj.objects(prefix:) #{prefix}" if debug_s3?
         s3_bucket.objects(prefix:, &)
       end
 
