@@ -202,6 +202,15 @@ module Scrappers
         constants[:skills_max_sp] = sp if constants[:skills_max_sp] < sp
         constants[:skills_max_cd] = cd if cd && constants[:skills_max_cd] < cd
 
+        fodders = []
+        skill[:fodder_details]&.each do |u|
+          unit = all_units_by_wikiname[u['WikiName']]
+          next (errors[:fodder_not_found] << u['WikiName']) if unit.nil?
+          next unless relevant_unit?(unit)
+
+          fodders << unit
+        end
+
         res = {
           id: skill['TagID'],
           base_id: skill[:base_id],
@@ -225,6 +234,9 @@ module Scrappers
             moves: sanitize_move_restriction(skill),
             weapons: sanitize_weapon_restriction(skill),
           },
+
+          addition_date: fodders.map { |u| u['AdditionDate'] }.min_by(&:to_date),
+          release_date:  fodders.map { |u| u['ReleaseDate']  }.min_by(&:to_date),
         }
 
         if skill[:upgrades_wikinames]
@@ -310,7 +322,8 @@ module Scrappers
         fodder_ids = []
         skill[:fodder_details]&.each do |u|
           unit = all_units_by_wikiname[u['WikiName']]
-          next (errors[:fodder_not_found] << u['WikiName']) if unit.nil?
+          next (errors[:fodder_not_found_bis] << u['WikiName']) if unit.nil?
+          next unless relevant_unit?(unit)
 
           fodder_ids << unit['TagID']
         end

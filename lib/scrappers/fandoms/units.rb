@@ -3,6 +3,10 @@
 require 'active_support/core_ext/enumerable'
 require 'active_support/core_ext/hash/slice'
 
+# to_date
+require 'active_support/core_ext/object/blank'
+require 'active_support/core_ext/string/conversions'
+
 module Scrappers
   module Fandoms
     module Units

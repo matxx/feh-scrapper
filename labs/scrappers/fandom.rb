@@ -9,14 +9,15 @@ require 'scrappers/fandom'
 
 x = Scrappers::Fandom.new
 # x = Scrappers::Fandom.new(level: Logger::DEBUG)
-x.handle_everything
+x.log_and_launch(:handle_everything)
+x.log_and_launch(:export_everything)
 
 # after code update
 
 Dir['lib/scrappers/**/*.rb'].each { |file| load(file) }
 # x = Scrappers::Fandom.new(level: Logger::DEBUG)
-x.reset!
-x.handle_everything
+x.log_and_launch(:reset!)
+x.log_and_launch(:handle_everything)
 
 # misc
 
