@@ -116,8 +116,6 @@ module Scrappers
       'Valaskjálf',
     ].freeze
 
-    REGEXP_SACRED_SEAL_SUFFIX = / [12]\Z/
-
     def retrieve_game8_skill_ratings
       f_skills_by_cat = fandom.relevant_skills_without_refine.group_by { |s| s['Scategory'] }
       f_skill_by_cat_and_name = f_skills_by_cat.transform_values { |skills| skills.index_by { |s| s['Name'] } }
@@ -154,7 +152,7 @@ module Scrappers
         if distance < 5
           errors[:skill_approximations] << { cat: g_skill['category'], game8: skill_name, fandom: true_skill_name }
         else
-          errors[:skill_not_found] << { cat: g_skill['category'], game8: skill_name }
+          errors[:fandom_skill_not_found] << { cat: g_skill['category'], game8: skill_name }
           next
         end
 
@@ -193,7 +191,7 @@ module Scrappers
         if distance < 5
           errors[:unit_approximations] << { game8: unit_name, fandom: true_unit_name }
         else
-          errors[:unit_not_found] << unit_name
+          errors[:fandom_unit_not_found] << unit_name
           next
         end
 
@@ -344,20 +342,12 @@ module Scrappers
       # assists
       # "Maiden's Solace",
       # A skills
-      'Spd/Res Solo 1',
-      'Spd/Res Solo 2',
-      'Spd/Res Solo 3',
+      # 'Spd/Res Solo 1',
       # B skills
+      # "Yune's Whispers",
       'Seal Atk/Res 1',
       'Seal Atk/Res 2',
-      "Yune's Whispers",
       # C skills
-      'Even Recovery 1',
-      'Even Recovery 2',
-      'Even Recovery 3',
-      'Odd Recovery 1',
-      'Odd Recovery 2',
-      'Odd Recovery 3',
       'Spd/Res Oath 1',
       'Spd/Res Oath 2',
       'Spd/Res Oath 3',

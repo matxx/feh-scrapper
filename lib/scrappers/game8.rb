@@ -17,20 +17,18 @@ module Scrappers
     attr_reader(
       :data_html_path,
       :data_json_path,
-      :force_extraction,
       :now,
       :logger,
       :errors,
       :all_units,
       :all_skills,
       :current_item,
-      :s3_files
+      :s3_files,
     )
 
-    def initialize(level: Logger::ERROR, force_extraction: false)
+    def initialize(level: Logger::ERROR)
       @data_html_path = 'game8/html'
       @data_json_path = 'game8/json'
-      @force_extraction = force_extraction
 
       @now = Time.now
       @logger = Logger.new($stdout)
@@ -92,7 +90,7 @@ module Scrappers
 
         json_path = "#{data_json_path}/index/#{file_name}.json"
         list =
-          if file_exist?(json_path) && !force_extraction
+          if file_exist?(json_path)
             logger.info "-- skipping extract because file exists : #{json_path}"
             JSON.parse(file_read(json_path))
           else
@@ -147,29 +145,23 @@ module Scrappers
 
       page_ids.each do |kind, page_id|
         final_file_name = "#{data_json_path}/detailed/#{kind}.json"
-        list =
-          if file_exist?(final_file_name) && !force_extraction
-            logger.info "-- file exists, retrieving previously extracted pages : #{final_file_name}"
+        if file_exist?(final_file_name)
+          logger.info "-- file exists, retrieving previously extracted pages : #{final_file_name}"
 
-            items = JSON.parse(file_read(final_file_name))
-
-            items.each do |item|
-              data_by_page_id[item['game8_id']] = item
-            end
-
-            items
-          else
-            file_name = "#{page_id}.#{kind}"
-            json_path = "#{data_json_path}/index/#{file_name}.json"
-            unless file_exist?(json_path)
-              errors[:missing_index_file] << json_path
-              logger.error "-- extract failed because file does not exist : #{json_path}"
-              next
-            end
-
-            JSON.parse(file_read(json_path))
+          JSON.parse(file_read(final_file_name)).each do |item|
+            data_by_page_id[item['game8_id']] = item
           end
+        end
 
+        file_name = "#{page_id}.#{kind}"
+        json_path = "#{data_json_path}/index/#{file_name}.json"
+        unless file_exist?(json_path)
+          errors[:missing_index_file] << json_path
+          logger.error "-- extract failed because file does not exist : #{json_path}"
+          next
+        end
+
+        list = JSON.parse(file_read(json_path))
         ids = list.map { |item| item['game8_id'] }
         list += (missing_page_ids[kind] - ids).map { |id| { 'game8_id' => id } } if missing_page_ids[kind]
 
@@ -191,7 +183,7 @@ module Scrappers
           html = file_read(html_path)
 
           json_path = page_json_key(kind, item['game8_id'])
-          if file_exist?(json_path) && !force_extraction
+          if file_exist?(json_path)
             logger.info "-- skipping extract because already done : #{suffix}"
             JSON.parse(file_read(json_path))
           else
