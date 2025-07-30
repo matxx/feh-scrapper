@@ -211,11 +211,17 @@ module Scrappers
           fodders << unit
         end
 
+        name = sanitize_name(skill['Name'])
+        if name == 'Falchion'
+          suffix = skill['WikiName'].match(/\AFalchion ([^ ]+)/)[1]
+          name = "#{name} (#{suffix})"
+        end
+
         res = {
           id: skill['TagID'],
           base_id: skill[:base_id],
           game8_id: skill[:game8_id],
-          name: sanitize_name(skill['Name']),
+          name:,
           group_name: sanitize_name(skill['GroupName']),
           category: skill['Scategory'],
           weapon_type: sanitize_weapon_type(skill),

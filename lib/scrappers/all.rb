@@ -93,6 +93,7 @@ module Scrappers
       'Firesweep Sword' => 'Firesweep S',
       'Firesweep Sword+' => 'Firesweep S+',
       'Firesweep Lance+' => 'Firesweep L+',
+      'In the Fold+' => 'In The Fold+',
       'Light is Time' => 'Light Is Time',
       'Lucrative Bow' => 'Gainful Bow',
       'Lucrative Bow+' => 'Gainful Bow+',
@@ -134,6 +135,7 @@ module Scrappers
         skill_name = g_skill['game8_name']
         skill_name = SKILL_NAME_SUBSTITUTIONS[skill_name] if SKILL_NAME_SUBSTITUTIONS.key?(skill_name)
 
+        # need to match those by wikiname because of same name
         case skill_name
         when 'Missiletainn (sword)'
           next store_skill(skill_id_bis('Missiletainn sword'), g_skill)
@@ -338,7 +340,9 @@ module Scrappers
     GAME8_MISSING_SKILL_NAMES = [
       # weapons
       'Atlas+',
-      'Falchion', # Falchion in on multiple pages (with suffixes) on fandom
+      # game8 has only one page for Falchion
+      # but there are 3 versions of it
+      'Falchion',
       # assists
       # "Maiden's Solace",
       # A skills
