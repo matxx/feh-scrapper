@@ -459,6 +459,15 @@ module Scrappers
       DRAGONFLOWERS_MULTIPLICATOR = 5
 
       def unit_as_json(unit)
+        element =
+          if unit[:properties].include?('legendary')
+            legend = all_legendary_heroes_by_pagename[unit['Page']]
+            legend['LegendaryEffect']
+          elsif unit[:properties].include?('mythic')
+            mythic = all_mythic_heroes_by_pagename[unit['Page']]
+            mythic['MythicEffect']
+          end
+
         {
           id: unit['TagID'],
           name: sanitize_name(unit['Name']),
@@ -493,6 +502,7 @@ module Scrappers
 
           is_legendary:  unit[:properties].include?('legendary'),
           is_mythic:     unit[:properties].include?('mythic'),
+          element:,
 
           is_duo:        unit[:properties].include?('duo'),
           is_harmonized: unit[:properties].include?('harmonized'),

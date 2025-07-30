@@ -20,18 +20,18 @@ module Scrappers
 
       def fill_skills_with_prefodder
         skills_min_tier = all_skills.select { |skill| skill[:downgrades_wikinames].nil? }
-        logger.info "- fill_skills_with_prefodder : #{skills_min_tier.size}"
+        logger.debug "- fill_skills_with_prefodder : #{skills_min_tier.size}"
         rec_compute_skills_fodder(skills_min_tier)
       end
 
       def rec_compute_skills_fodder(skills, tier = 0)
         return if skills.empty?
 
-        logger.info "-- rec_compute_skills_fodder : #{tier}"
+        logger.debug "-- rec_compute_skills_fodder : #{tier}"
 
         next_tier_skills = Set.new
         skills.each do |skill|
-          logger.info "--> skill : #{skill['Name']}"
+          logger.debug "--> skill : #{skill['Name']}"
           skill[:prefodder_one_mode] = {}
 
           if skill[:upgrades_wikinames]
