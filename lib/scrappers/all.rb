@@ -110,7 +110,13 @@ module Scrappers
       'Blood ＆ Thunder' => 'Blood &amp; Thunder',
     }.freeze
 
-    GAME8_ENEMY_SKILLS = [
+    GAME8_SKILLS_TO_IGNORE = [
+      # Kiran weapon
+      'Dire Breidablik',
+      # game8 has only one page for Falchion
+      # but there are 3 versions of it
+      'Falchion',
+      # ennemy skills
       'Élivágar',
       'Hel Scythe',
       'Kvasir',
@@ -123,8 +129,7 @@ module Scrappers
       f_seals_by_name = fandom.all_seals.index_by { |s| s['Name'] }
 
       game8.all_skills.each do |g_skill|
-        next if GAME8_ENEMY_SKILLS.include?(g_skill['game8_name'])
-        next if g_skill['game8_name'] == 'Dire Breidablik' # Kiran weapon
+        next if GAME8_SKILLS_TO_IGNORE.include?(g_skill['game8_name'])
 
         skill_by_name =
           if g_skill['category'] == game8.class::SKILLS_S
@@ -340,9 +345,6 @@ module Scrappers
     GAME8_MISSING_SKILL_NAMES = [
       # weapons
       'Atlas+',
-      # game8 has only one page for Falchion
-      # but there are 3 versions of it
-      'Falchion',
       # assists
       # "Maiden's Solace",
       # A skills
@@ -366,6 +368,7 @@ module Scrappers
     def fill_fandom_skills_with_game8_data
       fandom.relevant_skills.each do |f_skill|
         next if GAME8_MISSING_SKILL_NAMES.include?(f_skill['Name']) # TODO: need update
+        next if f_skill['Name'].include?('Falchion')
         next if f_skill[:fodder_details]&.all? { |desc| desc['WikiName'].include?('ENEMY') }
 
         f_id = f_skill[:base_id] || f_skill['TagID']
