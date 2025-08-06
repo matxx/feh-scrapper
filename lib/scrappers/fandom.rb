@@ -20,6 +20,7 @@ require 'scrappers/fandoms/unit_stats'
 require 'scrappers/fandoms/units'
 require 'scrappers/fandoms/units_fodder'
 require 'scrappers/fandoms/utils'
+require 'scrappers/fandoms/version_updates'
 
 module Scrappers
   # for all Fandom objects, the source of the data depends on the type of its key
@@ -46,6 +47,7 @@ module Scrappers
     include Scrappers::Fandoms::Units
     include Scrappers::Fandoms::UnitsFodder
     include Scrappers::Fandoms::Utils
+    include Scrappers::Fandoms::VersionUpdates
 
     attr_reader :client, :now, :errors, :logger, :constants
 
@@ -92,6 +94,7 @@ module Scrappers
       log_and_launch(:scrap_divine_codes)
       log_and_launch(:scrap_banner_focuses)
       log_and_launch(:scrap_distributions)
+      log_and_launch(:scrap_version_updates)
 
       log_and_launch(:compute_all_seals)
 
@@ -113,6 +116,7 @@ module Scrappers
       log_and_launch(:fill_units_with_skills)
       log_and_launch(:fill_units_with_stats)
       log_and_launch(:fill_units_with_themes)
+      log_and_launch(:fill_units_with_versions)
 
       log_and_launch(:fill_skills_with_images)
       log_and_launch(:fill_seals_with_images)

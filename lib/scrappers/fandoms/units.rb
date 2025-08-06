@@ -517,6 +517,7 @@ module Scrappers
 
           addition_date: unit['AdditionDate'],
           release_date: unit['ReleaseDate'],
+          version: unit[:version],
         }.merge(
           unit.slice(
             :game8_id,

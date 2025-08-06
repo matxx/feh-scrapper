@@ -243,6 +243,7 @@ module Scrappers
 
           addition_date: fodders.map { |u| u['AdditionDate'] }.min_by(&:to_date),
           release_date:  fodders.map { |u| u['ReleaseDate']  }.min_by(&:to_date),
+          version:       fodders.map { |u| u[:version]       }.min_by { |str| str.split('.').map(&:to_i) },
         }
 
         if skill[:upgrades_wikinames]
