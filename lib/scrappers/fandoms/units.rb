@@ -347,6 +347,7 @@ module Scrappers
       THEME_HOSTILE_SPRING = :hostile_spring
       THEME_PICNIC = :picnic
       THEME_PIRATES = :pirates
+      THEME_TEE = :tee
       THEME_TRIBES = :tribes
 
       ANNIVERSARY_MARTH_INT_ID = 1235
@@ -420,6 +421,8 @@ module Scrappers
               THEME_DANCE
             elsif [2018, 2024].include?(year) && month == 8
               THEME_HOSHIDAN_SUMMER
+            elsif [2023, 2025].include?(year) && month == 8
+              THEME_TEE
             elsif year == 2019 && month == 1 && day > 5
               THEME_HOSTILE_SPRING
             elsif year == 2019 && month == 4
@@ -660,6 +663,8 @@ module Scrappers
           return "Pic!#{name}"
         when THEME_PIRATES
           return "P!#{name}"
+        when THEME_TEE
+          return "T!#{name}"
         when THEME_TRIBES
           return "FT!#{name}" if unit['ReleaseDate']&.start_with?('2022')
           return "WT!#{name}" if unit['ReleaseDate']&.start_with?('2023')
