@@ -117,6 +117,15 @@ module Scrappers
         list += (missing_page_ids[kind] - ids).map { |id| { 'game8_id' => id } } if missing_page_ids[kind]
 
         list.each do |item|
+          if item['game8_id'].nil?
+            logger.warn "-- skipping fetch because no page ID : #{kind} - #{item['game8_name']}"
+            errors[:missing_page_id] << {
+              kind:,
+              item:,
+            }
+            next
+          end
+
           html_path = page_html_key(kind, item['game8_id'])
           if file_exist?(html_path)
             logger.warn "-- skipping fetch because file exists : #{html_path}"

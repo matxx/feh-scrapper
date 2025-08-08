@@ -6,7 +6,6 @@ Extract data from Fandom and Game8 and export it as JSONs
 
 ### Features
 
-1. save game8 files on s3
 1. automatic updates every night (https://jasonet.co/posts/scheduled-actions/)
 1. unit tests
 1. get all images from sprites

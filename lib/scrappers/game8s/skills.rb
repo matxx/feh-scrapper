@@ -175,7 +175,7 @@ module Scrappers
           'game8_name' => name,
           'game8_grade' => tds[1].text.strip,
           'how_to_obtain' => how_to_obtain,
-          'effect' => tds[2].at('hr').next_sibling.text,
+          'effect' => tds[2].at('hr').next_sibling.text.strip,
         }
       end
 

@@ -11,6 +11,7 @@ module Scrappers
         @all_distributions = nil
       end
 
+      # https://feheroes.fandom.com/wiki/Use_Heroic_Grails
       # https://feheroes.fandom.com/wiki/Special:CargoTables/Distributions
       def scrap_distributions
         return if all_distributions
