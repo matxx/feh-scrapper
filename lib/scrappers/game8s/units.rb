@@ -161,6 +161,14 @@ module Scrappers
             'recommended_bane' => 'none',
             'recommended_plus10' => 'Spd',
           )
+        when '543979'
+          # no IV advice (yet ?)
+          # https://game8.co/games/fire-emblem-heroes/archives/543979#hl_2
+          return base.merge(
+            'recommended_boon' => 'Spd',
+            'recommended_bane' => 'Def',
+            'recommended_plus10' => 'Spd',
+          )
         end
 
         # multiple same headers
