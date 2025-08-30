@@ -25,10 +25,13 @@ module Scrappers
       end
 
       def export_list_unit(node)
-        link = node.at('a').attr('href')
-        uri = URI.parse(link)
+        link = node.at('td:first-child').at('a')
+        if link
+          uri = URI.parse(link.attr('href'))
+          game8_id = uri.path.split('/').last
+        end
         {
-          'game8_id' => uri.path.split('/').last,
+          'game8_id' => game8_id,
           'game8_name' => node.at('td:first-child').text.strip,
           'game8_rating' => node.at('td:last-child').text.strip,
         }
