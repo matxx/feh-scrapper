@@ -36,6 +36,7 @@ module Scrappers
       UNIT_KIND_LEGENDARY = 'LEGENDARY'
       UNIT_KIND_MYTHIC = 'MYTHIC'
       UNIT_KIND_REARMED = 'REARMED'
+      UNIT_KIND_ENTWINED = 'ENTWINED'
 
       FIVE_STAR_FOCUS_ONLY_UNIT_KINDS = [
         UNIT_KIND_AIDED,
@@ -45,14 +46,16 @@ module Scrappers
         UNIT_KIND_LEGENDARY,
         UNIT_KIND_MYTHIC,
         UNIT_KIND_REARMED,
+        UNIT_KIND_ENTWINED,
       ].freeze
-      UNIT_TRAITS = [
-        UNIT_KIND_AIDED,
-        UNIT_KIND_ASCENDED,
-        UNIT_KIND_ATTUNED,
-        UNIT_KIND_EMBLEM,
-        UNIT_KIND_REARMED,
-      ].freeze
+      # UNIT_TRAITS = [
+      #   UNIT_KIND_AIDED,
+      #   UNIT_KIND_ASCENDED,
+      #   UNIT_KIND_ATTUNED,
+      #   UNIT_KIND_EMBLEM,
+      #   UNIT_KIND_REARMED,
+      #   UNIT_KIND_ENTWINED,
+      # ].freeze
 
       UNIT_PROPERTY_BY_KIND = {
         UNIT_KIND_AIDED => 'aided',
@@ -66,6 +69,7 @@ module Scrappers
         UNIT_KIND_LEGENDARY => 'legendary',
         UNIT_KIND_MYTHIC => 'mythic',
         UNIT_KIND_REARMED => 'rearmed',
+        UNIT_KIND_ENTWINED => 'entwined',
         # 'refresher'
         # 'tempest'
         # 'ghb'
@@ -515,6 +519,7 @@ module Scrappers
           is_ascended:   unit[:properties].include?('ascended'),
           is_emblem:     unit[:properties].include?('emblem'),
           is_aided:      unit[:properties].include?('aided'),
+          is_entwined:   unit[:properties].include?('entwined'),
 
           is_refresher:  unit[:properties].include?('refresher'),
 
@@ -678,6 +683,7 @@ module Scrappers
         return "At!#{name}" if unit[:properties].include?('attuned')
         return "E!#{name}" if unit[:properties].include?('emblem')
         return "R!#{name}" if unit[:properties].include?('rearmed')
+        return "Et!#{name}" if unit[:properties].include?('entwined')
 
         return "B!#{name}" if unit[:properties].include?('brave')
         return "F!#{name}" if unit[:properties].include?('fallen')

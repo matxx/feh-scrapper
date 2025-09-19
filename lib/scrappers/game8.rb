@@ -175,6 +175,11 @@ module Scrappers
         list += (missing_page_ids[kind] - ids).map { |id| { 'game8_id' => id } } if missing_page_ids[kind]
 
         items = list.map do |item|
+          if item['game8_id'].nil?
+            logger.warn "-- skipping extract because no page ID : #{kind} - #{item['game8_name']}"
+            next
+          end
+
           suffix = "#{kind} - #{item['game8_id']} - #{item['game8_name']}"
 
           if data_by_page_id[item['game8_id']]
