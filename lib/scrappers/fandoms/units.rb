@@ -7,9 +7,13 @@ require 'active_support/core_ext/hash/slice'
 require 'active_support/core_ext/object/blank'
 require 'active_support/core_ext/string/conversions'
 
+require 'scrappers/fandoms/units/arena'
+
 module Scrappers
   module Fandoms
     module Units
+      include Scrappers::Fandoms::Units::Arena
+
       attr_reader(
         :all_units,
         :all_units_by_wikiname,
@@ -151,7 +155,8 @@ module Scrappers
           unit[:divine_codes] = Hash.new { |h, k| h[k] = [] }
           unit[:properties] = (unit['Properties'] || '').split(',')
 
-          if unit[:properties].intersect?(FIVE_STAR_FOCUS_ONLY_UNIT_PROPERTIES)
+          if unit[:properties].intersect?(FIVE_STAR_FOCUS_ONLY_UNIT_PROPERTIES) ||
+             unit[:int_id] == ANNIVERSARY_MARTH_INT_ID
             unit[:is_in][:focus_only] = true
             unit[:lowest_rarity][:focus_only] = 5
           elsif unit[:properties].include?('ghb')
@@ -254,88 +259,6 @@ module Scrappers
         nil
       end
 
-      RARITY_1 = 1
-      RARITY_2 = 2
-      RARITY_3 = 3
-      RARITY_4 = 4
-      RARITY_5 = 5
-      ARENA_SCORES_CONSTANTS = {
-        RARITY_1 => {
-          base_value: 47,
-          level_factor: 68 / 39.0,
-        },
-        RARITY_2 => {
-          base_value: 49,
-          level_factor: 73 / 39.0,
-        },
-        RARITY_3 => {
-          base_value: 51,
-          level_factor: 79 / 39.0,
-        },
-        RARITY_4 => {
-          base_value: 53,
-          level_factor: 84 / 39.0,
-        },
-        RARITY_5 => {
-          base_value: 55,
-          level_factor: 7 / 3.0,
-        },
-      }.freeze
-
-      # formula :
-      # https://imgur.com/NycQzxt
-      # other resources :
-      # https://www.arcticsilverfox.com/score_calc/
-      # https://feheroes.fandom.com/wiki/Fire_Emblem_Heroes_Wiki:Arena_score_tier_list
-      # https://www.reddit.com/r/FireEmblemHeroes/comments/19atxtw/what_is_the_formula_for_calculating_arena_score/
-      # https://www.reddit.com/r/OrderOfHeroes/comments/7ihbqv/the_most_accurate_arena_score_calculator_to_date/
-      # https://docs.google.com/spreadsheets/d/1XF8AtQPzAIhyyW_fHHsbBd-Z2jWZM2rBwSkhWy8YeWk/edit?gid=1351020164#gid=1351020164
-      def fill_units_with_arena_scores
-        rarity_base_value   = ARENA_SCORES_CONSTANTS[RARITY_5][:base_value]
-        rarity_level_factor = ARENA_SCORES_CONSTANTS[RARITY_5][:level_factor]
-        level = 40
-        team_base_score = 150
-
-        all_units.each do |unit|
-          total_skill_sp = unit[:skills_max_sp]
-          if total_skill_sp.nil?
-            errors[:units_without_skills2] << unit['WikiName'] unless unit['Properties']&.include?('enemy')
-            next
-          end
-
-          merges_count = unit[:properties].include?('story') ? 0 : 10
-          unit[:visible_bst] = unit[:duel_score] || unit[:bst]
-          unit[:visible_bst] += (unit[:has_superboon] ? 4 : 3) if merges_count.positive?
-          unit[:visible_bst] = 180 if unit[:visible_bst] < 180
-
-          total_bst = unit[:visible_bst]
-          max_score =
-            rarity_base_value +
-            (rarity_level_factor * level).floor +
-            (merges_count * 2) +
-            (total_skill_sp / 100).floor +
-            (total_bst / 5).floor
-
-          logger.debug "-- #{unit['WikiName']}"
-          logger.debug "rarity_base_value: #{rarity_base_value}"
-          logger.debug "rarity_level_factor: #{rarity_level_factor}"
-          logger.debug "level: #{level}"
-          logger.debug "merges_count : #{merges_count}"
-          logger.debug "total_skill_sp: #{total_skill_sp}"
-          logger.debug "total_bst: #{total_bst}"
-
-          logger.debug "rarity part : #{rarity_base_value}"
-          logger.debug "level part : #{(rarity_level_factor * level).floor}"
-          logger.debug "merges part : #{merges_count * 2}"
-          logger.debug "skills part : #{(total_skill_sp / 100).floor}"
-          logger.debug "bst part : #{(total_bst / 5).floor}"
-
-          logger.debug "max_score : #{(team_base_score + max_score) * 2}"
-
-          unit[:max_score] = (team_base_score + max_score) * 2
-        end
-      end
-
       THEME_NEW_YEAR = :new_year
       THEME_DESERT = :desert
       THEME_DOD = :dod # day of devotion / valentines
@@ -366,7 +289,7 @@ module Scrappers
       INT_ID_SIGRUN = 415
       INT_ID_BRUNNYA = 452
       INT_ID_ITSUKI = 480
-      INT_IDS_OF_TT_UNITS_WITHOUT_THEMED = [
+      INT_IDS_OF_TT_UNITS_WITHOUT_THEME = [
         INT_ID_MARISA,
         INT_ID_GEROME,
         INT_ID_FINN,
@@ -394,7 +317,7 @@ module Scrappers
           unit[:theme] = nil
           next if unit[:int_id] == ANNIVERSARY_MARTH_INT_ID
           next if unit[:properties].include?('tempest') && unit['ReleaseDate'] < '2018-01'
-          next if INT_IDS_OF_TT_UNITS_WITHOUT_THEMED.include?(unit[:int_id])
+          next if INT_IDS_OF_TT_UNITS_WITHOUT_THEME.include?(unit[:int_id])
 
           year, month, day = unit['ReleaseDate'].split('-').map(&:to_i)
 

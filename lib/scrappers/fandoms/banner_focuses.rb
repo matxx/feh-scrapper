@@ -45,7 +45,7 @@ module Scrappers
             unit_ids: rows.map do |row|
               unit = all_units_by_wikiname[row['Unit']]
               if unit.nil?
-                @errors[:banner_focus_not_found] << row
+                @errors[:unit_on_banner_focus_not_found] << row
                 next
               end
 
