@@ -18,6 +18,16 @@ module Scrappers
       SLOT_S = 's'
       SLOT_X = 'x'
 
+      SLOTS_FOR_SCORE = [
+        SLOT_WEAPON,
+        SLOT_ASSIST,
+        SLOT_SPECIAL,
+        SLOT_A,
+        SLOT_B,
+        SLOT_C,
+        SLOT_S,
+      ].freeze
+
       SKILL_BY_SLOT_BY_WIKI_SLOT = {
         'weapon' => SLOT_WEAPON,
         'assist' => SLOT_ASSIST,
@@ -27,6 +37,17 @@ module Scrappers
         'passivec' => SLOT_C,
         'sacredseal' => SLOT_S,
         'passivex' => SLOT_X,
+      }.freeze
+
+      # exceptions are dealt with later
+      MAX_INHERITABLE_SP_COST = {
+        SLOT_WEAPON => 350, # arcane weapons
+        SLOT_ASSIST => 400,
+        SLOT_SPECIAL => 500,
+        SLOT_A => 300,
+        SLOT_B => 300,
+        SLOT_C => 300,
+        SLOT_S => 240,
       }.freeze
 
       def reset_all_unit_skills!
@@ -86,16 +107,25 @@ module Scrappers
 
           errors[:units_without_weapon] << unit['WikiName'] if unit[:original_skills_max_sp_by_slot][SLOT_WEAPON].nil?
 
-          unit[:skills_max_sp_by_slot] = {
-            SLOT_WEAPON => unit[:original_skills_max_sp_by_slot][SLOT_WEAPON] || 0,
-            SLOT_ASSIST => 400,
-            SLOT_SPECIAL => 500,
-            SLOT_A => 300,
-            SLOT_B => 300,
-            SLOT_C => is_dragon   ? 400 : 300,
-            SLOT_S => has_dc_seal ? 300 : 240,
-            # SLOT_X => 300,
-          }
+          unit[:skills_max_sp_by_slot] = {}
+          SLOTS_FOR_SCORE.each do |slot|
+            # original unit skill
+            # (deals with PRF weapons & Chrom PRF assists skills which are the only "500 SP" assist skills)
+            original_skill_max_sp = unit[:original_skills_max_sp_by_slot][slot] || 0
+
+            max_inheritable_sp_cost =
+              if slot == SLOT_B && is_dragon
+                # only dragons can inherit "High Dragon Wall"
+                400
+              elsif slot == SLOT_S && has_dc_seal
+                300
+              else
+                MAX_INHERITABLE_SP_COST[slot]
+              end
+
+            unit[:skills_max_sp_by_slot][slot] = [original_skill_max_sp, max_inheritable_sp_cost].max
+          end
+
           unit[:skills_max_sp] = unit[:skills_max_sp_by_slot].values.sum
         end
 
