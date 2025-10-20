@@ -43,7 +43,7 @@ module Scrappers
 
       def fill_units_with_versions
         all_units.each do |unit|
-          if unit['ReleaseDate'].nil?
+          if unit['ReleaseDate'].blank?
             errors[:units_without_release_date] << unit['WikiName'] unless unit['Properties']&.include?('enemy')
             next
           end

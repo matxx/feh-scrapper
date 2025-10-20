@@ -128,6 +128,9 @@ module Scrappers
       f_skill_by_cat_and_name = f_skills_by_cat.transform_values { |skills| skills.index_by { |s| s['Name'] } }
       f_seals_by_name = fandom.all_seals.index_by { |s| s['Name'] }
 
+      missing_categories = CATEGORY_GAME8_TO_FANDOM.values - f_skill_by_cat_and_name.keys
+      errors[:missing_categories] << missing_categories if missing_categories.any?
+
       game8.all_skills.each do |g_skill|
         next if GAME8_SKILLS_TO_IGNORE.include?(g_skill['game8_name'])
 
@@ -137,6 +140,7 @@ module Scrappers
           else
             f_skill_by_cat_and_name[CATEGORY_GAME8_TO_FANDOM[g_skill['category']]]
           end
+
         skill_name = g_skill['game8_name']
         skill_name = SKILL_NAME_SUBSTITUTIONS[skill_name] if SKILL_NAME_SUBSTITUTIONS.key?(skill_name)
 
@@ -147,6 +151,8 @@ module Scrappers
         when 'Missiletainn (tome)'
           next store_skill(skill_id_bis('Missiletainn tome'), g_skill)
         end
+
+        next if skill_by_name.nil? # error reported with :missing_categories
 
         f_skill = skill_by_name[skill_name]
         next store_skill(f_skill['TagID'], g_skill) if f_skill

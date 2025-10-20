@@ -82,7 +82,7 @@ module Scrappers
         @all_skills_grouped_by_name = all_skills.group_by { |x| x['Name'] }
         @all_skills_by_name =
           all_skills
-          .reject { |x| x['RefinePath'] }
+          .reject { |x| x['RefinePath'].present? }
           .index_by { |x| x['Name'] }
 
         skills_with_same_wikiname = all_skills.group_by { |x| x['WikiName'] }.select { |_, v| v.size > 1 }
@@ -90,7 +90,7 @@ module Scrappers
 
         skills_with_same_name =
           all_skills
-          .reject { |x| x['RefinePath'] }
+          .reject { |x| x['RefinePath'].present? }
           .group_by { |x| x['Name'] }
           .select { |_, v| v.size > 1 }
         true_skills_with_same_name = skills_with_same_name.keys - KNOW_SKILLS_WITH_SAME_NAME
@@ -108,7 +108,7 @@ module Scrappers
 
       def fill_skills_with_base_id
         all_skills.each do |skill|
-          next if skill['RefinePath'].nil?
+          next if skill['RefinePath'].blank?
           next (errors[:skill_without_tag_id] << skill['WikiName']) if skill['TagID'].nil?
 
           # 3 letter with refine path are concatenated to the ID :
@@ -124,7 +124,7 @@ module Scrappers
 
       def fill_skills_with_genealogy
         all_skills.each do |skill|
-          next if skill['Required'].nil?
+          next if skill['Required'].blank?
 
           skill[:downgrades_wikinames] = skill['Required'].split(';')
           skill[:downgrades_wikinames].each do |downgrade_wikiname|
@@ -138,7 +138,7 @@ module Scrappers
         # this loop needs all the downgrades/upgrades to be filled,
         # so it can not be combined with previous loop
         all_skills.each do |skill|
-          next if skill['Required']
+          next if skill['Required'].present?
 
           rec_fill_tier(skill, 1)
         end
@@ -161,9 +161,9 @@ module Scrappers
         # do not export enemy only skills
         return false if skill[:fodder_details]&.all? { |desc| desc['WikiName'].include?('ENEMY') }
         # only export refines with effect
-        return false unless [nil, 'skill1', 'skill2'].include?(skill['RefinePath'])
+        return false unless ['', 'skill1', 'skill2'].include?(skill['RefinePath'])
         # do not export "Røkkr Sieges" skills
-        return false if skill[:fodder_details].nil? && skill[:base_id].nil? && skill['Required'].nil?
+        return false if skill[:fodder_details].nil? && skill[:base_id].nil? && skill['Required'].blank?
 
         true
       end
@@ -175,7 +175,7 @@ module Scrappers
       def relevant_skills_without_refine
         @relevant_skills_without_refine ||=
           relevant_skills
-          .select { |skill| skill['RefinePath'].nil? }
+          .select { |skill| skill['RefinePath'].blank? }
       end
 
       private
@@ -198,7 +198,7 @@ module Scrappers
         sp = skill['SP'].to_i
         cd = skill['Cooldown'] == '-1' ? nil : skill['Cooldown'].to_i
 
-        constants[:skills_max_tier] = tier if constants[:skills_max_tier] < tier
+        constants[:skills_max_tier] = tier if tier && constants[:skills_max_tier] < tier
         constants[:skills_max_sp] = sp if constants[:skills_max_sp] < sp
         constants[:skills_max_cd] = cd if cd && constants[:skills_max_cd] < cd
 
@@ -217,6 +217,8 @@ module Scrappers
           name = "#{name} (#{suffix})"
         end
 
+        errors[:missing_tier_on_skill] << name if tier.nil?
+
         res = {
           id: skill['TagID'],
           base_id: skill[:base_id],
@@ -231,7 +233,7 @@ module Scrappers
           is_prf: skill['Exclusive'] == '1',
           sp:,
           tier:,
-          refine: skill['RefinePath'],
+          refine: skill['RefinePath'].presence,
 
           cd:,
           eff: skill['WeaponEffectiveness']&.split(','),
@@ -339,7 +341,7 @@ module Scrappers
           id: skill['TagID'],
 
           fodder_ids:,
-          fodder: skill[:prefodder].transform_values { |n| [1, n].max },
+          fodder: skill[:prefodder]&.transform_values { |n| [1, n].max },
           is_in: obfuscate_keys(skill[:is_in]),
           self.class::OBFUSCATED_KEYS[:fodder_lowest_rarity_when_obtained] =>
             obfuscate_keys(skill[:fodder_lowest_rarity_when_obtained].compact),

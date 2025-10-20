@@ -309,7 +309,7 @@ module Scrappers
 
           next if !unit[:properties].include?('special') && !unit[:properties].include?('tempest')
 
-          if unit['ReleaseDate'].nil?
+          if unit['ReleaseDate'].blank?
             errors[:units_without_release_date] << unit['WikiName'] unless unit['Properties']&.include?('enemy')
             next
           end
