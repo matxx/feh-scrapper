@@ -491,8 +491,11 @@ module Scrappers
           is_in: obfuscate_keys(unit[:is_in]),
           lowest_rarity: obfuscate_keys(unit[:lowest_rarity].compact),
           skill_ids: unit[:all_unit_skills].map do |desc|
-            skill = all_skills_by_wikiname[desc['skill']]
-            next (errors[:units_skills_without_skill] << [unit['WikiName'], desc]) if skill.nil?
+            skill = get_skill_from_wikiname(desc['skill'])
+            if skill.nil?
+              errors[:units_skills_without_skill] << [unit['WikiName'], desc]
+              next
+            end
 
             skill['TagID']
           end.compact.sort,

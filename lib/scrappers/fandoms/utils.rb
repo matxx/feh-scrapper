@@ -57,6 +57,13 @@ module Scrappers
         pagename_to_wikiname(str).gsub('+', ' Plus')
       end
 
+      # handling disambiguations (ex: Atlas, Kvasir, Naga, Thief, Seiðr)
+      def get_skill_from_wikiname(name)
+        skill   = all_skills_by_wikiname[name]
+        skill ||= all_skills_by_wikiname["#{name} weapon"]
+        skill
+      end
+
       def keys_for_is_in
         @keys_for_is_in ||= hash_for_is_in.keys
       end

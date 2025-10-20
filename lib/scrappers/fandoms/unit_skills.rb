@@ -56,14 +56,14 @@ module Scrappers
 
       def fill_units_with_skills
         all_units.each do |unit|
-          unit[:all_unit_skills] = all_unit_skills_by_unit_wikiname[unit['WikiName']]
+          unit[:all_unit_skills] = all_unit_skills_by_unit_wikiname[unit['WikiName']].dup
           if unit[:all_unit_skills].nil?
             errors[:units_without_skills] << unit['WikiName'] unless unit['Properties']&.include?('enemy')
             next
           end
 
           unit[:all_unit_skills].reject! do |unit_skill|
-            skill = all_skills_by_wikiname[unit_skill['skill']]
+            skill = get_skill_from_wikiname(unit_skill['skill'])
             next false if skill
 
             errors[:missing_skill] << unit_skill
@@ -73,17 +73,18 @@ module Scrappers
           unit[:all_unit_skills].sort_by! { |unit_skill| unit_skill['skillPos'].to_i }
 
           unit[:skills_by_slot] = unit[:all_unit_skills].group_by do |unit_skill|
-            wiki_slot = all_skills_by_wikiname[unit_skill['skill']]['Scategory']
+            skill = get_skill_from_wikiname(unit_skill['skill'])
+            wiki_slot = skill['Scategory']
             SKILL_BY_SLOT_BY_WIKI_SLOT[wiki_slot] || wiki_slot
           end
           unit[:original_skills_max_sp_by_slot] = unit[:skills_by_slot].transform_values do |skills|
-            skills.map { |unit_skill| all_skills_by_wikiname[unit_skill['skill']]['SP'].to_i }.max
+            skills.map { |unit_skill| get_skill_from_wikiname(unit_skill['skill'])['SP'].to_i }.max
           end
 
           is_dragon = unit['WeaponType'].include?('Breath')
           has_dc_seal = is_dragon || ['Red Sword', 'Green Axe', 'Blue Lance'].include?(unit['WeaponType'])
 
-          errors[:units_without_weapon] << unit if unit[:original_skills_max_sp_by_slot][SLOT_WEAPON].nil?
+          errors[:units_without_weapon] << unit['WikiName'] if unit[:original_skills_max_sp_by_slot][SLOT_WEAPON].nil?
 
           unit[:skills_max_sp_by_slot] = {
             SLOT_WEAPON => unit[:original_skills_max_sp_by_slot][SLOT_WEAPON] || 0,
@@ -181,7 +182,7 @@ module Scrappers
         end
         return unless relevant_unit?(unit)
 
-        skill = all_skills_by_wikiname[unit_skill['skill']]
+        skill = get_skill_from_wikiname(unit_skill['skill'])
         if skill.nil?
           errors[:unit_skill_without_skill] << unit_skill['WikiName']
           return
