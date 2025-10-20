@@ -80,7 +80,7 @@ module Scrappers
       'skills_a' => 'passivea',
       'skills_b' => 'passiveb',
       'skills_c' => 'passivec',
-      'skills_s' => 'sacredseal',
+      # 'skills_s' => 'sacredseal',
       'skills_x' => 'passivex',
     }.freeze
 
@@ -106,8 +106,8 @@ module Scrappers
       'Red Tome Valor 3' => 'R Tome Valor 3',
       'Time is Light' => 'Time Is Light',
       'Yearling (Armored)' => 'Yearling (Arm.)',
-      'Full Light ＆ Dark' => 'Full Light &amp; Dark',
-      'Blood ＆ Thunder' => 'Blood &amp; Thunder',
+      'Full Light ＆ Dark' => 'Full Light & Dark',
+      'Blood ＆ Thunder' => 'Blood & Thunder',
     }.freeze
 
     GAME8_SKILLS_TO_IGNORE = [
@@ -163,9 +163,16 @@ module Scrappers
 
         true_skill_name, distance = skill_by_name.map { |name, _| [name, lev(name, skill_name)] }.min_by(&:last)
         if distance < 5
-          errors[:skill_approximations] << { cat: g_skill['category'], game8: skill_name, fandom: true_skill_name }
+          errors[:skill_approximations] << {
+            cat: g_skill['category'],
+            game8: g_skill['game8_name'],
+            fandom: true_skill_name,
+          }
         else
-          errors[:fandom_skill_not_found] << { cat: g_skill['category'], game8: skill_name }
+          errors[:fandom_skill_not_found] << {
+            cat: g_skill['category'],
+            game8: g_skill['game8_name'],
+          }
           next
         end
 
@@ -185,8 +192,8 @@ module Scrappers
       'Fiora: Defrosted Illian' => 'Fiora: Defrosted Ilian',
       "Hilda: Deer's Two Piece" => "Hilda: Deer's Two-Piece",
       'Leila: Rose Amid Fangs' => 'Leila: Rose amid Fangs',
-      'Rennac: Rich Merchant' => 'Rennac: Rich &quot;Merchant&quot;',
-      'Tharja: Normal Girl' => 'Tharja: &quot;Normal Girl&quot;',
+      'Rennac: Rich Merchant' => 'Rennac: Rich "Merchant"',
+      'Tharja: Normal Girl' => 'Tharja: "Normal Girl"',
       "Excellus: Conqueror's Wile" => 'Excellus: Conqueror’s Wile',
     }.freeze
 
@@ -194,17 +201,25 @@ module Scrappers
       unit_names = fandom.all_units_by_pagename.keys
 
       game8.all_units.each do |g_unit|
-        unit_name = "#{g_unit['name']}: #{g_unit['title']}"
+        g_full_name = "#{g_unit['name']}: #{g_unit['title']}"
+
+        unit_name = g_full_name
         next if unit_name == 'Kiran: Hero Summoner'
 
         next store_unit(unit_id(unit_name), g_unit) if unit_names.include?(unit_name)
-        next store_unit(unit_id(UNIT_NAME_SUBSTITUTIONS[unit_name]), g_unit) if UNIT_NAME_SUBSTITUTIONS.key?(unit_name)
+
+        if UNIT_NAME_SUBSTITUTIONS.key?(unit_name)
+          unit_name = UNIT_NAME_SUBSTITUTIONS[unit_name]
+          next store_unit(unit_id(unit_name), g_unit) if unit_names.include?(unit_name)
+
+          errors[:invalid_unit_name_substitution] << [unit_name, g_unit]
+        end
 
         true_unit_name, distance = unit_names.map { |name| [name, lev(name, unit_name)] }.min_by(&:last)
         if distance < 5
-          errors[:unit_approximations] << { game8: unit_name, fandom: true_unit_name }
+          errors[:unit_approximations] << { game8: g_full_name, fandom: true_unit_name }
         else
-          errors[:fandom_unit_not_found] << unit_name
+          errors[:fandom_unit_not_found] << g_full_name
           next
         end
 

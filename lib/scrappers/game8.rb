@@ -211,6 +211,7 @@ module Scrappers
                 errors[:extract_item] << {
                   kind:,
                   page_id: item['game8_id'],
+                  game8_name: item['game8_name'],
                   url: game8_url(item['game8_id']),
                   class: e.class.name,
                   error: e.message,
