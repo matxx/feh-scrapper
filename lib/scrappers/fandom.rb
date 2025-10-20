@@ -54,8 +54,11 @@ module Scrappers
     BATCH_SIZE = 500
 
     def initialize(level: Logger::ERROR)
-      @client = MediawikiApi::Client.new 'https://feheroes.fandom.com/api.php'
       @now = Time.now
+
+      @client = MediawikiApi::Client.new 'https://feheroes.fandom.com/api.php'
+      client.log_in(ENV.fetch('WIKIBOT_USERNAME', nil), ENV.fetch('WIKIBOT_PASSWORD', nil))
+
       @logger = Logger.new($stdout)
       logger.level = level
 
@@ -190,7 +193,10 @@ module Scrappers
         break if response.data.empty?
 
         pages += response.data.map { |d| d['title'] }
+        break if response.data.size < BATCH_SIZE
+
         offset += limit
+        sleep 3 # try to avoid rate limits
       end
       pages
     end
