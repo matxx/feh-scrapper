@@ -6,7 +6,7 @@ module Scrappers
       attr_reader(
         :all_unit_skills,
         :all_unit_skills_by_unit_wikiname,
-        :all_unit_skills_by_skill_wikiname,
+        :all_unit_skills_by_skill_name,
       )
 
       SLOT_WEAPON = 'weapon'
@@ -54,6 +54,7 @@ module Scrappers
         @all_unit_skills = nil
         @all_unit_skills_by_unit_wikiname = nil
         @all_unit_skills_by_skill_wikiname = nil
+        @all_unit_skills_by_skill_name = nil
       end
 
       # https://feheroes.fandom.com/wiki/Special:CargoTables/UnitSkills
@@ -69,8 +70,8 @@ module Scrappers
           'unlockRarity',
         ]
         @all_unit_skills = retrieve_all_pages('UnitSkills', fields)
-        @all_unit_skills_by_unit_wikiname  = all_unit_skills.group_by { |x| x['WikiName'] }
-        @all_unit_skills_by_skill_wikiname = all_unit_skills.group_by { |x| x['skill'] }
+        @all_unit_skills_by_unit_wikiname = all_unit_skills.group_by { |x| x['WikiName'] }
+        @all_unit_skills_by_skill_name = all_unit_skills.group_by { |x| x['skill'] }
 
         nil
       end
@@ -134,7 +135,8 @@ module Scrappers
 
       def fill_skills_with_availabilities
         all_skills.each do |skill|
-          skill[:fodder_details] = all_unit_skills_by_skill_wikiname[skill['WikiName']]
+          skill[:fodder_details]   = all_unit_skills_by_skill_name[skill['WikiName']]
+          skill[:fodder_details] ||= all_unit_skills_by_skill_name[skill_pagename_to_wikiname(skill['Name'])]
           skill[:is_in] = hash_for_is_in
           skill[:fodder_lowest_rarity_when_obtained] = hash_for_lowest_rarity
           skill[:fodder_lowest_rarity_for_inheritance] = hash_for_lowest_rarity

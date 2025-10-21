@@ -181,14 +181,23 @@ module Scrappers
       pages = []
       offset = 0
       loop do
-        logger.warn %{-- querying table "#{table}" (with limit: #{limit}, offset: #{offset})}
-        response = client.action(
-          :cargoquery,
-          tables: table,
-          fields: fields.join(','),
-          offset:,
-          limit:,
-        )
+        response =
+          begin
+            logger.warn %{-- querying table "#{table}" (with limit: #{limit}, offset: #{offset})}
+            client.action(
+              :cargoquery,
+              tables: table,
+              fields: fields.join(','),
+              offset:,
+              limit:,
+            )
+          rescue MediawikiApi::ApiError => e
+            raise e unless e.message.include?('ratelimited')
+
+            logger.error '--- rate limit exceeded : going to sleep'
+            sleep 5
+            retry
+          end
         logger.warn "--- number of results : #{response.data.size}"
         break if response.data.empty?
 
@@ -196,7 +205,7 @@ module Scrappers
         break if response.data.size < BATCH_SIZE
 
         offset += limit
-        sleep 3 # try to avoid rate limits
+        sleep 5 # try to avoid rate limits
       end
       pages
     end

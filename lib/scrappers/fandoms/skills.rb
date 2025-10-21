@@ -161,7 +161,7 @@ module Scrappers
         # do not export enemy only skills
         return false if skill[:fodder_details]&.all? { |desc| desc['WikiName'].include?('ENEMY') }
         # only export refines with effect
-        return false unless ['', 'skill1', 'skill2'].include?(skill['RefinePath'])
+        return false unless [nil, '', 'skill1', 'skill2'].include?(skill['RefinePath'])
         # do not export "Røkkr Sieges" skills
         return false if skill[:fodder_details].nil? && skill[:base_id].nil? && skill['Required'].blank?
 
@@ -236,7 +236,7 @@ module Scrappers
           refine: skill['RefinePath'].presence,
 
           cd:,
-          eff: skill['WeaponEffectiveness']&.split(','),
+          eff: skill['WeaponEffectiveness'].presence&.split(','),
 
           restrictions: {
             moves: sanitize_move_restriction(skill),
@@ -310,7 +310,7 @@ module Scrappers
       end
 
       def sanitize_description(desc)
-        return if desc.nil?
+        return if desc.blank?
 
         desc
           .gsub('&quot;', '"')

@@ -56,7 +56,8 @@ module Scrappers
             merges_count = unit[:properties].include?('story') ? 0 : 10
             unit[:visible_bst] = unit[:duel_score] || unit[:bst]
             unit[:visible_bst] += (unit[:has_superboon] ? 4 : 3) if merges_count.positive?
-            unit[:visible_bst] = 180 if unit[:visible_bst] < 180
+            # adjust for "Duel" A skills
+            unit[:visible_bst] = 180 if unit[:visible_bst] < 180 && unit['MoveType'] != self.class::MOVE_A
 
             total_bst = unit[:visible_bst]
             max_score =
