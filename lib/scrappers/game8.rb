@@ -275,17 +275,25 @@ module Scrappers
       "#{data_json_path}/#{kind}/#{page_id}.json"
     end
 
-    def delete_page_html_file(kind, page_id)
+    def delete_page_html_file_from_kind(kind, page_id)
       log_and_file_delete(page_html_key(kind, page_id))
     end
 
-    def delete_page_json_file(kind, page_id)
+    def delete_page_json_file_from_kind(kind, page_id)
       log_and_file_delete(page_json_key(kind, page_id))
     end
 
-    def delete_page_files(kind, page_id)
-      delete_page_html_file(kind, page_id)
-      delete_page_json_file(kind, page_id)
+    def delete_page_files_from_kind(kind, page_id)
+      delete_page_html_file_from_kind(kind, page_id)
+      delete_page_json_file_from_kind(kind, page_id)
+    end
+
+    def delete_page_files(page_id)
+      s3_files.each do |s3_key|
+        next unless s3_key.include?(page_id)
+
+        log_and_file_delete(s3_key)
+      end
     end
 
     private
