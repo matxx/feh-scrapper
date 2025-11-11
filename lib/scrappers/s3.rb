@@ -2,15 +2,11 @@
 
 require 'open-uri'
 
-# const DOMAIN = 'data.feh-peeler.com'
-# const COMMIT = 'eb053dcdbe5f59a7fcf0f650c4374d3b583de0da'
-# $fetch(`https://data.feh-peeler.com/commits/${COMMIT}/skills.json`)
-
 module Scrappers
   class S3 < Base
     attr_reader :now, :logger, :all_seals_by_id, :all_skills_by_id
 
-    COMMIT = 'eb053dcdbe5f59a7fcf0f650c4374d3b583de0da'
+    COMMIT = '3bff3e2a34a3baf8552ca92a22d2416ac48d8361'
     DIR = "https://data.feh-peeler.com/commits/#{COMMIT}".freeze
 
     def initialize(level: Logger::ERROR)
