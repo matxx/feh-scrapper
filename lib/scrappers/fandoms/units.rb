@@ -242,6 +242,15 @@ module Scrappers
         all_units.each do |unit|
           wikiname = unit['WikiName']
 
+          if unit[:divine_codes].key?(:normal)
+            unit[:divine_codes][:normal]
+              .sort_by! { |desc| [desc[:number], desc[:title], desc[:cost]] }
+          end
+          if unit[:divine_codes].key?(:limited)
+            unit[:divine_codes][:limited]
+              .sort_by! { |desc| [desc[:year], desc[:month], desc[:rarity], desc[:cost]] }
+          end
+
           unit[:lowest_rarity_summon] =
             unit[:lowest_rarity]
             .slice(:generic_summon_pool, :special_summon_pool, :heroic_grails, :focus_only)

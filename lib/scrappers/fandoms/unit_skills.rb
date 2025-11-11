@@ -185,7 +185,7 @@ module Scrappers
           if limited_divine_codes.any?
             skill[:divine_codes][:limited] =
               limited_divine_codes
-              .sort_by { |desc| [desc[:number], desc[:title], desc[:cost]] }
+              .sort_by { |desc| [desc[:year], desc[:month], desc[:rarity], desc[:cost]] }
           end
 
           nil
