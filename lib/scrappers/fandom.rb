@@ -49,12 +49,15 @@ module Scrappers
     include Scrappers::Fandoms::Utils
     include Scrappers::Fandoms::VersionUpdates
 
-    attr_reader :client, :now, :errors, :logger, :constants
+    attr_reader :client, :now, :errors, :logger, :constants, :s3
 
     BATCH_SIZE = 500
 
-    def initialize(level: Logger::ERROR)
+    INVALID_WEAPONS_RESTRICTIONS = { can_use: [] }.freeze
+
+    def initialize(level: Logger::ERROR, s3: nil)
       @now = Time.now
+      @s3 = s3
 
       @client = MediawikiApi::Client.new 'https://feheroes.fandom.com/api.php'
       client.log_in(ENV.fetch('WIKIBOT_USERNAME', nil), ENV.fetch('WIKIBOT_PASSWORD', nil))
@@ -202,7 +205,7 @@ module Scrappers
         break if response.data.empty?
 
         pages += response.data.map { |d| d['title'] }
-        break if response.data.size < BATCH_SIZE
+        break if response.data.size < limit
 
         offset += limit
         sleep 5 # try to avoid rate limits

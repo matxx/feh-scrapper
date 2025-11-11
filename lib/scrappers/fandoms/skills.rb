@@ -219,6 +219,12 @@ module Scrappers
 
         errors[:missing_tier_on_skill] << name if tier.nil?
 
+        # MONKEY PATCH: fandom "CanUseWeapon" are blank when they should not...
+        weapons_restrictions = sanitize_weapon_restriction(skill)
+        if weapons_restrictions == self.class::INVALID_WEAPONS_RESTRICTIONS && s3
+          weapons_restrictions = s3.all_skills_by_id[skill['TagID']]&.dig('restrictions', 'weapons')
+        end
+
         res = {
           id: skill['TagID'],
           base_id: skill[:base_id],
@@ -240,7 +246,7 @@ module Scrappers
 
           restrictions: {
             moves: sanitize_move_restriction(skill),
-            weapons: sanitize_weapon_restriction(skill),
+            weapons: weapons_restrictions,
           },
 
           addition_date: fodders.map { |u| u['AdditionDate'] }.min_by(&:to_date),

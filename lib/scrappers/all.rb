@@ -5,6 +5,7 @@ require 'awesome_print'
 require 'scrappers/base'
 require 'scrappers/fandom'
 require 'scrappers/game8'
+require 'scrappers/s3'
 
 module Scrappers
   class All < Base
@@ -22,6 +23,7 @@ module Scrappers
     attr_accessor(
       :fandom,
       :game8,
+      :s3,
     )
 
     def initialize(level: Logger::ERROR, game8: {})
@@ -29,7 +31,8 @@ module Scrappers
       @logger = Logger.new($stdout)
       logger.level = level
 
-      @fandom = Scrappers::Fandom.new(level:)
+      @s3     = Scrappers::S3.new(level:)
+      @fandom = Scrappers::Fandom.new(level:, s3:)
       @game8  = Scrappers::Game8.new(level:, **game8)
 
       boot
@@ -42,6 +45,7 @@ module Scrappers
       boot
       fandom.reset!
       game8.reset!
+      s3.reset!
 
       nil
     end
@@ -49,6 +53,7 @@ module Scrappers
     def handle_everything
       game8.log_and_launch(:handle_everything)
       fandom.log_and_launch(:handle_everything)
+      s3.log_and_launch(:handle_everything)
 
       log_and_launch(:retrieve_game8_unit_ratings)
       log_and_launch(:retrieve_game8_skill_ratings)
@@ -101,6 +106,7 @@ module Scrappers
       'Pulse Up：Blades' => 'Pulse Up: Blades',
       'Pulse Up：Ploy' => 'Pulse Up: Ploy',
       'Pulse On：Blades' => 'Pulse On: Blades',
+      'Preempt：Ploy' => 'Preempt: Ploy',
       'Red Tome Valor 1' => 'R Tome Valor 1',
       'Red Tome Valor 2' => 'R Tome Valor 2',
       'Red Tome Valor 3' => 'R Tome Valor 3',

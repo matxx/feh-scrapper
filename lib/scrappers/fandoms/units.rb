@@ -150,6 +150,7 @@ module Scrappers
       # https://feheroes.fandom.com/wiki/Template:GeneralSummonRarities?action=edit
       def fill_units_with_availabilities
         all_units.each do |unit|
+          unit[:int_id] = unit['IntID'].to_i
           unit[:is_in] = hash_for_is_in
           unit[:lowest_rarity] = hash_for_lowest_rarity
           unit[:divine_codes] = Hash.new { |h, k| h[k] = [] }
@@ -367,6 +368,7 @@ module Scrappers
           'units.json' => :units_as_json,
           'units-availabilities.json' => :unit_availabilities_as_json,
           'units-stats.json' => :unit_stats_as_json,
+          'units-stats-ranks.json' => :unit_stats_ranks_as_json,
         )
       end
 
@@ -510,6 +512,10 @@ module Scrappers
         relevant_units.map { |unit| unit_stat_as_json(unit) }
       end
 
+      def unit_stats_ranks_as_json
+        relevant_units.map { |unit| unit_stat_rank_as_json(unit) }
+      end
+
       # do not compact
       def unit_stat_as_json(unit)
         {
@@ -531,17 +537,26 @@ module Scrappers
             :level40_spd,
             :level40_def,
             :level40_res,
+            :iv_hp,
+            :iv_atk,
+            :iv_spd,
+            :iv_def,
+            :iv_res,
+          ),
+        )
+      end
+
+      def unit_stat_rank_as_json(unit)
+        {
+          id: unit['TagID'],
+        }.merge(
+          unit.slice(
             :rank_hp,
             :rank_atk,
             :rank_spd,
             :rank_def,
             :rank_res,
             :rank_bst,
-            :iv_hp,
-            :iv_atk,
-            :iv_spd,
-            :iv_def,
-            :iv_res,
           ),
         )
       end

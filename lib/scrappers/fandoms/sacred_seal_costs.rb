@@ -67,6 +67,12 @@ module Scrappers
       end
 
       def seal_as_json(seal)
+        # MONKEY PATCH: fandom "CanUseWeapon" are blank when they should not...
+        weapons_restrictions = sanitize_weapon_restriction(seal, :seal)
+        if weapons_restrictions == self.class::INVALID_WEAPONS_RESTRICTIONS && s3
+          weapons_restrictions = s3.all_seals_by_id[seal['TagID']]&.dig('restrictions', 'weapons')
+        end
+
         {
           id: seal['TagID'],
           game8_id: seal[:game8_id],
@@ -78,7 +84,7 @@ module Scrappers
 
           restrictions: {
             moves: sanitize_move_restriction(seal, :seal),
-            weapons: sanitize_weapon_restriction(seal, :seal),
+            weapons: weapons_restrictions,
           },
         }
       end
