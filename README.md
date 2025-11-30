@@ -10,6 +10,10 @@ Extract data from Fandom and Game8 and export it as JSONs
 1. unit tests
 1. get all images from sprites
 
+### QoL
+
+1. handle "themes" ["Scion"](https://game8.co/games/fire-emblem-heroes/archives/341797) (s12! s! scion of twelve) and ["ferox"](https://game8.co/games/fire-emblem-heroes/archives/549583) (f!)
+
 ### Fixes
 
 1. remove(?) "4.5", pass everything as BigDecimal ? (comparison to 4.5 (float) can be incorrect)

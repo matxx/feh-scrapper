@@ -45,7 +45,7 @@ module Scrappers
         SLOT_ASSIST => 400,
         SLOT_SPECIAL => 500,
         SLOT_A => 300,
-        SLOT_B => 300,
+        SLOT_B => 400,
         SLOT_C => 300,
         SLOT_S => 240,
       }.freeze
@@ -104,7 +104,9 @@ module Scrappers
           end
 
           is_dragon = unit['WeaponType'].include?('Breath')
-          has_dc_seal = is_dragon || ['Red Sword', 'Green Axe', 'Blue Lance'].include?(unit['WeaponType'])
+          is_melee = self.class::ALL_MELEE.include?(unit['WeaponType'])
+          is_staff = unit['WeaponType'] == self.class::WEAPON_C_ST
+          has_dc_seal = is_dragon || is_melee
 
           errors[:units_without_weapon] << unit['WikiName'] if unit[:original_skills_max_sp_by_slot][SLOT_WEAPON].nil?
 
@@ -114,15 +116,17 @@ module Scrappers
             # (deals with PRF weapons & Chrom PRF assists skills which are the only "500 SP" assist skills)
             original_skill_max_sp = unit[:original_skills_max_sp_by_slot][slot] || 0
 
+            # rubocop:disable Lint/DuplicateBranch
             max_inheritable_sp_cost =
-              if slot == SLOT_B && is_dragon
-                # only dragons can inherit "High Dragon Wall"
-                400
+              if slot == SLOT_B && is_staff
+                # only staff units do not have access to a 400 SP B-skill
+                300
               elsif slot == SLOT_S && has_dc_seal
                 300
               else
                 MAX_INHERITABLE_SP_COST[slot]
               end
+            # rubocop:enable Lint/DuplicateBranch
 
             unit[:skills_max_sp_by_slot][slot] = [original_skill_max_sp, max_inheritable_sp_cost].max
           end
