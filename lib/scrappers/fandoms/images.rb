@@ -23,6 +23,12 @@ module Scrappers
           retrieve_images(titles)
         end
 
+        # chosen unit icons
+        titles =
+          ['Fire', 'Water', 'Wind', 'Earth']
+          .map { |element| "File:Chosen Effect #{element}.png" }
+        retrieve_images(titles)
+
         # legendary unit icons
         titles =
           ['Fire', 'Water', 'Wind', 'Earth']
@@ -55,6 +61,10 @@ module Scrappers
         all_units.each do |unit|
           unit[:image_url_for_portrait] = all_images_by_pagename[unit_face_img(unit)]
 
+          if unit[:properties].include?('chosen')
+            title = image_url_for_icon_chosen(unit)
+            unit[:image_url_for_icon_chosen] = all_images_by_pagename[title]
+          end
           if unit[:properties].include?('legendary')
             title = image_url_for_icon_legendary(unit)
             unit[:image_url_for_icon_legendary] = all_images_by_pagename[title]
@@ -98,6 +108,12 @@ module Scrappers
 
       def unit_face_img(unit)
         "File:#{unit['WikiName']} Face FC.webp"
+      end
+
+      def image_url_for_icon_chosen(unit)
+        chosen = all_chosen_heroes_by_pagename[unit['Page']]
+        element = chosen['ChosenEffect']
+        "File:Chosen Effect #{element}.png"
       end
 
       def image_url_for_icon_legendary(unit)

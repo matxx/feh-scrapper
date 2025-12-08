@@ -4,6 +4,7 @@ require 'mediawiki_api'
 
 require 'scrappers/base'
 require 'scrappers/fandoms/banner_focuses'
+require 'scrappers/fandoms/chosen_heroes'
 require 'scrappers/fandoms/distributions'
 require 'scrappers/fandoms/divine_codes'
 require 'scrappers/fandoms/duo_heroes'
@@ -31,6 +32,7 @@ module Scrappers
   # - `unit[:properties]` has been added by this repo (and is an array of strings ; ex: ['aided', 'aide'])
   class Fandom < Base
     include Scrappers::Fandoms::BannerFocuses
+    include Scrappers::Fandoms::ChosenHeroes
     include Scrappers::Fandoms::Distributions
     include Scrappers::Fandoms::DivineCodes
     include Scrappers::Fandoms::DuoHeroes
@@ -93,6 +95,7 @@ module Scrappers
       log_and_launch(:scrap_sacred_seal_costs)
       log_and_launch(:scrap_duo_heroes)
       # log_and_launch(:scrap_resplendent_heroes) # available in unit properties
+      log_and_launch(:scrap_chosen_heroes)
       log_and_launch(:scrap_legendary_heroes)
       log_and_launch(:scrap_mythic_heroes)
       log_and_launch(:scrap_generic_summon_pool)
@@ -118,6 +121,7 @@ module Scrappers
       log_and_launch(:fill_skills_with_prefodder)
 
       log_and_launch(:fill_units_with_duo_duel_scores)
+      log_and_launch(:fill_units_with_chosen_duel_scores)
       log_and_launch(:fill_units_with_legendary_duel_scores)
       log_and_launch(:fill_units_with_skills)
       log_and_launch(:fill_units_with_stats)

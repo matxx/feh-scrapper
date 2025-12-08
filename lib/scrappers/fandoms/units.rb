@@ -37,6 +37,7 @@ module Scrappers
       UNIT_KIND_EMBLEM = 'EMBLEM'
       # UNIT_KIND_FALLEN = 'FALLEN'
       UNIT_KIND_HARMONIZED = 'HARMONIZED'
+      UNIT_KIND_CHOSEN = 'CHOSEN'
       UNIT_KIND_LEGENDARY = 'LEGENDARY'
       UNIT_KIND_MYTHIC = 'MYTHIC'
       UNIT_KIND_REARMED = 'REARMED'
@@ -47,6 +48,7 @@ module Scrappers
         # UNIT_KIND_ASCENDED,
         UNIT_KIND_ATTUNED,
         UNIT_KIND_EMBLEM,
+        UNIT_KIND_CHOSEN,
         UNIT_KIND_LEGENDARY,
         UNIT_KIND_MYTHIC,
         UNIT_KIND_REARMED,
@@ -59,6 +61,7 @@ module Scrappers
       #   UNIT_KIND_EMBLEM,
       #   UNIT_KIND_REARMED,
       #   UNIT_KIND_ENTWINED,
+      #   UNIT_KIND_CHOSEN,
       # ].freeze
 
       UNIT_PROPERTY_BY_KIND = {
@@ -70,6 +73,7 @@ module Scrappers
         UNIT_KIND_EMBLEM => 'emblem',
         # UNIT_KIND_FALLEN => 'fallen',
         UNIT_KIND_HARMONIZED => 'harmonized',
+        UNIT_KIND_CHOSEN => 'chosen',
         UNIT_KIND_LEGENDARY => 'legendary',
         UNIT_KIND_MYTHIC => 'mythic',
         UNIT_KIND_REARMED => 'rearmed',
@@ -157,7 +161,7 @@ module Scrappers
           unit[:properties] = (unit['Properties'] || '').split(',')
 
           if unit[:properties].intersect?(FIVE_STAR_FOCUS_ONLY_UNIT_PROPERTIES) ||
-             unit[:int_id] == ANNIVERSARY_MARTH_INT_ID
+             INT_IDS_OF_SPECIAL_DUOS.include?(unit[:int_id])
             unit[:is_in][:focus_only] = true
             unit[:lowest_rarity][:focus_only] = 5
           elsif unit[:properties].include?('ghb')
@@ -288,6 +292,11 @@ module Scrappers
       THEME_TRIBES = :tribes
 
       ANNIVERSARY_MARTH_INT_ID = 1235
+      DUO_ELINCIA_INT_ID = 1303
+      INT_IDS_OF_SPECIAL_DUOS = [
+        ANNIVERSARY_MARTH_INT_ID,
+        DUO_ELINCIA_INT_ID,
+      ].freeze
       INT_ID_NY_CORRIN = 200
 
       INT_ID_MARISA = 212
@@ -325,7 +334,7 @@ module Scrappers
           end
 
           unit[:theme] = nil
-          next if unit[:int_id] == ANNIVERSARY_MARTH_INT_ID
+          next if INT_IDS_OF_SPECIAL_DUOS.include?(unit[:int_id])
           next if unit[:properties].include?('tempest') && unit['ReleaseDate'] < '2018-01'
           next if INT_IDS_OF_TT_UNITS_WITHOUT_THEME.include?(unit[:int_id])
 
@@ -401,7 +410,10 @@ module Scrappers
 
       def unit_as_json(unit)
         element =
-          if unit[:properties].include?('legendary')
+          if unit[:properties].include?('chosen')
+            chosen = all_chosen_heroes_by_pagename[unit['Page']]
+            chosen['ChosenEffect']
+          elsif unit[:properties].include?('legendary')
             legend = all_legendary_heroes_by_pagename[unit['Page']]
             legend['LegendaryEffect']
           elsif unit[:properties].include?('mythic')
@@ -441,6 +453,7 @@ module Scrappers
           is_special: unit[:properties].include?('special'),
           is_generic_pool: unit[:is_in][:generic_summon_pool],
 
+          is_chosen:     unit[:properties].include?('chosen'),
           is_legendary:  unit[:properties].include?('legendary'),
           is_mythic:     unit[:properties].include?('mythic'),
           element:,
@@ -466,6 +479,7 @@ module Scrappers
             :game8_name,
 
             :image_url_for_portrait,
+            :image_url_for_icon_chosen,
             :image_url_for_icon_legendary,
             :image_url_for_icon_mythic,
 
@@ -572,10 +586,12 @@ module Scrappers
 
       def abbreviated_name(unit)
         return '35!Marth' if unit[:int_id] == ANNIVERSARY_MARTH_INT_ID
+        return 'D!Elincia' if unit[:int_id] == DUO_ELINCIA_INT_ID
         return 'Azura (Young)' if unit[:int_id] == INT_ID_AZURA_YOUNG
 
         name = unit['Name']
         name = 'BK' if name == 'Black Knight'
+        # TODO: handle with GENERIC_MAIN_CHAR_NAMES = [corrin alear robin byleth...]
         name = "#{name}(M)" if unit[:game8_name]&.end_with?(' (M)')
         name = "#{name}(F)" if unit[:game8_name]&.end_with?(' (F)')
 
@@ -586,8 +602,7 @@ module Scrappers
         when THEME_NEW_YEAR
           return "NY!#{name}"
         when THEME_DESERT
-          # return "De!#{name}"
-          return "D!#{name}"
+          return "De!#{name}"
         when THEME_DOD
           return "V!#{name}"
         when THEME_SPRING
@@ -638,6 +653,7 @@ module Scrappers
         return "B!#{name}" if unit[:properties].include?('brave')
         return "F!#{name}" if unit[:properties].include?('fallen')
 
+        return "C!#{name}" if unit[:properties].include?('chosen')
         return "L!#{name}" if unit[:properties].include?('legendary')
         return "M!#{name}" if unit[:properties].include?('mythic')
 
