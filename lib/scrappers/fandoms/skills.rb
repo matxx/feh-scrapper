@@ -159,11 +159,11 @@ module Scrappers
         # do not export captain skills
         return false if skill['Scategory'] == 'captain'
         # do not export enemy only skills
-        return false if skill[:fodder_details]&.all? { |desc| desc['WikiName'].include?('ENEMY') }
+        return false if skill[:owner_details]&.all? { |desc| desc['WikiName'].include?('ENEMY') }
         # only export refines with effect
         return false unless [nil, '', 'skill1', 'skill2'].include?(skill['RefinePath'])
         # do not export "Røkkr Sieges" skills
-        return false if skill[:fodder_details].nil? && skill[:base_id].nil? && skill['Required'].blank?
+        return false if skill[:owner_details].nil? && skill[:base_id].nil? && skill['Required'].blank?
 
         true
       end
@@ -202,13 +202,13 @@ module Scrappers
         constants[:skills_max_sp] = sp if constants[:skills_max_sp] < sp
         constants[:skills_max_cd] = cd if cd && constants[:skills_max_cd] < cd
 
-        fodders = []
-        skill[:fodder_details]&.each do |u|
+        owners = []
+        skill[:owner_details]&.each do |u|
           unit = all_units_by_wikiname[u['WikiName']]
-          next (errors[:fodder_not_found] << u['WikiName']) if unit.nil?
+          next (errors[:owner_not_found] << u['WikiName']) if unit.nil?
           next unless relevant_unit?(unit)
 
-          fodders << unit
+          owners << unit
         end
 
         name = sanitize_name(skill['Name'])
@@ -249,9 +249,9 @@ module Scrappers
             weapons: weapons_restrictions,
           },
 
-          addition_date: fodders.map { |u| u['AdditionDate'] }.min_by(&:to_date),
-          release_date:  fodders.map { |u| u['ReleaseDate']  }.min_by(&:to_date),
-          version:       fodders.map { |u| u[:version]       }.min_by { |str| str.split('.').map(&:to_i) },
+          addition_date: owners.map { |u| u['AdditionDate'] }.min_by(&:to_date),
+          release_date:  owners.map { |u| u['ReleaseDate']  }.min_by(&:to_date),
+          version:       owners.map { |u| u[:version]       }.min_by { |str| str.split('.').map(&:to_i) },
         }
 
         if skill[:upgrades_wikinames]
@@ -334,25 +334,25 @@ module Scrappers
       end
 
       def skill_availability_as_json(skill)
-        fodder_ids = []
-        skill[:fodder_details]&.each do |u|
+        owner_ids = []
+        skill[:owner_details]&.each do |u|
           unit = all_units_by_wikiname[u['WikiName']]
-          next (errors[:fodder_not_found_bis] << u['WikiName']) if unit.nil?
+          next (errors[:owner_not_found_bis] << u['WikiName']) if unit.nil?
           next unless relevant_unit?(unit)
 
-          fodder_ids << unit['TagID']
+          owner_ids << unit['TagID']
         end
 
         {
           id: skill['TagID'],
 
-          fodder_ids:,
-          fodder: skill[:prefodder]&.transform_values { |n| [1, n].max },
+          owner_ids:,
+          required_slots: skill[:prefodder]&.transform_values { |n| [1, n].max },
           is_in: obfuscate_keys(skill[:is_in]),
-          self.class::OBFUSCATED_KEYS[:fodder_lowest_rarity_when_obtained] =>
-            obfuscate_keys(skill[:fodder_lowest_rarity_when_obtained].compact),
-          self.class::OBFUSCATED_KEYS[:fodder_lowest_rarity_for_inheritance] =>
-            obfuscate_keys(skill[:fodder_lowest_rarity_for_inheritance].compact),
+          self.class::OBFUSCATED_KEYS[:owner_lowest_rarity_when_obtained] =>
+            obfuscate_keys(skill[:owner_lowest_rarity_when_obtained].compact),
+          self.class::OBFUSCATED_KEYS[:owner_lowest_rarity_for_inheritance] =>
+            obfuscate_keys(skill[:owner_lowest_rarity_for_inheritance].compact),
           divine_codes: skill[:divine_codes],
         }
       end

@@ -161,7 +161,7 @@ module Scrappers
           unit[:properties] = (unit['Properties'] || '').split(',')
 
           if unit[:properties].intersect?(FIVE_STAR_FOCUS_ONLY_UNIT_PROPERTIES) ||
-             INT_IDS_OF_SPECIAL_DUOS.include?(unit[:int_id])
+             INT_IDS_OF_FOCUS_ONLY_UNITS.include?(unit[:int_id])
             unit[:is_in][:focus_only] = true
             unit[:lowest_rarity][:focus_only] = 5
           elsif unit[:properties].include?('ghb')
@@ -291,12 +291,17 @@ module Scrappers
       THEME_TEE = :tee
       THEME_TRIBES = :tribes
 
-      ANNIVERSARY_MARTH_INT_ID = 1235
-      DUO_ELINCIA_INT_ID = 1303
-      INT_IDS_OF_SPECIAL_DUOS = [
-        ANNIVERSARY_MARTH_INT_ID,
-        DUO_ELINCIA_INT_ID,
+      INT_ID_ANNIVERSARY_MARTH = 1235
+      INT_ID_D_ELINCIA = 1303
+      INT_ID_H_B_IKE = 1315
+      INT_ID_H_B_LYN = 1316
+      INT_IDS_OF_FOCUS_ONLY_UNITS = [
+        INT_ID_ANNIVERSARY_MARTH,
+        INT_ID_D_ELINCIA,
+        INT_ID_H_B_IKE,
+        INT_ID_H_B_LYN,
       ].freeze
+
       INT_ID_NY_CORRIN = 200
 
       INT_ID_MARISA = 212
@@ -334,7 +339,7 @@ module Scrappers
           end
 
           unit[:theme] = nil
-          next if INT_IDS_OF_SPECIAL_DUOS.include?(unit[:int_id])
+          next if INT_IDS_OF_FOCUS_ONLY_UNITS.include?(unit[:int_id])
           next if unit[:properties].include?('tempest') && unit['ReleaseDate'] < '2018-01'
           next if INT_IDS_OF_TT_UNITS_WITHOUT_THEME.include?(unit[:int_id])
 
@@ -569,6 +574,18 @@ module Scrappers
         )
       end
 
+      NAMES_OF_CHARACTERS_WITH_BOTH_GENDERS = [
+        'Alear',
+        'Byleth',
+        'Corrin',
+        'Grima',
+        'Kana',
+        'Kris',
+        'Morgan',
+        'Robin',
+        'Shez',
+      ].freeze
+
       def unit_stat_rank_as_json(unit)
         {
           id: unit['TagID'],
@@ -584,16 +601,30 @@ module Scrappers
         )
       end
 
+      ABBREVIATED_NAME = {
+        INT_ID_ANNIVERSARY_MARTH => '35!Marth',
+        INT_ID_D_ELINCIA => 'D!Elincia',
+        INT_ID_H_B_IKE => 'H!B!Ike',
+        INT_ID_H_B_LYN => 'H!B!Lyn',
+
+        # TODO
+        INT_ID_AZURA_YOUNG => 'Azura (Young)',
+      }.freeze
+
+      NAME_ABBREVIATIONS = {
+        'Black Knight' => 'BK',
+      }.freeze
+
       def abbreviated_name(unit)
-        return '35!Marth' if unit[:int_id] == ANNIVERSARY_MARTH_INT_ID
-        return 'D!Elincia' if unit[:int_id] == DUO_ELINCIA_INT_ID
-        return 'Azura (Young)' if unit[:int_id] == INT_ID_AZURA_YOUNG
+        return ABBREVIATED_NAME[unit[:int_id]] if ABBREVIATED_NAME.key?(unit[:int_id])
 
         name = unit['Name']
-        name = 'BK' if name == 'Black Knight'
-        # TODO: handle with GENERIC_MAIN_CHAR_NAMES = [corrin alear robin byleth...]
-        name = "#{name}(M)" if unit[:game8_name]&.end_with?(' (M)')
-        name = "#{name}(F)" if unit[:game8_name]&.end_with?(' (F)')
+        name = NAME_ABBREVIATIONS[name] || name
+
+        if NAMES_OF_CHARACTERS_WITH_BOTH_GENDERS.include?(unit['Name'])
+          name = "#{name}(M)" if unit['Gender'].start_with?('M')
+          name = "#{name}(F)" if unit['Gender'].start_with?('F')
+        end
 
         # seasonals
 

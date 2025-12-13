@@ -8,8 +8,8 @@ module Scrappers
       attr_reader :accents_table, :accents_table_regexp
 
       OBFUSCATED_KEYS = {
-        fodder_lowest_rarity_when_obtained: :flrwo,
-        fodder_lowest_rarity_for_inheritance: :flrfi,
+        owner_lowest_rarity_when_obtained: :olrwo,
+        owner_lowest_rarity_for_inheritance: :olrfi,
 
         generic_summon_pool: :gsp,
         special_summon_pool: :ssp,

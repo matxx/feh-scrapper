@@ -139,25 +139,25 @@ module Scrappers
 
       def fill_skills_with_availabilities
         all_skills.each do |skill|
-          skill[:fodder_details]   = all_unit_skills_by_skill_name[skill['WikiName']]
-          skill[:fodder_details] ||= all_unit_skills_by_skill_name[skill_pagename_to_wikiname(skill['Name'])]
+          skill[:owner_details]   = all_unit_skills_by_skill_name[skill['WikiName']]
+          skill[:owner_details] ||= all_unit_skills_by_skill_name[skill_pagename_to_wikiname(skill['Name'])]
           skill[:is_in] = hash_for_is_in
-          skill[:fodder_lowest_rarity_when_obtained] = hash_for_lowest_rarity
-          skill[:fodder_lowest_rarity_for_inheritance] = hash_for_lowest_rarity
+          skill[:owner_lowest_rarity_when_obtained] = hash_for_lowest_rarity
+          skill[:owner_lowest_rarity_for_inheritance] = hash_for_lowest_rarity
           skill[:divine_codes] = Hash.new { |h, k| h[k] = [] }
         end
 
         all_skills_by_wikiname.each_value do |skill|
-          next if skill[:fodder_details].nil?
+          next if skill[:owner_details].nil?
 
-          missings = skill[:fodder_details].select { |x| all_units_by_wikiname[x['WikiName']].nil? }
-          next (errors[:missing_fodder_wikinames] << missings.map { |x| x['WikiName'] }) if missings.any?
+          missings = skill[:owner_details].select { |x| all_units_by_wikiname[x['WikiName']].nil? }
+          next (errors[:missing_owner_wikinames] << missings.map { |x| x['WikiName'] }) if missings.any?
 
           normal_divine_codes  = []
           limited_divine_codes = []
 
-          skill[:fodder_details].each do |fodder_detail|
-            unit = all_units_by_wikiname[fodder_detail['WikiName']]
+          skill[:owner_details].each do |owner_detail|
+            unit = all_units_by_wikiname[owner_detail['WikiName']]
 
             normal_divine_codes  += unit[:divine_codes][:normal]  if unit[:is_in][:normal_divine_codes]
             limited_divine_codes += unit[:divine_codes][:limited] if unit[:is_in][:limited_divine_codes]
@@ -167,16 +167,16 @@ module Scrappers
 
               skill[:is_in][key] = true
 
-              lowest_rarity = fodder_detail['unlockRarity'].to_i
-              if skill[:fodder_lowest_rarity_for_inheritance][key].nil? ||
-                 lowest_rarity < skill[:fodder_lowest_rarity_for_inheritance][key]
-                skill[:fodder_lowest_rarity_for_inheritance][key] = lowest_rarity
+              lowest_rarity = owner_detail['unlockRarity'].to_i
+              if skill[:owner_lowest_rarity_for_inheritance][key].nil? ||
+                 lowest_rarity < skill[:owner_lowest_rarity_for_inheritance][key]
+                skill[:owner_lowest_rarity_for_inheritance][key] = lowest_rarity
               end
 
               lowest_rarity = unit[:lowest_rarity][key]
-              if skill[:fodder_lowest_rarity_when_obtained][key].nil? ||
-                 lowest_rarity < skill[:fodder_lowest_rarity_when_obtained][key]
-                skill[:fodder_lowest_rarity_when_obtained][key] = lowest_rarity
+              if skill[:owner_lowest_rarity_when_obtained][key].nil? ||
+                 lowest_rarity < skill[:owner_lowest_rarity_when_obtained][key]
+                skill[:owner_lowest_rarity_when_obtained][key] = lowest_rarity
               end
             end
           end

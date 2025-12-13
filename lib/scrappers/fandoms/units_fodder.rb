@@ -64,7 +64,7 @@ module Scrappers
           end
 
           if skill[:is_in][:generic_summon_pool]
-            rarity = skill[:fodder_lowest_rarity_when_obtained][:generic_summon_pool]
+            rarity = skill[:owner_lowest_rarity_when_obtained][:generic_summon_pool]
             case rarity
             when 1, 2, 3, 4
               skill[:prefodder_one_mode][MODE_GENERIC_POOL_34] = 0
@@ -89,7 +89,7 @@ module Scrappers
           end
 
           if skill[:is_in][:special_summon_pool]
-            rarity = skill[:fodder_lowest_rarity_when_obtained][:special_summon_pool]
+            rarity = skill[:owner_lowest_rarity_when_obtained][:special_summon_pool]
             case rarity
             when 4
               skill[:prefodder_one_mode][MODE_SPECIAL_POOL_4] = 0

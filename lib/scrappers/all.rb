@@ -125,8 +125,10 @@ module Scrappers
       # ennemy skills
       'Élivágar',
       'Hel Scythe',
+      'Gjallarhorn',
       'Kvasir',
       'Valaskjálf',
+      'Vengeful God',
     ].freeze
 
     def retrieve_game8_skill_ratings
@@ -396,7 +398,7 @@ module Scrappers
       fandom.relevant_skills.each do |f_skill|
         next if GAME8_MISSING_SKILL_NAMES.include?(f_skill['Name']) # TODO: need update
         next if f_skill['Name'].include?('Falchion')
-        next if f_skill[:fodder_details]&.all? { |desc| desc['WikiName'].include?('ENEMY') }
+        next if f_skill[:owner_details]&.all? { |desc| desc['WikiName'].include?('ENEMY') }
 
         f_id = f_skill[:base_id] || f_skill['TagID']
         a_skill = all_skills_by_id[f_id]
