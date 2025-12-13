@@ -18,21 +18,22 @@ module Scrappers
         skills_x: '430372', # https://game8.co/games/fire-emblem-heroes/archives/430372
       }.freeze
 
+      # TODO: remove me
       # add page IDs of new skills
       # that are not yet in the skills lists page yet
       # to extract them anyway
-      PAGE_IDS_OF_NEW_SKILLS = {
-        # Desert-Tiger Axe | Father's-Son Axe
-        skills_weapon: ['417545', '417548'],
-        skills_assist: [],
-        skills_special: [],
-        # Atk/Spd Tidings | Atk/Res Tidings | Trample | Distant A/D Form
-        skills_a: ['512297', '520603', '512296', '524039'],
-        skills_b: [],
-        skills_c: [],
-        skills_s: [],
-        skills_x: [],
-      }.freeze
+      # PAGE_IDS_OF_NEW_SKILLS = {
+      #   # Desert-Tiger Axe | Father's-Son Axe
+      #   skills_weapon: ['417545', '417548'],
+      #   skills_assist: [],
+      #   skills_special: [],
+      #   # Atk/Spd Tidings | Atk/Res Tidings | Trample | Distant A/D Form
+      #   skills_a: ['512297', '520603', '512296', '524039'],
+      #   skills_b: [],
+      #   skills_c: [],
+      #   skills_s: [],
+      #   skills_x: [],
+      # }.freeze
 
       EXTRACT = {
         skills_assist: [

@@ -6,20 +6,50 @@ module Scrappers
   module Game8s
     module Units
       KIND_UNIT = :units
+      KIND_UNIT_RED = :units_red
+      KIND_UNIT_BLUE = :units_blue
+      KIND_UNIT_GREEN = :units_green
+      KIND_UNIT_COLORLESS = :units_colorless
 
       PAGE_ID_UNITS = {
-        KIND_UNIT => '242267', # https://game8.co/games/fire-emblem-heroes/archives/242267
+        # KIND_UNIT => '242267',
+        # index page of all units
+        # https://game8.co/games/fire-emblem-heroes/archives/242267
+        # now uses a clever virtual scroller
+        # (only a few units are loaded at the same time => can not be parsed)
+        # so we need to use the index pages for each color
+        KIND_UNIT_RED => '242271',
+        KIND_UNIT_BLUE => '242272',
+        KIND_UNIT_GREEN => '242273',
+        KIND_UNIT_COLORLESS => '242274',
       }.freeze
 
+      # TODO: remove me
       # add page IDs of new units
       # that are not yet in the units list page yet
       # to extract them anyway
-      PAGE_IDS_OF_NEW_UNITS = {
-        KIND_UNIT => [],
-      }.freeze
+      # PAGE_IDS_OF_NEW_UNITS = {
+      #   KIND_UNIT => [],
+      # }.freeze
+
+      def extract_list_units_red(dom)
+        extract_list_units(dom)
+      end
+
+      def extract_list_units_blue(dom)
+        extract_list_units(dom)
+      end
+
+      def extract_list_units_green(dom)
+        extract_list_units(dom)
+      end
+
+      def extract_list_units_colorless(dom)
+        extract_list_units(dom)
+      end
 
       def extract_list_units(dom)
-        node = dom.at('h2:contains("List of All Heroes")')
+        node = dom.at('h2:contains("List of All")')
         node = node.next_element until node.name == 'table'
         node.search('tbody tr').map { |tr| export_list_unit(tr) }
       end
@@ -33,8 +63,24 @@ module Scrappers
         {
           'game8_id' => game8_id,
           'game8_name' => node.at('td:first-child').text.strip,
-          'game8_rating' => node.at('td:last-child').text.strip,
+          'game8_rating' => node.at('td:last-child').text.strip.gsub(%r{/10\Z}, '').strip,
         }
+      end
+
+      def extract_item_units_red(dom, item)
+        extract_item_units(dom, item)
+      end
+
+      def extract_item_units_blue(dom, item)
+        extract_item_units(dom, item)
+      end
+
+      def extract_item_units_green(dom, item)
+        extract_item_units(dom, item)
+      end
+
+      def extract_item_units_colorless(dom, item)
+        extract_item_units(dom, item)
       end
 
       def extract_item_units(dom, item)

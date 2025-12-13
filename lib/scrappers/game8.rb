@@ -113,8 +113,10 @@ module Scrappers
             file_write(json_path, JSON.pretty_generate(json))
             json
           end
-        ids = list.map { |item| item['game8_id'] }
-        list += (missing_page_ids[kind] - ids).map { |id| { 'game8_id' => id } } if missing_page_ids[kind]
+
+        # TODO: remove me
+        # ids = list.map { |item| item['game8_id'] }
+        # list += (missing_page_ids[kind] - ids).map { |id| { 'game8_id' => id } } if missing_page_ids[kind]
 
         list.each do |item|
           if item['game8_id'].nil?
@@ -171,8 +173,10 @@ module Scrappers
         end
 
         list = JSON.parse(file_read(json_path))
-        ids = list.map { |item| item['game8_id'] }
-        list += (missing_page_ids[kind] - ids).map { |id| { 'game8_id' => id } } if missing_page_ids[kind]
+
+        # TODO: remove me
+        # ids = list.map { |item| item['game8_id'] }
+        # list += (missing_page_ids[kind] - ids).map { |id| { 'game8_id' => id } } if missing_page_ids[kind]
 
         items = list.map do |item|
           if item['game8_id'].nil?
@@ -228,12 +232,19 @@ module Scrappers
         file_write(final_file_name, JSON.pretty_generate(items))
 
         case kind
-        when self.class::KIND_UNIT
+        # when self.class::KIND_UNIT
+        when self.class::KIND_UNIT_RED,
+             self.class::KIND_UNIT_BLUE,
+             self.class::KIND_UNIT_GREEN,
+             self.class::KIND_UNIT_COLORLESS
           @all_units += items
         else
           @all_skills += items
         end
       end
+
+      @all_units.sort_by! { |item| item['game8_id'] }
+      @all_skills.sort_by! { |item| item['game8_id'] }
 
       nil
     end
@@ -315,9 +326,10 @@ module Scrappers
       @page_ids ||= PAGE_ID_UNITS.merge(PAGE_ID_SKILLS)
     end
 
-    def missing_page_ids
-      @missing_page_ids ||= PAGE_IDS_OF_NEW_UNITS.merge(PAGE_IDS_OF_NEW_SKILLS)
-    end
+    # TODO: remove me
+    # def missing_page_ids
+    #   @missing_page_ids ||= PAGE_IDS_OF_NEW_UNITS.merge(PAGE_IDS_OF_NEW_SKILLS)
+    # end
 
     def raise_with_item(message)
       raise "[#{current_item}] #{message}"
