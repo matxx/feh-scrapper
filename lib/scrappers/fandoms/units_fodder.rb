@@ -3,19 +3,23 @@
 module Scrappers
   module Fandoms
     module UnitsFodder
-      MODE_GENERIC_POOL_34 = 'g4'
       MODE_HEROIC_GRAILS = 'hg'
       MODE_DIVINE_CODES = 'dc'
-      MODE_SPECIAL_POOL_4 = 'sh4'
+      MODE_GENERIC_POOL_4 = 'g4'
       MODE_GENERIC_POOL_45 = 'gsr'
+      MODE_GENERIC_POOL_5 = 'g5'
+      MODE_SPECIAL_POOL_4 = 'sh4'
       MODE_SPECIAL_POOL_45 = 'shsr'
-      MODES = [
-        MODE_GENERIC_POOL_34,
+      MODE_SPECIAL_POOL_5 = 'sh5'
+      MODES_IN_ORDER = [
+        MODE_GENERIC_POOL_4,
         MODE_HEROIC_GRAILS,
         MODE_DIVINE_CODES,
         MODE_SPECIAL_POOL_4,
         MODE_GENERIC_POOL_45,
         MODE_SPECIAL_POOL_45,
+        MODE_GENERIC_POOL_5,
+        MODE_SPECIAL_POOL_5,
       ].freeze
 
       def fill_skills_with_prefodder
@@ -63,60 +67,51 @@ module Scrappers
               end
           end
 
+          skill[:prefodder_one_mode][MODE_GENERIC_POOL_4] =
+            downgrades_prefodder(skill, downgrades, MODE_GENERIC_POOL_4) + 1
+          skill[:prefodder_one_mode][MODE_GENERIC_POOL_45] =
+            downgrades_prefodder(skill, downgrades, MODE_GENERIC_POOL_45) + 1
+          skill[:prefodder_one_mode][MODE_GENERIC_POOL_5] =
+            downgrades_prefodder(skill, downgrades, MODE_GENERIC_POOL_5) + 1
           if skill[:is_in][:generic_summon_pool]
             rarity = skill[:owner_lowest_rarity_when_obtained][:generic_summon_pool]
             case rarity
             when 1, 2, 3, 4
-              skill[:prefodder_one_mode][MODE_GENERIC_POOL_34] = 0
+              skill[:prefodder_one_mode][MODE_GENERIC_POOL_4] = 0
+            when 4.5
               skill[:prefodder_one_mode][MODE_GENERIC_POOL_45] = 0
-            when 4.5, 5
-              skill[:prefodder_one_mode][MODE_GENERIC_POOL_34] =
-                downgrades_prefodder(skill, downgrades, MODE_GENERIC_POOL_34) + 1
-              skill[:prefodder_one_mode][MODE_GENERIC_POOL_45] =
-                if rarity == 4.5 # rubocop:disable Lint/FloatComparison
-                  0
-                else
-                  downgrades_prefodder(skill, downgrades, MODE_GENERIC_POOL_45) + 1
-                end
+            when 5
+              skill[:prefodder_one_mode][MODE_GENERIC_POOL_5] = 0
             else
               errors[:skill_fodder_with_generic_weird_rarity] << [skill['WikiName'], :rarity]
             end
-          else
-            skill[:prefodder_one_mode][MODE_GENERIC_POOL_34] =
-              downgrades_prefodder(skill, downgrades, MODE_GENERIC_POOL_34) + 1
-            skill[:prefodder_one_mode][MODE_GENERIC_POOL_45] =
-              downgrades_prefodder(skill, downgrades, MODE_GENERIC_POOL_45) + 1
           end
 
+          skill[:prefodder_one_mode][MODE_SPECIAL_POOL_4] =
+            downgrades_prefodder(skill, downgrades, MODE_SPECIAL_POOL_4) + 1
+          skill[:prefodder_one_mode][MODE_SPECIAL_POOL_45] =
+            downgrades_prefodder(skill, downgrades, MODE_SPECIAL_POOL_45) + 1
+          skill[:prefodder_one_mode][MODE_SPECIAL_POOL_5] =
+            downgrades_prefodder(skill, downgrades, MODE_SPECIAL_POOL_5) + 1
           if skill[:is_in][:special_summon_pool]
             rarity = skill[:owner_lowest_rarity_when_obtained][:special_summon_pool]
             case rarity
             when 4
               skill[:prefodder_one_mode][MODE_SPECIAL_POOL_4] = 0
+            when 4.5
               skill[:prefodder_one_mode][MODE_SPECIAL_POOL_45] = 0
-            when 4.5, 5
-              skill[:prefodder_one_mode][MODE_SPECIAL_POOL_4] =
-                downgrades_prefodder(skill, downgrades, MODE_SPECIAL_POOL_4) + 1
-              skill[:prefodder_one_mode][MODE_SPECIAL_POOL_45] =
-                if rarity == 4.5 # rubocop:disable Lint/FloatComparison
-                  0
-                else
-                  downgrades_prefodder(skill, downgrades, MODE_SPECIAL_POOL_45) + 1
-                end
+            when 5
+              skill[:prefodder_one_mode][MODE_SPECIAL_POOL_5] = 0
             else
               errors[:skill_fodder_with_special_weird_rarity] << [skill['WikiName'], rarity]
             end
-          else
-            skill[:prefodder_one_mode][MODE_SPECIAL_POOL_4] =
-              downgrades_prefodder(skill, downgrades, MODE_SPECIAL_POOL_4) + 1
-            skill[:prefodder_one_mode][MODE_SPECIAL_POOL_45] =
-              downgrades_prefodder(skill, downgrades, MODE_SPECIAL_POOL_45) + 1
           end
 
           skill[:prefodder] = {}
-          (0...MODES.length).to_a.each do |index|
-            mode = MODES[index]
-            skill[:prefodder][mode] = MODES[0..index].map { |m| skill[:prefodder_one_mode][m] }.compact.min
+          (0...MODES_IN_ORDER.length).to_a.each do |index|
+            mode = MODES_IN_ORDER[index]
+            # skill[:prefodder][mode] = MODES_IN_ORDER[0..index].map { |m| skill[:prefodder_one_mode][m] }.compact.min
+            skill[:prefodder][mode] = skill[:prefodder_one_mode][mode]
           end
 
           nil # rubocop:disable Lint/Void
