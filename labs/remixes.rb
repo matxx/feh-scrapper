@@ -200,7 +200,7 @@ puts(hdiif.map do |unit, diff|
   space_after = line_size - unit.size - 2 - space_before
   [
     '*' * line_size,
-    '*' + ' ' * space_before + unit + ' ' * space_after + '*',
+    "*#{' ' * space_before}#{unit}#{' ' * space_after}*",
     '*' * line_size,
     diff.to_s,
     "\n\n\n",
