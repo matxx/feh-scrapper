@@ -202,13 +202,17 @@ module Scrappers
         constants[:skills_max_sp] = sp if constants[:skills_max_sp] < sp
         constants[:skills_max_cd] = cd if cd && constants[:skills_max_cd] < cd
 
-        owners = []
-        skill[:owner_details]&.each do |u|
-          unit = all_units_by_wikiname[u['WikiName']]
-          next (errors[:owner_not_found] << u['WikiName']) if unit.nil?
-          next unless relevant_unit?(unit)
-
-          owners << unit
+        first_owner_detail =
+          skill[:owner_details]
+          &.reject { |us| us['additionDate'].nil? }
+          &.min_by { |us| us['additionDate'] }
+        if first_owner_detail
+          unit = all_units_by_wikiname[first_owner_detail['WikiName']]
+          if unit.nil?
+            errors[:owner_not_found] << first_owner_detail['WikiName']
+          else
+            first_owner = unit
+          end
         end
 
         name = sanitize_name(skill['Name'])
@@ -249,9 +253,9 @@ module Scrappers
             weapons: weapons_restrictions,
           },
 
-          addition_date: owners.map { |u| u['AdditionDate'] }.min_by(&:to_date),
-          release_date:  owners.map { |u| u['ReleaseDate']  }.min_by(&:to_date),
-          version:       owners.map { |u| u[:version]       }.min_by { |str| str.split('.').map(&:to_i) },
+          addition_date: first_owner&.dig('AdditionDate'),
+          release_date:  first_owner&.dig('ReleaseDate'),
+          version:       first_owner&.dig(:version),
         }
 
         if skill[:upgrades_wikinames]

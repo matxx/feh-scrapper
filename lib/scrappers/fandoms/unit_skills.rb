@@ -68,6 +68,7 @@ module Scrappers
           'skillPos',
           'defaultRarity',
           'unlockRarity',
+          'additionDate',
         ]
         @all_unit_skills = retrieve_all_pages('UnitSkills', fields)
         @all_unit_skills_by_unit_wikiname = all_unit_skills.group_by { |x| x['WikiName'] }
