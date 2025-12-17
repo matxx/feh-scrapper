@@ -5,6 +5,7 @@ source 'https://rubygems.org'
 ruby '3.4.1'
 
 gem 'aws-sdk-s3', '~> 1'
+gem 'diffy'
 gem 'http'
 gem 'nokogiri'
 gem 'rubocop', '~> 1.66.1'
