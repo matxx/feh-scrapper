@@ -119,6 +119,7 @@ module Scrappers
           # 'game8_rating' => item['game8_rating'] || rating, # prioritize the rating on "index" page
         )
 
+        # rubocop:disable Lint/DuplicateBranch
         case item['game8_id']
         when '317540'
           # no IVs at all ! (Kiran)
@@ -136,11 +137,12 @@ module Scrappers
             'recommended_bane' => 'Spd',
             'recommended_plus10' => 'Def',
           )
-        when '488074', '488073', '526831'
+        when '488074', '488073', '526831', '569699'
           # TODO: handle several recommended "no merge" and "+10" builds...
           # https://game8.co/games/fire-emblem-heroes/archives/488074#hl_2
           # https://game8.co/games/fire-emblem-heroes/archives/488073#hl_2
           # https://game8.co/games/fire-emblem-heroes/archives/526831
+          # https://game8.co/games/fire-emblem-heroes/archives/569699
           return base.merge(
             'recommended_boon' => nil,
             'recommended_bane' => nil,
@@ -177,6 +179,14 @@ module Scrappers
           return base.merge(
             'recommended_boon' => nil,
             'recommended_bane' => nil,
+            'recommended_plus10' => 'Res',
+          )
+        when '571438'
+          # TODO: handle several recommended "no merge" builds...
+          # https://game8.co/games/fire-emblem-heroes/archives/571438
+          return base.merge(
+            'recommended_boon' => 'Res',
+            'recommended_bane' => 'Def',
             'recommended_plus10' => 'Res',
           )
         when '376961'
@@ -219,6 +229,7 @@ module Scrappers
             'recommended_plus10' => 'Spd',
           )
         end
+        # rubocop:enable Lint/DuplicateBranch
 
         # multiple same headers
         # ex : https://game8.co/games/fire-emblem-heroes/archives/269116#hl_2
