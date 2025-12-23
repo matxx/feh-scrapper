@@ -326,13 +326,13 @@ module Scrappers
         when '356376'
           # https://game8.co/games/fire-emblem-heroes/archives/356376#hl_2
           # header marked as <p>
-          ivs = [nil, 'spd', nil, 'hp']
-          plus10 = [nil, 'spd']
+          ivs = [nil, 'Spd', nil, 'HP']
+          plus10 = [nil, 'Spd']
         when '356375'
           # https://game8.co/games/fire-emblem-heroes/archives/356375#hl_2
           # IVs not in right spot and as <p>
-          ivs = [nil, 'spd', nil, 'res']
-          plus10 = [nil, 'spd']
+          ivs = [nil, 'Spd', nil, 'Res']
+          plus10 = [nil, 'Spd']
         end
 
         recommended_boon = sanitize_iv(ivs[1]) if ivs
