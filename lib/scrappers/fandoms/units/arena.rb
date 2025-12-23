@@ -32,6 +32,9 @@ module Scrappers
           },
         }.freeze
 
+        DUEL_SKILL_SCORE_MIN = 175
+        DUEL_SKILL_SCORE_MAX = 180
+
         # formula :
         # https://imgur.com/NycQzxt
         # other resources :
@@ -54,10 +57,25 @@ module Scrappers
             end
 
             merges_count = unit[:properties].include?('story') ? 0 : 10
-            unit[:visible_bst] = unit[:duel_score] || unit[:bst]
-            unit[:visible_bst] += (unit[:has_superboon] ? 4 : 3) if merges_count.positive?
-            # adjust for "Duel" A skills
-            unit[:visible_bst] = 180 if unit[:visible_bst] < 180 && unit['MoveType'] != self.class::MOVE_A
+            max_bst = unit[:bst]
+            max_bst += (unit[:has_superboon] ? 4 : 3) if merges_count.positive?
+
+            # "Duel" A skills
+            duel_skill_score =
+              if unit['MoveType'] == self.class::MOVE_A
+                nil
+              elsif unit[:properties].include?('legendary') || unit[:properties].include?('mythic')
+                DUEL_SKILL_SCORE_MIN
+              else
+                DUEL_SKILL_SCORE_MAX
+              end
+
+            unit[:visible_bst] = [
+              max_bst,
+              unit[:duel_score],
+              unit[:clash_score],
+              duel_skill_score,
+            ].compact.max
 
             total_bst = unit[:visible_bst]
             max_score =

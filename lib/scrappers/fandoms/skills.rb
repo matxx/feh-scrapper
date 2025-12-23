@@ -71,7 +71,7 @@ module Scrappers
           'Cooldown',
           'WeaponEffectiveness',
           # 'SkillBuildCost',
-          # 'Properties',
+          'Properties',
         ]
         skills = retrieve_all_pages('Skills', fields)
         seals, others = skills.partition { |s| s['Scategory'] == self.class::SACRED_SEAL }
@@ -241,6 +241,7 @@ module Scrappers
           image_url: skill[:image_url],
 
           is_prf: skill['Exclusive'] == '1',
+          is_arcane: skill['Properties']&.include?('arcane'),
           sp:,
           tier:,
           refine: skill['RefinePath'].presence,

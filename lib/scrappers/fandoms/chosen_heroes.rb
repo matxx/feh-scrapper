@@ -45,7 +45,7 @@ module Scrappers
           score = hero['Clash'].to_i
           next if score.zero?
 
-          unit[:duel_score] = score
+          unit[:clash_score] = score
         end
 
         nil

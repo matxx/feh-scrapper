@@ -490,6 +490,7 @@ module Scrappers
 
             :bst,
             :duel_score,
+            :clash_score,
             :visible_bst,
             :max_score,
           ),

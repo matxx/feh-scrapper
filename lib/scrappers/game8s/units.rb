@@ -133,9 +133,9 @@ module Scrappers
           # missing header
           # https://game8.co/games/fire-emblem-heroes/archives/492367#hl_2
           return base.merge(
-            'recommended_boon' => 'Def',
-            'recommended_bane' => 'Spd',
-            'recommended_plus10' => 'Def',
+            'recommended_boon' => 'def',
+            'recommended_bane' => 'spd',
+            'recommended_plus10' => 'def',
           )
         when '488074', '488073', '526831', '569699'
           # TODO: handle several recommended "no merge" and "+10" builds...
@@ -153,7 +153,7 @@ module Scrappers
           # https://game8.co/games/fire-emblem-heroes/archives/534611
           return base.merge(
             'recommended_boon' => nil,
-            'recommended_bane' => 'Spd',
+            'recommended_bane' => 'spd',
             'recommended_plus10' => nil,
           )
         when '267455'
@@ -162,7 +162,7 @@ module Scrappers
           return base.merge(
             'recommended_boon' => nil,
             'recommended_bane' => nil,
-            'recommended_plus10' => 'Atk',
+            'recommended_plus10' => 'atk',
           )
         when '267183', '356374'
           # TODO: handle several recommended "no merge" builds...
@@ -171,7 +171,7 @@ module Scrappers
           return base.merge(
             'recommended_boon' => nil,
             'recommended_bane' => nil,
-            'recommended_plus10' => 'Spd',
+            'recommended_plus10' => 'spd',
           )
         when '537827'
           # TODO: handle several recommended "no merge" builds...
@@ -179,38 +179,38 @@ module Scrappers
           return base.merge(
             'recommended_boon' => nil,
             'recommended_bane' => nil,
-            'recommended_plus10' => 'Res',
+            'recommended_plus10' => 'res',
           )
         when '571438'
           # TODO: handle several recommended "no merge" builds...
           # https://game8.co/games/fire-emblem-heroes/archives/571438
           return base.merge(
-            'recommended_boon' => 'Res',
-            'recommended_bane' => 'Def',
-            'recommended_plus10' => 'Res',
+            'recommended_boon' => 'res',
+            'recommended_bane' => 'def',
+            'recommended_plus10' => 'res',
           )
         when '376961'
           # TODO: handle several recommended "+10" builds...
           # https://game8.co/games/fire-emblem-heroes/archives/376961#hl_2
           return base.merge(
-            'recommended_boon' => 'Spd',
-            'recommended_bane' => 'Atk',
+            'recommended_boon' => 'spd',
+            'recommended_bane' => 'atk',
             'recommended_plus10' => nil,
           )
         when '267295'
           # TODO: handle several recommended "+10" builds...
           # https://game8.co/games/fire-emblem-heroes/archives/267295#hl_2
           return base.merge(
-            'recommended_boon' => 'Atk',
-            'recommended_bane' => 'HP',
+            'recommended_boon' => 'atk',
+            'recommended_bane' => 'hp',
             'recommended_plus10' => nil,
           )
         when '505100'
           # TODO: handle several recommended "+10" builds...
           # https://game8.co/games/fire-emblem-heroes/archives/267295#hl_2
           return base.merge(
-            'recommended_boon' => 'Atk',
-            'recommended_bane' => 'Spd',
+            'recommended_boon' => 'atk',
+            'recommended_bane' => 'spd',
             'recommended_plus10' => nil,
           )
         when '267095'
@@ -218,15 +218,15 @@ module Scrappers
           return base.merge(
             'recommended_boon' => 'none',
             'recommended_bane' => 'none',
-            'recommended_plus10' => 'Spd',
+            'recommended_plus10' => 'spd',
           )
         when '543979'
           # no IV advice (yet ?)
           # https://game8.co/games/fire-emblem-heroes/archives/543979#hl_2
           return base.merge(
-            'recommended_boon' => 'Spd',
-            'recommended_bane' => 'Def',
-            'recommended_plus10' => 'Spd',
+            'recommended_boon' => 'spd',
+            'recommended_bane' => 'def',
+            'recommended_plus10' => 'spd',
           )
         end
         # rubocop:enable Lint/DuplicateBranch
@@ -326,13 +326,13 @@ module Scrappers
         when '356376'
           # https://game8.co/games/fire-emblem-heroes/archives/356376#hl_2
           # header marked as <p>
-          ivs = [nil, 'Spd', nil, 'HP']
-          plus10 = [nil, 'Spd']
+          ivs = [nil, 'spd', nil, 'hp']
+          plus10 = [nil, 'spd']
         when '356375'
           # https://game8.co/games/fire-emblem-heroes/archives/356375#hl_2
           # IVs not in right spot and as <p>
-          ivs = [nil, 'Spd', nil, 'Res']
-          plus10 = [nil, 'Spd']
+          ivs = [nil, 'spd', nil, 'res']
+          plus10 = [nil, 'spd']
         end
 
         recommended_boon = sanitize_iv(ivs[1]) if ivs
@@ -349,8 +349,8 @@ module Scrappers
       def sanitize_iv(stat)
         iv = stat.strip
         return if iv.nil?
-        return iv if ['HP', 'Atk', 'Spd', 'Def', 'Res', 'none'].include?(iv)
-        return 'HP' if iv == 'Hp'
+        return iv.downcase if ['HP', 'Atk', 'Spd', 'Def', 'Res', 'none'].include?(iv)
+        return 'hp' if iv == 'Hp'
 
         raise_with_item "unknown iv : #{iv}"
       end
