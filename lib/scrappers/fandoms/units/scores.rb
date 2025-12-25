@@ -3,13 +3,13 @@
 module Scrappers
   module Fandoms
     module Units
-      module Arena
+      module Scores
         RARITY_1 = 1
         RARITY_2 = 2
         RARITY_3 = 3
         RARITY_4 = 4
         RARITY_5 = 5
-        ARENA_SCORES_CONSTANTS = {
+        SCORES_CONSTANTS = {
           RARITY_1 => {
             base_value: 47,
             level_factor: 68 / 39.0,
@@ -43,9 +43,9 @@ module Scrappers
         # https://www.reddit.com/r/FireEmblemHeroes/comments/19atxtw/what_is_the_formula_for_calculating_arena_score/
         # https://www.reddit.com/r/OrderOfHeroes/comments/7ihbqv/the_most_accurate_arena_score_calculator_to_date/
         # https://docs.google.com/spreadsheets/d/1XF8AtQPzAIhyyW_fHHsbBd-Z2jWZM2rBwSkhWy8YeWk/edit?gid=1351020164#gid=1351020164
-        def fill_units_with_arena_scores
-          rarity_base_value   = ARENA_SCORES_CONSTANTS[RARITY_5][:base_value]
-          rarity_level_factor = ARENA_SCORES_CONSTANTS[RARITY_5][:level_factor]
+        def fill_units_with_scores
+          rarity_base_value   = SCORES_CONSTANTS[RARITY_5][:base_value]
+          rarity_level_factor = SCORES_CONSTANTS[RARITY_5][:level_factor]
           level = 40
           team_base_score = 150
 

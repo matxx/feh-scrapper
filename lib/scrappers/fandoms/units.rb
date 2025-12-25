@@ -7,12 +7,14 @@ require 'active_support/core_ext/hash/slice'
 require 'active_support/core_ext/object/blank'
 require 'active_support/core_ext/string/conversions'
 
-require 'scrappers/fandoms/units/arena'
+require 'scrappers/fandoms/units/scores'
+require 'scrappers/fandoms/units/themes'
 
 module Scrappers
   module Fandoms
     module Units
-      include Scrappers::Fandoms::Units::Arena
+      include Scrappers::Fandoms::Units::Scores
+      include Scrappers::Fandoms::Units::Themes
 
       attr_reader(
         :all_units,
@@ -273,24 +275,6 @@ module Scrappers
         nil
       end
 
-      THEME_NEW_YEAR = :new_year
-      THEME_DESERT = :desert
-      THEME_DOD = :dod # day of devotion / valentines
-      THEME_SPRING = :spring
-      THEME_KIDS = :kids
-      THEME_WEDDING = :wedding
-      THEME_SUMMER = :summer
-      THEME_HALLOWEEN = :halloween
-      THEME_NINJAS = :ninjas
-      THEME_WINTER = :winter
-      THEME_DANCE = :dance
-      THEME_HOSHIDAN_SUMMER = :hs
-      THEME_HOSTILE_SPRING = :hostile_spring
-      THEME_PICNIC = :picnic
-      THEME_PIRATES = :pirates
-      THEME_TEE = :tee
-      THEME_TRIBES = :tribes
-
       INT_ID_ANNIVERSARY_MARTH = 1235
       INT_ID_D_ELINCIA = 1303
       INT_ID_H_B_IKE = 1315
@@ -324,67 +308,6 @@ module Scrappers
         INT_ID_BRUNNYA,
         INT_ID_ITSUKI,
       ].freeze
-
-      # https://feheroes.fandom.com/wiki/Module:SpecialHeroList#L-8
-      def fill_units_with_themes
-        all_units.each do |unit|
-          unit[:int_id] = unit['IntID'].to_i
-          next (unit[:theme] = THEME_NEW_YEAR) if unit[:int_id] == INT_ID_NY_CORRIN
-
-          next if !unit[:properties].include?('special') && !unit[:properties].include?('tempest')
-
-          if unit['ReleaseDate'].blank?
-            errors[:units_without_release_date] << unit['WikiName'] unless unit['Properties']&.include?('enemy')
-            next
-          end
-
-          unit[:theme] = nil
-          next if INT_IDS_OF_FOCUS_ONLY_UNITS.include?(unit[:int_id])
-          next if unit[:properties].include?('tempest') && unit['ReleaseDate'] < '2018-01'
-          next if INT_IDS_OF_TT_UNITS_WITHOUT_THEME.include?(unit[:int_id])
-
-          year, month, day = unit['ReleaseDate'].split('-').map(&:to_i)
-
-          unit[:theme] =
-            # recurring
-            if (month == 12 && day >= 25) || (month == 1 && day <= 5)
-              THEME_NEW_YEAR
-            elsif year >= 2021 && month == 1 && day > 5
-              THEME_DESERT
-            elsif month == 2
-              THEME_DOD
-            elsif month == 3
-              THEME_SPRING
-            elsif year >= 2020 && month == 4
-              THEME_KIDS
-            elsif month == 5
-              THEME_WEDDING
-            elsif [6, 7].include?(month)
-              THEME_SUMMER
-            elsif month == 10
-              THEME_HALLOWEEN
-            elsif year >= 2020 && month == 11
-              THEME_NINJAS
-            elsif month == 12 && day < 25
-              THEME_WINTER
-            # other
-            elsif [2017, 2019, 2020].include?(year) && month == 9
-              THEME_DANCE
-            elsif [2018, 2024].include?(year) && month == 8
-              THEME_HOSHIDAN_SUMMER
-            elsif [2023, 2025].include?(year) && month == 8
-              THEME_TEE
-            elsif year == 2019 && month == 1 && day > 5
-              THEME_HOSTILE_SPRING
-            elsif year == 2019 && month == 4
-              THEME_PICNIC
-            elsif [2020, 2021].include?(year) && month == 8
-              THEME_PIRATES
-            elsif year >= 2021 && month == 9
-              THEME_TRIBES
-            end
-        end
-      end
 
       def export_units
         export_files(
@@ -631,43 +554,43 @@ module Scrappers
 
         case unit[:theme]
         # recurring
-        when THEME_NEW_YEAR
+        when self.class::THEME_NEW_YEAR
           return "NY!#{name}"
-        when THEME_DESERT
+        when self.class::THEME_DESERT
           return "De!#{name}"
-        when THEME_DOD
+        when self.class::THEME_DOD
           return "V!#{name}"
-        when THEME_SPRING
+        when self.class::THEME_SPRING
           return "Sp!#{name}"
-        when THEME_KIDS
+        when self.class::THEME_KIDS
           return "Y!#{name}"
-        when THEME_WEDDING
+        when self.class::THEME_WEDDING
           return "Gr!#{name}" if unit['Gender'].start_with?('M')
           return "Br!#{name}" if unit['Gender'].start_with?('F')
 
           return "We!#{name}"
-        when THEME_SUMMER
+        when self.class::THEME_SUMMER
           return "Su!#{name}"
-        when THEME_HALLOWEEN
+        when self.class::THEME_HALLOWEEN
           return "H!#{name}"
-        when THEME_NINJAS
+        when self.class::THEME_NINJAS
           return "N!#{name}"
-        when THEME_WINTER
+        when self.class::THEME_WINTER
           return "W!#{name}"
         # other
-        when THEME_DANCE
+        when self.class::THEME_DANCE
           return "Da!#{name}"
-        when THEME_HOSHIDAN_SUMMER
+        when self.class::THEME_HOSHIDAN_SUMMER
           return "HSu!#{name}"
-        when THEME_HOSTILE_SPRING
+        when self.class::THEME_HOSTILE_SPRING
           return "HSp!#{name}"
-        when THEME_PICNIC
+        when self.class::THEME_PICNIC
           return "Pic!#{name}"
-        when THEME_PIRATES
+        when self.class::THEME_PIRATES
           return "P!#{name}"
-        when THEME_TEE
+        when self.class::THEME_TEE
           return "T!#{name}"
-        when THEME_TRIBES
+        when self.class::THEME_TRIBES
           return "FT!#{name}" if unit['ReleaseDate']&.start_with?('2022')
           return "WT!#{name}" if unit['ReleaseDate']&.start_with?('2023')
           return "IT!#{name}" if unit['ReleaseDate']&.start_with?('2024')

@@ -132,7 +132,7 @@ module Scrappers
       log_and_launch(:fill_seals_with_images)
       log_and_launch(:fill_units_with_images)
 
-      log_and_launch(:fill_units_with_arena_scores)
+      log_and_launch(:fill_units_with_scores)
 
       nil
     end
