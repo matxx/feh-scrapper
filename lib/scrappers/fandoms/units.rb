@@ -588,7 +588,7 @@ module Scrappers
           return "Pic!#{name}"
         when self.class::THEME_PIRATES
           return "P!#{name}"
-        when self.class::THEME_TEE
+        when self.class::THEME_TEA
           return "T!#{name}"
         when self.class::THEME_TRIBES
           return "FT!#{name}" if unit['ReleaseDate']&.start_with?('2022')

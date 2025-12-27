@@ -19,7 +19,7 @@ module Scrappers
         THEME_HOSTILE_SPRING = :hostile_spring
         THEME_PICNIC = :picnic
         THEME_PIRATES = :pirates
-        THEME_TEE = :tee
+        THEME_TEA = :tea
         THEME_TRIBES = :tribes
 
         # https://feheroes.fandom.com/wiki/Module:SpecialHeroList#L-8
@@ -70,7 +70,7 @@ module Scrappers
               elsif [2018, 2024].include?(year) && month == 8
                 THEME_HOSHIDAN_SUMMER
               elsif [2023, 2025].include?(year) && month == 8
-                THEME_TEE
+                THEME_TEA
               elsif year == 2019 && month == 1 && day > 5
                 THEME_HOSTILE_SPRING
               elsif year == 2019 && month == 4
