@@ -61,3 +61,20 @@ a.game8.all_skills.select { |x| x['category'] == 'skills_s' && !x['game8_name'].
 # => 243
 a.fandom.all_skills.select { |x| x['Scategory'] == 'sacredseal' && !x['Name'].include?('Squad') }.size
 # => 56
+
+# some tests on refines
+
+xs = a.fandom.all_skills.select { |s| s['Scategory'] == 'weapon' }.group_by { |s| s['SP'] }
+xs['350'].reject { |s| s['RefinePath'].present? }.count
+# => 0
+# all 350 SP weapons are refines
+# (only 1 skill other than refine has 350 SP : Ostian Counter)
+ys = a.fandom.all_skills.select { |s| s['Scategory'] == 'weapon' && s['RefinePath'].present? }.group_by { |s|s['SP'] }
+ys.keys
+# => ["350", "400"]
+# all refines are either 350 or 400 SP
+zs = a.fandom.all_skills.group_by { |s| s['TagID'] }
+zs.transform_values(&:size).select { |_, v| v > 1 }
+# => {"" => 25}
+# all skills have unique TagID
+# except captain skills which dont have any

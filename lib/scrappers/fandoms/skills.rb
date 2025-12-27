@@ -5,6 +5,7 @@ module Scrappers
     module Skills
       WEAPON = 'weapon'
       SACRED_SEAL = 'sacredseal'
+      CAPTAIN = 'captain'
 
       # as long as "all_skills_by_name" is only used for seals
       # there is no problem with those
@@ -20,6 +21,7 @@ module Scrappers
         :all_skills_by_wikiname,
         :all_skills_grouped_by_name,
         :all_skills_by_name,
+        :all_skills_by_tag_id,
 
         :seals_from_skills,
         :seals_from_skills_by_name,
@@ -30,6 +32,7 @@ module Scrappers
         @all_skills_by_wikiname = nil
         @all_skills_grouped_by_name = nil
         @all_skills_by_name = nil
+        @all_skills_by_tag_id = nil
 
         @seals_from_skills = nil
         @seals_from_skills_by_name = nil
@@ -74,6 +77,8 @@ module Scrappers
           'Properties',
         ]
         skills = retrieve_all_pages('Skills', fields)
+        # when a seal exists as a skill, it is not listed in the "Skills" table
+        # it only appears in "SacredSealCosts" table
         seals, others = skills.partition { |s| s['Scategory'] == self.class::SACRED_SEAL }
         @seals_from_skills = seals
         @all_skills = others
@@ -103,6 +108,14 @@ module Scrappers
           .select { |_, v| v.size > 1 }
         errors[:seals_with_same_name] = seals_with_same_name.keys if seals_with_same_name.any?
 
+        @all_skills_by_tag_id = all_skills.index_by { |x| x['TagID'] }
+        skills_with_same_tag_id =
+          all_skills
+          .reject { |x| x['Scategory'] == CAPTAIN }
+          .group_by { |x| x['TagID'] }
+          .select { |_, v| v.size > 1 }
+        errors[:skills_with_same_tag_id] = skills_with_same_tag_id.keys if skills_with_same_tag_id.any?
+
         nil
       end
 
@@ -118,7 +131,14 @@ module Scrappers
           # Obsidian Lance: "SID_黒曜の槍_一"
           # Bull Blade: "SID_猛牛の剣_連"
           # Taguel Fang: "SID_タグエルの爪牙2_一"
-          skill[:base_id] = skill['TagID'].gsub(/_[A-Z]{3}\Z/, '').gsub(/2?_[^_]\Z/, '')
+          base_id = skill['TagID'].gsub(/2?_[A-Z]{3}\Z/, '').gsub(/2?_[^_]\Z/, '')
+          skill[:base_id] = base_id
+
+          base = all_skills_by_tag_id[base_id]
+          next (errors[:base_skill_not_found] << [skill['WikiName'], base_id]) if base.nil?
+
+          base[:refine_ids] ||= []
+          base[:refine_ids] << skill['TagID']
         end
       end
 
@@ -157,7 +177,7 @@ module Scrappers
 
       def relevant_skill?(skill)
         # do not export captain skills
-        return false if skill['Scategory'] == 'captain'
+        return false if skill['Scategory'] == CAPTAIN
         # do not export enemy only skills
         return false if skill[:owner_details]&.all? { |desc| desc['WikiName'].include?('ENEMY') }
         # only export refines with effect
@@ -240,11 +260,14 @@ module Scrappers
 
           image_url: skill[:image_url],
 
-          is_prf: skill['Exclusive'] == '1',
-          is_arcane: skill['Properties']&.include?('arcane'),
+          is_prf: true_or_nil(skill['Exclusive'] == '1'),
+          is_arcane: true_or_nil(skill['Properties']&.include?('arcane')),
           sp:,
           tier:,
-          refine: skill['RefinePath'].presence,
+
+          has_refine: true_or_nil(skill[:refine_ids].present?),
+          refines_max_sp: skill[:refine_ids]&.map { |id| all_skills_by_tag_id[id]['SP'].to_i }&.max,
+          refine_kind: skill['RefinePath'].presence,
 
           cd:,
           eff: skill['WeaponEffectiveness'].presence&.split(','),

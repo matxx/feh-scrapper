@@ -93,6 +93,10 @@ module Scrappers
       def obfuscate_keys(hash)
         hash.transform_keys { |k| OBFUSCATED_KEYS[k] }
       end
+
+      def true_or_nil(bool)
+        bool ? true : nil
+      end
     end
   end
 end
