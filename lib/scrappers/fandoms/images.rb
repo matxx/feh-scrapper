@@ -5,7 +5,11 @@ module Scrappers
     module Images
       attr_reader :all_images_by_pagename
 
-      # Too many values supplied for parameter "titles". The limit is 50. (toomanyvalues) (MediawikiApi::ApiError)
+      # possible errors when retrieving too much images at a time :
+      # - with limit 500 :
+      # `unexpected HTTP response (414) (MediawikiApi::HttpError)`
+      # - with limit 100 :
+      # `Too many values supplied for parameter "titles". The limit is 50. (toomanyvalues) (MediawikiApi::ApiError)`
       MAX_TITLES_SIZE = 50
 
       def reset_all_images_by_pagename!
@@ -16,43 +20,34 @@ module Scrappers
         return if all_images_by_pagename
 
         @all_images_by_pagename = {}
+        pages_to_retrieve = []
 
         # unit portraits
-        all_units.each_slice(MAX_TITLES_SIZE).each do |units|
-          titles = units.map { |unit| unit_face_img(unit) }
-          retrieve_images(titles)
-        end
+        pages_to_retrieve += all_units.map { |unit| unit_face_img(unit) }
 
         # chosen unit icons
-        titles =
+        pages_to_retrieve +=
           ['Fire', 'Water', 'Wind', 'Earth']
           .map { |element| "File:Chosen Effect #{element}.png" }
-        retrieve_images(titles)
 
         # legendary unit icons
-        titles =
+        pages_to_retrieve +=
           ['Fire', 'Water', 'Wind', 'Earth']
           .map { |element| "File:Legendary Effect #{element}.png" }
-        retrieve_images(titles)
 
         # mythic unit icons
-        titles =
+        pages_to_retrieve +=
           ['Light', 'Dark', 'Astra', 'Anima']
           .product(['', ' 02', ' 03'])
           .flat_map { |element, suffix| "File:Mythic Effect #{element}#{suffix}.png" }
-        retrieve_images(titles)
 
         # skill icons
-        all_skills.each_slice(MAX_TITLES_SIZE).each do |skills|
-          titles = skills.map { |skill| skill_icon(skill) }
-          retrieve_images(titles)
-        end
+        pages_to_retrieve += all_skills.map { |skill| skill_icon(skill) }
 
         # seal icons
-        all_seals.each_slice(MAX_TITLES_SIZE).each do |skills|
-          titles = skills.map { |skill| skill_icon(skill) }
-          retrieve_images(titles)
-        end
+        pages_to_retrieve += all_seals.map { |skill| skill_icon(skill) }
+
+        retrieve_images(pages_to_retrieve.uniq)
 
         nil
       end
@@ -96,14 +91,41 @@ module Scrappers
 
       private
 
-      def retrieve_images(titles)
-        response = client.query(format: :json, prop: :imageinfo, iiprop: :url, titles:)
-        response.data['pages'].each_value do |data|
-          next if data['imageinfo'].nil?
+      def retrieve_images(pages_to_retrieve, limit = MAX_TITLES_SIZE)
+        total = pages_to_retrieve.size
+        offset = 0
+        loop do
+          titles = pages_to_retrieve[offset..offset + limit - 1]
+          break if titles.nil? || titles.empty?
 
-          all_images_by_pagename[data['title']] =
-            data['imageinfo'][0]['url'].gsub(%r{https://static\.}, 'https://vignette.')
+          response =
+            begin
+              logger.warn %{-- querying images (total: #{total}, with limit: #{limit}, offset: #{offset})}
+              client.query(
+                format: :json,
+                prop: :imageinfo,
+                iiprop: :url,
+                titles:,
+              )
+            rescue MediawikiApi::ApiError => e
+              raise e unless e.message.include?('ratelimited')
+
+              logger.error '--- rate limit exceeded : going to sleep'
+              sleep 5
+              retry
+            end
+
+          response.data['pages'].each_value do |data|
+            next if data['imageinfo'].nil?
+
+            all_images_by_pagename[data['title']] =
+              data['imageinfo'][0]['url'].gsub(%r{https://static\.}, 'https://vignette.')
+          end
+
+          offset += limit
         end
+
+        nil
       end
 
       def unit_face_img(unit)

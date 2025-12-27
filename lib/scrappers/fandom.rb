@@ -205,7 +205,7 @@ module Scrappers
             sleep 5
             retry
           end
-        logger.warn "--- number of results : #{response.data.size}"
+        # logger.warn "--- number of results : #{response.data.size}"
         break if response.data.empty?
 
         pages += response.data.map { |d| d['title'] }
