@@ -7,12 +7,14 @@ require 'active_support/core_ext/hash/slice'
 require 'active_support/core_ext/object/blank'
 require 'active_support/core_ext/string/conversions'
 
+require 'scrappers/fandoms/units/abbreviated_names'
 require 'scrappers/fandoms/units/scores'
 require 'scrappers/fandoms/units/themes'
 
 module Scrappers
   module Fandoms
     module Units
+      include Scrappers::Fandoms::Units::AbbreviatedNames
       include Scrappers::Fandoms::Units::Scores
       include Scrappers::Fandoms::Units::Themes
 
@@ -510,18 +512,6 @@ module Scrappers
         )
       end
 
-      NAMES_OF_CHARACTERS_WITH_BOTH_GENDERS = [
-        'Alear',
-        'Byleth',
-        'Corrin',
-        'Grima',
-        'Kana',
-        'Kris',
-        'Morgan',
-        'Robin',
-        'Shez',
-      ].freeze
-
       def unit_stat_rank_as_json(unit)
         {
           id: unit['TagID'],
@@ -540,24 +530,6 @@ module Scrappers
       INT_ID_CAMILLA_ADRIFT = 308
       INT_ID_CORRIN_M_ADRIFT = 309
       INT_ID_CORRIN_F_ADRIFT = 310
-
-      ABBREVIATED_NAME = {
-        INT_ID_ANNIVERSARY_MARTH => '35!Marth',
-        INT_ID_D_ELINCIA => 'D!Elincia',
-        INT_ID_H_B_IKE => 'H!B!Ike',
-        INT_ID_H_B_LYN => 'H!B!Lyn',
-
-        INT_ID_CAMILLA_ADRIFT => 'Ad!Camilla',
-        INT_ID_CORRIN_M_ADRIFT => 'Ad!Corrin(M)',
-        INT_ID_CORRIN_F_ADRIFT => 'Ad!Corrin(F)',
-
-        # TODO
-        # INT_ID_AZURA_YOUNG => 'Azura (Young)',
-      }.freeze
-
-      NAME_ABBREVIATIONS = {
-        'Black Knight' => 'BK',
-      }.freeze
 
       INT_ID_EIRIKA_TOME = 209
       INT_ID_CHROM_CAV = 225
@@ -608,117 +580,6 @@ module Scrappers
         INT_ID_TIKI_Y_AT,
         INT_ID_TIKI_Y_F,
       ].freeze
-
-      ABBREVIATED_NAME_SUFFIXES = {
-        INT_ID_EIRIKA_TOME => 'Tome',
-        INT_ID_CHROM_CAV => 'Cav',
-        INT_ID_REINHARDT_SWORD => 'Sword',
-        INT_ID_OLWEN_GREEN => 'Green',
-        INT_ID_HINOKA_BOW => 'Bow',
-        INT_ID_NINO_FLYING => 'Fly',
-        INT_ID_OLIVIA_FLYING => 'Fly',
-
-        INT_ID_MARTH_FE13 => 'FE13',
-        INT_ID_ANNA_FE13 => 'FE13',
-        INT_ID_SELENA_FE8 => 'FE8',
-        # INT_ID_HILDA_FE16 => 'FE16',
-        INT_ID_HILDA_FE4 => 'FE4',
-        # INT_ID_ARTHUR_FE14 => 'FE14',
-        INT_ID_ARTHUR_FE4 => 'FE4',
-
-        INT_ID_CATRIA_SOV => 'SoV',
-        INT_ID_PALLA_SOV => 'SoV',
-        INT_ID_EST_SOV => 'SoV',
-      }.freeze
-
-      def abbreviated_name(unit)
-        return ABBREVIATED_NAME[unit[:int_id]] if ABBREVIATED_NAME.key?(unit[:int_id])
-
-        name = unit['Name']
-        name = NAME_ABBREVIATIONS[name] || name
-
-        if NAMES_OF_CHARACTERS_WITH_BOTH_GENDERS.include?(unit['Name'])
-          name = "#{name}(M)" if unit['Gender'].start_with?('M')
-          name = "#{name}(F)" if unit['Gender'].start_with?('F')
-        end
-
-        name = "#{name}(A)" if INT_IDS_OF_ADULTS.include?(unit[:int_id])
-        name = "#{name}(Y)" if INT_IDS_OF_YOUNGS.include?(unit[:int_id])
-
-        name = "#{name}(#{ABBREVIATED_NAME_SUFFIXES[unit[:int_id]]})" if ABBREVIATED_NAME_SUFFIXES.key?(unit[:int_id])
-
-        # seasonals
-
-        case unit[:theme]
-        # recurring
-        when self.class::THEME_NEW_YEAR
-          return "NY!#{name}"
-        when self.class::THEME_DESERT
-          return "De!#{name}"
-        when self.class::THEME_DOD
-          return "V!#{name}"
-        when self.class::THEME_SPRING
-          return "Sp!#{name}"
-        when self.class::THEME_KIDS
-          return "Y!#{name}"
-        when self.class::THEME_WEDDING
-          return "Gr!#{name}" if unit['Gender'].start_with?('M')
-          return "Br!#{name}" if unit['Gender'].start_with?('F')
-
-          return "We!#{name}"
-        when self.class::THEME_SUMMER
-          return "Su!#{name}"
-        when self.class::THEME_HALLOWEEN
-          return "H!#{name}"
-        when self.class::THEME_NINJAS
-          return "N!#{name}"
-        when self.class::THEME_WINTER
-          return "W!#{name}"
-        # other
-        when self.class::THEME_DANCE
-          return "Da!#{name}"
-        when self.class::THEME_HOSHIDAN_SUMMER
-          return "HSu!#{name}"
-        when self.class::THEME_HOSTILE_SPRING
-          return "HSp!#{name}"
-        when self.class::THEME_PICNIC
-          return "Pic!#{name}"
-        when self.class::THEME_PIRATES
-          return "P!#{name}"
-        when self.class::THEME_TEA
-          return "T!#{name}"
-        when self.class::THEME_THIEVES
-          return "Th!#{name}"
-        when self.class::THEME_S12
-          return "S12!#{name}"
-        when self.class::THEME_NATIONS
-          return "FT!#{name}" if unit['ReleaseDate']&.start_with?('2022')
-          return "WT!#{name}" if unit['ReleaseDate']&.start_with?('2023')
-          return "IT!#{name}" if unit['ReleaseDate']&.start_with?('2024')
-          return "Fe!#{name}" if unit['ReleaseDate']&.start_with?('2025')
-        end
-
-        # traits
-
-        return "Ai!#{name}" if unit[:properties].include?('aided')
-        return "As!#{name}" if unit[:properties].include?('ascended')
-        return "At!#{name}" if unit[:properties].include?('attuned')
-        return "E!#{name}" if unit[:properties].include?('emblem')
-        return "R!#{name}" if unit[:properties].include?('rearmed')
-        return "Et!#{name}" if unit[:properties].include?('entwined')
-
-        return "B!#{name}" if unit[:properties].include?('brave')
-        return "F!#{name}" if unit[:properties].include?('fallen')
-
-        return "C!#{name}" if unit[:properties].include?('chosen')
-        return "L!#{name}" if unit[:properties].include?('legendary')
-        return "M!#{name}" if unit[:properties].include?('mythic')
-
-        return "D!#{name}" if unit[:properties].include?('duo')
-        return "H!#{name}" if unit[:properties].include?('harmonized')
-
-        name
-      end
 
       # B!Eirika & P!Hinoka have same version 5.8 but different max DF
       # => diff between release dates (and not versions)
