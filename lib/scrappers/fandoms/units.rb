@@ -590,10 +590,15 @@ module Scrappers
           return "P!#{name}"
         when self.class::THEME_TEA
           return "T!#{name}"
-        when self.class::THEME_TRIBES
+        when self.class::THEME_THIEVES
+          return "Th!#{name}"
+        when self.class::THEME_S12
+          return "S12!#{name}"
+        when self.class::THEME_NATIONS
           return "FT!#{name}" if unit['ReleaseDate']&.start_with?('2022')
           return "WT!#{name}" if unit['ReleaseDate']&.start_with?('2023')
           return "IT!#{name}" if unit['ReleaseDate']&.start_with?('2024')
+          return "Fe!#{name}" if unit['ReleaseDate']&.start_with?('2025')
         end
 
         # others

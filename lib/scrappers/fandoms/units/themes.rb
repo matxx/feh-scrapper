@@ -20,7 +20,9 @@ module Scrappers
         THEME_PICNIC = :picnic
         THEME_PIRATES = :pirates
         THEME_TEA = :tea
-        THEME_TRIBES = :tribes
+        THEME_THIEVES = :thieves
+        THEME_S12 = :s12
+        THEME_NATIONS = :nations
 
         # https://feheroes.fandom.com/wiki/Module:SpecialHeroList#L-8
         def fill_units_with_themes
@@ -46,13 +48,13 @@ module Scrappers
               # recurring
               if (month == 12 && day >= 25) || (month == 1 && day <= 5)
                 THEME_NEW_YEAR
-              elsif year >= 2021 && month == 1 && day > 5
+              elsif month == 1 && year >= 2021 && day > 5
                 THEME_DESERT
               elsif month == 2
                 THEME_DOD
               elsif month == 3
                 THEME_SPRING
-              elsif year >= 2020 && month == 4
+              elsif month == 4 && year >= 2020
                 THEME_KIDS
               elsif month == 5
                 THEME_WEDDING
@@ -60,25 +62,29 @@ module Scrappers
                 THEME_SUMMER
               elsif month == 10
                 THEME_HALLOWEEN
-              elsif year >= 2020 && month == 11
+              elsif month == 11 && year >= 2020
                 THEME_NINJAS
               elsif month == 12 && day < 25
                 THEME_WINTER
               # other
               elsif [2017, 2019, 2020].include?(year) && month == 9
                 THEME_DANCE
-              elsif [2018, 2024].include?(year) && month == 8
+              elsif month == 8 && [2018, 2024].include?(year)
                 THEME_HOSHIDAN_SUMMER
-              elsif [2023, 2025].include?(year) && month == 8
+              elsif month == 8 && [2023, 2025].include?(year)
                 THEME_TEA
-              elsif year == 2019 && month == 1 && day > 5
+              elsif month == 8 && [2022].include?(year)
+                THEME_THIEVES
+              elsif month == 1 && year == 2019 && day > 5
                 THEME_HOSTILE_SPRING
-              elsif year == 2019 && month == 4
+              elsif month == 4 && year == 2019
                 THEME_PICNIC
-              elsif [2020, 2021].include?(year) && month == 8
+              elsif month == 8 && [2020, 2021].include?(year)
                 THEME_PIRATES
-              elsif [2022, 2023, 2024].include?(year) && month == 9
-                THEME_TRIBES
+              elsif month == 9 && year == 2021
+                THEME_S12
+              elsif month == 9 && [2022, 2023, 2024, 2025].include?(year)
+                THEME_NATIONS
               end
           end
         end
