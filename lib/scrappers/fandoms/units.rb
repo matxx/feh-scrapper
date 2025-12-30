@@ -21,6 +21,7 @@ module Scrappers
         :all_units_by_wikiname,
         :all_units_grouped_by_pagename,
         :all_units_by_pagename,
+        :all_units_by_abbr_name,
       )
 
       def reset_all_units!
@@ -28,6 +29,7 @@ module Scrappers
         @all_units_by_wikiname = nil
         @all_units_grouped_by_pagename = nil
         @all_units_by_pagename = nil
+        @all_units_by_abbr_name = nil
         @relevant_units = nil
       end
 
@@ -143,6 +145,8 @@ module Scrappers
           .group_by { |x| x['Page'] }
           .select { |_, v| v.size > 1 }
         errors[:units_with_same_pagename] = units_with_same_pagename.keys if units_with_same_pagename.any?
+
+        @all_units_by_abbr_name = {}
 
         nil
       end
@@ -349,12 +353,20 @@ module Scrappers
             mythic['MythicEffect']
           end
 
+        abbr_name = abbreviated_name(unit)
+        if all_units_by_abbr_name[abbr_name].nil?
+          all_units_by_abbr_name[abbr_name] = [abbr_name, unit['Page']]
+        else
+          all_units_by_abbr_name[abbr_name] << unit['Page']
+          errors[:units_with_same_abbr_name] << all_units_by_abbr_name[abbr_name]
+        end
+
         {
           id: unit['TagID'],
           name: sanitize_name(unit['Name']),
           title: sanitize_name(unit['Title']),
           full_name: sanitize_name(unit['Page']),
-          abbreviated_name: abbreviated_name(unit),
+          abbreviated_name: abbr_name,
           theme: unit[:theme],
 
           gender: unit['Gender'],
@@ -525,18 +537,98 @@ module Scrappers
         )
       end
 
+      INT_ID_CAMILLA_ADRIFT = 308
+      INT_ID_CORRIN_M_ADRIFT = 309
+      INT_ID_CORRIN_F_ADRIFT = 310
+
       ABBREVIATED_NAME = {
         INT_ID_ANNIVERSARY_MARTH => '35!Marth',
         INT_ID_D_ELINCIA => 'D!Elincia',
         INT_ID_H_B_IKE => 'H!B!Ike',
         INT_ID_H_B_LYN => 'H!B!Lyn',
 
+        INT_ID_CAMILLA_ADRIFT => 'Ad!Camilla',
+        INT_ID_CORRIN_M_ADRIFT => 'Ad!Corrin(M)',
+        INT_ID_CORRIN_F_ADRIFT => 'Ad!Corrin(F)',
+
         # TODO
-        INT_ID_AZURA_YOUNG => 'Azura (Young)',
+        # INT_ID_AZURA_YOUNG => 'Azura (Young)',
       }.freeze
 
       NAME_ABBREVIATIONS = {
         'Black Knight' => 'BK',
+      }.freeze
+
+      INT_ID_EIRIKA_TOME = 209
+      INT_ID_CHROM_CAV = 225
+      INT_ID_REINHARDT_SWORD = 234
+      INT_ID_OLWEN_GREEN = 235
+      INT_ID_HINOKA_BOW = 240
+      INT_ID_NINO_FLYING = 255
+      INT_ID_OLIVIA_FLYING = 269
+
+      INT_ID_MARTH_FE13 = 136
+      INT_ID_ANNA_FE13 = 527
+      INT_ID_SELENA_FE8 = 596
+      # INT_ID_HILDA_FE16 = 409
+      INT_ID_HILDA_FE4 = 797
+      # INT_ID_ARTHUR_FE14 = 52
+      INT_ID_ARTHUR_FE4 = 795
+
+      INT_ID_CATRIA_SOV = 434
+      INT_ID_PALLA_SOV = 667
+      INT_ID_EST_SOV = 829
+
+      INT_ID_TIKI_A = 95
+      INT_ID_TIKI_A_SU = 146
+      INT_ID_TIKI_A_B = 841
+      INT_ID_TIKI_A_BR = 950
+      INT_IDS_OF_ADULTS = [
+        INT_ID_TIKI_A,
+        INT_ID_TIKI_A_SU,
+        INT_ID_TIKI_A_B,
+        INT_ID_TIKI_A_BR,
+      ].freeze
+
+      INT_ID_AZURA_Y = 312
+      INT_ID_TIKI_Y = 94
+      INT_ID_TIKI_Y_SU = 267
+      INT_ID_TIKI_Y_L = 297
+      INT_ID_TIKI_Y_H = 571
+      INT_ID_TIKI_Y_AS = 874
+      INT_ID_TIKI_Y_AT = 1230
+      INT_ID_TIKI_Y_F = 372
+      INT_IDS_OF_YOUNGS = [
+        INT_ID_AZURA_Y,
+        INT_ID_TIKI_Y,
+        INT_ID_TIKI_Y_SU,
+        INT_ID_TIKI_Y_L,
+        INT_ID_TIKI_Y_H,
+        INT_ID_TIKI_Y_AS,
+        INT_ID_TIKI_Y_AT,
+        INT_ID_TIKI_Y_F,
+      ].freeze
+
+      ABBREVIATED_NAME_SUFFIXES = {
+        INT_ID_EIRIKA_TOME => 'Tome',
+        INT_ID_CHROM_CAV => 'Cav',
+        INT_ID_REINHARDT_SWORD => 'Sword',
+        INT_ID_OLWEN_GREEN => 'Green',
+        INT_ID_HINOKA_BOW => 'Bow',
+        INT_ID_NINO_FLYING => 'Fly',
+        INT_ID_OLIVIA_FLYING => 'Fly',
+
+        INT_ID_MARTH_FE13 => 'FE13',
+        INT_ID_ANNA_FE13 => 'FE13',
+        INT_ID_SELENA_FE8 => 'FE8',
+        # INT_ID_HILDA_FE16 => 'FE16',
+        INT_ID_HILDA_FE4 => 'FE4',
+        # INT_ID_ARTHUR_FE14 => 'FE14',
+        INT_ID_ARTHUR_FE4 => 'FE4',
+
+        INT_ID_CATRIA_SOV => 'SoV',
+        INT_ID_PALLA_SOV => 'SoV',
+        INT_ID_EST_SOV => 'SoV',
       }.freeze
 
       def abbreviated_name(unit)
@@ -549,6 +641,11 @@ module Scrappers
           name = "#{name}(M)" if unit['Gender'].start_with?('M')
           name = "#{name}(F)" if unit['Gender'].start_with?('F')
         end
+
+        name = "#{name}(A)" if INT_IDS_OF_ADULTS.include?(unit[:int_id])
+        name = "#{name}(Y)" if INT_IDS_OF_YOUNGS.include?(unit[:int_id])
+
+        name = "#{name}(#{ABBREVIATED_NAME_SUFFIXES[unit[:int_id]]})" if ABBREVIATED_NAME_SUFFIXES.key?(unit[:int_id])
 
         # seasonals
 
@@ -601,7 +698,7 @@ module Scrappers
           return "Fe!#{name}" if unit['ReleaseDate']&.start_with?('2025')
         end
 
-        # others
+        # traits
 
         return "Ai!#{name}" if unit[:properties].include?('aided')
         return "As!#{name}" if unit[:properties].include?('ascended')
@@ -617,12 +714,10 @@ module Scrappers
         return "L!#{name}" if unit[:properties].include?('legendary')
         return "M!#{name}" if unit[:properties].include?('mythic')
 
-        # return "D!#{name}" if unit[:properties].include?('duo')
-        # return "H!#{name}" if unit[:properties].include?('harmonized')
+        return "D!#{name}" if unit[:properties].include?('duo')
+        return "H!#{name}" if unit[:properties].include?('harmonized')
 
-        # TODO: handle Tiki Young/Adult
-
-        unit[:game8_name] || name
+        name
       end
 
       # B!Eirika & P!Hinoka have same version 5.8 but different max DF
