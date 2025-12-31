@@ -406,6 +406,7 @@ module Scrappers
 
       def unit_book(unit)
         id = unit['IntID'].to_i
+        return 10 if id >= 1318 # Alfonse: Opening Miracle
         return 9 if id >= 1174 # Rune: Source of Wisdom
         return 8 if id >= 1029 # Ratatoskr: Mending Hand
         return 7 if id >= 882 # Seiðr: Goddess of Hope
