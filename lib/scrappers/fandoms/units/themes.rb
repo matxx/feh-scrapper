@@ -28,7 +28,7 @@ module Scrappers
         def fill_units_with_themes
           all_units.each do |unit|
             unit[:int_id] = unit['IntID'].to_i
-            next (unit[:theme] = THEME_NEW_YEAR) if unit[:int_id] == self.class::INT_ID_NY_CORRIN
+            next (unit[:theme] = THEME_NEW_YEAR) if unit[:int_id] == self.class::INT_ID_NY_CORRIN_M
 
             next if !unit[:properties].include?('special') && !unit[:properties].include?('tempest')
 

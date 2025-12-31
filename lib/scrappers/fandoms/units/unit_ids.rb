@@ -15,7 +15,7 @@ module Scrappers
           INT_ID_H_B_LYN,
         ].freeze
 
-        INT_ID_NY_CORRIN = 200
+        INT_ID_NY_CORRIN_M = 200
 
         INT_ID_MARISA = 212
         INT_ID_GEROME = 228

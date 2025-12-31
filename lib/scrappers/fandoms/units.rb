@@ -15,10 +15,12 @@ require 'scrappers/fandoms/units/unit_ids'
 module Scrappers
   module Fandoms
     module Units
+      # must be included first
+      include Scrappers::Fandoms::Units::UnitIds
+
       include Scrappers::Fandoms::Units::AbbreviatedNames
       include Scrappers::Fandoms::Units::Scores
       include Scrappers::Fandoms::Units::Themes
-      include Scrappers::Fandoms::Units::UnitIds
 
       attr_reader(
         :all_units,
