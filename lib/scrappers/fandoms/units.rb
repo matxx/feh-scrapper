@@ -333,6 +333,12 @@ module Scrappers
           errors[:units_with_same_abbr_name] << all_units_by_abbr_name[abbr_name]
         end
 
+        gender = sanitize_gender(unit['Gender'])
+        constants[:units_genders] << gender
+
+        games = (unit['Origin'] || '').split(',')
+        constants[:games] += games
+
         {
           id: unit['TagID'],
           name: sanitize_name(unit['Name']),
@@ -341,10 +347,10 @@ module Scrappers
           abbreviated_name: abbr_name,
           theme: unit[:theme],
 
-          gender: unit['Gender'],
+          gender:,
           move_type: unit['MoveType'],
           weapon_type: unit['WeaponType'],
-          games: (unit['Origin'] || '').split(','),
+          games:,
 
           # game_sort: unit['GameSort'],
           # char_sort: unit['CharSort'],
@@ -519,6 +525,17 @@ module Scrappers
           2
         else
           1
+        end
+      end
+
+      def sanitize_gender(gender)
+        case gender
+        when 'Male'
+          'M'
+        when 'Female'
+          'F'
+        else
+          gender
         end
       end
     end

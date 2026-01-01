@@ -163,7 +163,17 @@ module Scrappers
     end
 
     def export_constants
-      constants.transform_values! { |v| v.is_a?(Array) ? v.sort : v }
+      constants.transform_values! do |v|
+        case v
+        when Set
+          v.to_a.sort
+        when Array
+          v.sort
+        else
+          v
+        end
+      end
+
       export_files(
         'constants.json' => constants,
       )
@@ -177,6 +187,8 @@ module Scrappers
         skills_max_tier: 0,
         skills_max_sp: 0,
         skills_max_cd: 0,
+        units_genders: Set.new,
+        games: Set.new,
       }
     end
 
