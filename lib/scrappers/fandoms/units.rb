@@ -35,6 +35,10 @@ module Scrappers
         @all_units_by_wikiname = nil
         @all_units_grouped_by_pagename = nil
         @all_units_by_pagename = nil
+      end
+
+      def reset_cached_units!
+        @relevant_units = nil
         @all_units_by_abbr_name = {}
       end
 
@@ -150,8 +154,6 @@ module Scrappers
           .group_by { |x| x['Page'] }
           .select { |_, v| v.size > 1 }
         errors[:units_with_same_pagename] = units_with_same_pagename.keys if units_with_same_pagename.any?
-
-        @all_units_by_abbr_name = {}
 
         nil
       end

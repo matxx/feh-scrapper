@@ -181,11 +181,15 @@ module Scrappers
         # do not export captain skills
         return false if skill['Scategory'] == CAPTAIN
         # do not export enemy only skills
+        return false if skill['Properties']&.include?('enemy_only')
+        # do not export enemy only skills (part 2)
+        # some skills from ennemies OCs (ex: "Bitter Winter") can appear
+        # as long as the OC is not yet released as playable unit
         return false if skill[:owner_details]&.all? { |desc| desc['WikiName'].include?('ENEMY') }
+        # do not export Kiran's weapons
+        return false if skill[:owner_details]&.all? { |desc| desc['WikiName'].include?('Kiran') }
         # only export refines with effect
         return false unless [nil, '', 'skill1', 'skill2'].include?(skill['RefinePath'])
-        # do not export "Røkkr Sieges" skills
-        return false if skill[:owner_details].nil? && skill[:base_id].nil? && skill['Required'].blank?
 
         true
       end

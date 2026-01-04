@@ -197,8 +197,9 @@ module Scrappers
         games: Set.new,
       }
 
-      @all_units_by_abbr_name = {}
-      @relevant_units = nil
+      reset_cached_seals!
+      reset_cached_skills!
+      reset_cached_units!
     end
 
     def empty_errors

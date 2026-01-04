@@ -19,6 +19,10 @@ module Scrappers
         @all_seals_by_name = nil
       end
 
+      def reset_cached_seals!
+        @relevant_seals = nil
+      end
+
       # https://feheroes.fandom.com/wiki/Special:CargoTables/SacredSealCosts
       def scrap_sacred_seal_costs
         return if all_sacred_seal_costs
@@ -112,8 +116,19 @@ module Scrappers
         end.compact
       end
 
+      def relevant_seal?(seal)
+        # do not export enemy only seals
+        return false if seal['Properties']&.include?('enemy_only')
+
+        true
+      end
+
+      def relevant_seals
+        @relevant_seals ||= all_seals.select { |seal| relevant_seal?(seal) }
+      end
+
       def seals_as_json
-        all_seals.map { |seal| seal_as_json(seal) }
+        relevant_seals.map { |seal| seal_as_json(seal) }
       end
 
       def seal_as_json(seal)

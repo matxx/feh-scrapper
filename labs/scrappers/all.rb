@@ -71,7 +71,7 @@ xs['350'].reject { |s| s['RefinePath'].present? }.count
 # => 0
 # all 350 SP weapons are refines
 # (only 1 skill other than refine has 350 SP : Ostian Counter)
-ys = a.fandom.all_skills.select { |s| s['Scategory'] == 'weapon' && s['RefinePath'].present? }.group_by { |s|s['SP'] }
+ys = a.fandom.all_skills.select { |s| s['Scategory'] == 'weapon' && s['RefinePath'].present? }.group_by { |s| s['SP'] }
 ys.keys
 # => ["350", "400"]
 # all refines are either 350 or 400 SP
