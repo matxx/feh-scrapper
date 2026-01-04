@@ -35,8 +35,7 @@ module Scrappers
         @all_units_by_wikiname = nil
         @all_units_grouped_by_pagename = nil
         @all_units_by_pagename = nil
-        @all_units_by_abbr_name = nil
-        @relevant_units = nil
+        @all_units_by_abbr_name = {}
       end
 
       UNIT_KIND_AIDED = 'AIDED'

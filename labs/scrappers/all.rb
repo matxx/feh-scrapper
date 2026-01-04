@@ -25,7 +25,9 @@ a.handle_everything
 
 # after code update
 
-Dir['lib/scrappers/**/*.rb'].each { |file| load(file) }
+Dir['lib/scrappers/**/*.rb'].each do |file|
+  load(file) unless file == 'lib/scrappers/fandoms/units/abbreviated_names.rb'
+end
 # a = Scrappers::All.new
 a.reset!
 a.handle_everything

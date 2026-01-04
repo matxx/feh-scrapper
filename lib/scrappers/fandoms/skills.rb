@@ -4,6 +4,8 @@ module Scrappers
   module Fandoms
     module Skills
       WEAPON = 'weapon'
+      SPECIAL = 'special'
+      PASSIVE_X = 'passivex'
       SACRED_SEAL = 'sacredseal'
       CAPTAIN = 'captain'
 
@@ -160,7 +162,7 @@ module Scrappers
         all_skills.each do |skill|
           next if skill['Required'].present?
 
-          rec_fill_tier(skill, 1)
+          rec_fill_skill_tier(skill, 1)
         end
         # rubocop:enable Style/CombinableLoops
 
@@ -200,12 +202,12 @@ module Scrappers
 
       private
 
-      def rec_fill_tier(skill, tier)
+      def rec_fill_skill_tier(skill, tier)
         skill[:tier] = tier
         return if skill[:upgrades_wikinames].nil?
 
         skill[:upgrades_wikinames].each do |skill_wikiname|
-          rec_fill_tier(all_skills_by_wikiname[skill_wikiname], tier + 1)
+          rec_fill_skill_tier(all_skills_by_wikiname[skill_wikiname], tier + 1)
         end
       end
 
@@ -215,11 +217,11 @@ module Scrappers
 
       def skill_as_json(skill)
         tier = skill[:tier]
-        sp = skill['SP'].to_i
-        cd = skill['Cooldown'] == '-1' ? nil : skill['Cooldown'].to_i
+        sp = skill['SP'].to_i unless skill['Scategory'] == PASSIVE_X
+        cd = skill['Cooldown'] == '-1' ? nil : skill['Cooldown'].to_i if skill['Scategory'] == SPECIAL
 
         constants[:skills_max_tier] = tier if tier && constants[:skills_max_tier] < tier
-        constants[:skills_max_sp] = sp if constants[:skills_max_sp] < sp
+        constants[:skills_max_sp] = sp if sp && constants[:skills_max_sp] < sp
         constants[:skills_max_cd] = cd if cd && constants[:skills_max_cd] < cd
 
         first_owner_detail =

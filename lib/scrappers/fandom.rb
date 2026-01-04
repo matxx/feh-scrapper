@@ -12,7 +12,7 @@ require 'scrappers/fandoms/images'
 require 'scrappers/fandoms/legendary_heroes'
 require 'scrappers/fandoms/mythic_heroes'
 require 'scrappers/fandoms/resplendent_heroes'
-require 'scrappers/fandoms/sacred_seal_costs'
+require 'scrappers/fandoms/seals'
 require 'scrappers/fandoms/skills'
 require 'scrappers/fandoms/skills_weapons'
 require 'scrappers/fandoms/summon_pool'
@@ -40,7 +40,7 @@ module Scrappers
     include Scrappers::Fandoms::LegendaryHeroes
     include Scrappers::Fandoms::MythicHeroes
     include Scrappers::Fandoms::ResplendentHeroes
-    include Scrappers::Fandoms::SacredSealCosts
+    include Scrappers::Fandoms::Seals
     include Scrappers::Fandoms::Skills
     include Scrappers::Fandoms::SkillsWeapons
     include Scrappers::Fandoms::SummonPool
@@ -120,6 +120,8 @@ module Scrappers
       log_and_launch(:fill_skills_with_availabilities)
       log_and_launch(:fill_skills_with_prefodder)
 
+      log_and_launch(:fill_seals_with_genealogy)
+
       log_and_launch(:fill_units_with_duo_duel_scores)
       log_and_launch(:fill_units_with_chosen_duel_scores)
       log_and_launch(:fill_units_with_legendary_duel_scores)
@@ -187,9 +189,16 @@ module Scrappers
         skills_max_tier: 0,
         skills_max_sp: 0,
         skills_max_cd: 0,
+
+        seals_max_tier: 0,
+        seals_max_sp: 0,
+
         units_genders: Set.new,
         games: Set.new,
       }
+
+      @all_units_by_abbr_name = {}
+      @relevant_units = nil
     end
 
     def empty_errors
