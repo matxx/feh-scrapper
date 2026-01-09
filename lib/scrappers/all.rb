@@ -68,7 +68,7 @@ module Scrappers
 
       log_and_launch(:export_game8_unit_ratings)
       log_and_launch(:export_game8_skill_ratings)
-      log_and_launch(:export_game8_seal_ratings)
+      # log_and_launch(:export_game8_seal_ratings)
 
       fandom.log_and_launch(:export_everything)
 
@@ -240,7 +240,7 @@ module Scrappers
 
     def export_game8_skill_ratings
       export_files(
-        'skills-ratings-game8.json' => -> { exclude_game8_keys(all_skills) },
+        'skills-ratings-game8.json' => -> { exclude_game8_keys(all_skills + all_seals) },
       )
     end
 

@@ -42,8 +42,13 @@ module Scrappers
       def compute_all_seals
         return if all_seals
 
-        @all_seals = seals_from_skills
-        @all_seals += seals_from_costs_table
+        @all_seals = seals_from_skills # seals not available as skills
+        @all_seals += seals_from_costs_table # seals available as skills
+
+        @all_seals.each do |seal|
+          # make sure that seals have a different ID than skills
+          seal['TagID'] = "S#{seal['TagID']}"
+        end
 
         @all_seals_by_wikiname = all_seals.index_by { |x| x['WikiName'] }
         @all_seals_grouped_by_name = all_seals.group_by { |x| x['Name'] }
@@ -97,7 +102,10 @@ module Scrappers
         return if seal[:upgrades_wikinames].nil?
 
         seal[:upgrades_wikinames].each do |seal_wikiname|
-          rec_fill_seal_tier(all_seals_by_wikiname[seal_wikiname], tier + 1)
+          upgrade = all_seals_by_wikiname[seal_wikiname]
+          next (errors[:seals_upgrades_not_found] << [seal['Name'], tier, seal_wikiname]) if upgrade.nil?
+
+          rec_fill_seal_tier(upgrade, tier + 1)
         end
       end
 
@@ -135,13 +143,17 @@ module Scrappers
         tier = seal[:tier]
         sp = seal['SP'].to_i
 
-        constants[:seals_max_tier] = tier if tier && constants[:seals_max_tier] < tier
-        constants[:seals_max_sp] = sp if constants[:seals_max_sp] < sp
+        # constants[:seals_max_tier] = tier if tier && constants[:seals_max_tier] < tier
+        # constants[:seals_max_sp] = sp if constants[:seals_max_sp] < sp
 
         # MONKEY PATCH: fandom "CanUseWeapon" are blank when they should not...
         weapons_restrictions = sanitize_weapon_restriction(seal, :seal)
         if weapons_restrictions == self.class::INVALID_WEAPONS_RESTRICTIONS && s3
-          weapons_restrictions = s3.all_seals_by_id[seal['TagID']]&.dig('restrictions', 'weapons')
+          weapons_restrictions =
+            (
+              s3.all_seals_by_id[seal['TagID']] ||
+              s3.all_seals_by_id[seal['TagID'].gsub(/\AS/, '')]
+            )&.dig('restrictions', 'weapons')
         end
 
         res = {
@@ -150,7 +162,7 @@ module Scrappers
           name: seal['Name'],
           group_name: seal['GroupName'],
           image_url: seal[:image_url],
-          sp: seal['SP'].to_i,
+          sp:,
           tier:,
 
           restrictions: {

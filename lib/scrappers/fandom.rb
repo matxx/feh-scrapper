@@ -146,7 +146,7 @@ module Scrappers
       log_and_launch(:export_units)
       log_and_launch(:export_skills)
       log_and_launch(:export_skills_units)
-      log_and_launch(:export_seals)
+      # log_and_launch(:export_seals)
 
       # must be exported after skills
       log_and_launch(:export_constants)
@@ -190,8 +190,8 @@ module Scrappers
         skills_max_sp: 0,
         skills_max_cd: 0,
 
-        seals_max_tier: 0,
-        seals_max_sp: 0,
+        # seals_max_tier: 0,
+        # seals_max_sp: 0,
 
         units_genders: Set.new,
         games: Set.new,

@@ -216,7 +216,7 @@ module Scrappers
       end
 
       def skills_as_json
-        relevant_skills.map { |skill| skill_as_json(skill) }
+        (relevant_skills + relevant_seals).map { |skill| skill_as_json(skill) }
       end
 
       def skill_as_json(skill)
@@ -252,7 +252,15 @@ module Scrappers
         # MONKEY PATCH: fandom "CanUseWeapon" are blank when they should not...
         weapons_restrictions = sanitize_weapon_restriction(skill)
         if weapons_restrictions == self.class::INVALID_WEAPONS_RESTRICTIONS && s3
-          weapons_restrictions = s3.all_skills_by_id[skill['TagID']]&.dig('restrictions', 'weapons')
+          weapons_restrictions =
+            if skill['Scategory'] == self.class::SACRED_SEAL
+              (
+                s3.all_seals_by_id[skill['TagID']] ||
+                s3.all_seals_by_id[skill['TagID'].gsub(/\AS/, '')]
+              )&.dig('restrictions', 'weapons')
+            else
+              s3.all_skills_by_id[skill['TagID']]&.dig('restrictions', 'weapons')
+            end
         end
 
         res = {
@@ -290,7 +298,12 @@ module Scrappers
 
         if skill[:upgrades_wikinames]
           res[:upgrade_ids] = skill[:upgrades_wikinames].map do |name|
-            upgrade = all_skills_by_wikiname[name]
+            upgrade =
+              if skill['Scategory'] == self.class::SACRED_SEAL
+                all_seals_by_wikiname[name]
+              else
+                all_skills_by_wikiname[name]
+              end
             next (errors[:skills_upgrades_without_skill] << [skill['WikiName'], name]) if upgrade.nil?
 
             upgrade['TagID']
@@ -298,7 +311,12 @@ module Scrappers
         end
         if skill[:downgrades_wikinames]
           res[:downgrade_ids] = skill[:downgrades_wikinames].map do |name|
-            downgrade = all_skills_by_wikiname[name]
+            downgrade =
+              if skill['Scategory'] == self.class::SACRED_SEAL
+                all_seals_by_wikiname[name]
+              else
+                all_skills_by_wikiname[name]
+              end
             next (errors[:skills_downgrades_without_skill] << [skill['WikiName'], name]) if downgrade.nil?
 
             downgrade['TagID']
@@ -339,7 +357,7 @@ module Scrappers
       end
 
       def skill_descriptions_as_json
-        relevant_skills.map { |skill| skill_description_as_json(skill) }
+        (relevant_skills + relevant_seals).map { |skill| skill_description_as_json(skill) }
       end
 
       def skill_description_as_json(skill)
