@@ -289,6 +289,7 @@ module Scrappers
       def export_units
         export_files(
           'units.json' => :units_as_json,
+          'units-arts.json' => :units_arts_as_json,
           'units-availabilities.json' => :unit_availabilities_as_json,
           'units-stats.json' => :unit_stats_as_json,
           'units-stats-ranks.json' => :unit_stats_ranks_as_json,
@@ -395,7 +396,6 @@ module Scrappers
         }.merge(
           unit.slice(
             :game8_id,
-            :game8_name,
 
             :image_url_for_portrait,
             :image_url_for_icon_chosen,
@@ -424,6 +424,32 @@ module Scrappers
         return 2 if id >= 191 # Fjorm: Princess of Ice
 
         1
+      end
+
+      def units_arts_as_json
+        relevant_units.map { |unit| unit_art_as_json(unit) }
+      end
+
+      def unit_art_as_json(unit)
+        {
+          id: unit['TagID'],
+
+          art_a: unit[:image_url_for_art_a],
+          art_b: unit[:image_url_for_art_b],
+          art_c: unit[:image_url_for_art_c],
+          art_d: unit[:image_url_for_art_d],
+        }.merge(
+          if unit[:properties].include?('resplendent')
+            {
+              art_resp_a: unit[:image_url_for_art_resp_a],
+              art_resp_b: unit[:image_url_for_art_resp_b],
+              art_resp_c: unit[:image_url_for_art_resp_c],
+              art_resp_d: unit[:image_url_for_art_resp_d],
+            }
+          else
+            {}
+          end,
+        )
       end
 
       def unit_availabilities_as_json

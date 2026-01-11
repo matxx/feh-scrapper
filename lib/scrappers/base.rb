@@ -13,6 +13,10 @@ module Scrappers
       send(method)
     end
 
+    def cleanup_exports
+      delete_files_in('exports')
+    end
+
     def export_files(data)
       data.each do |filename, method|
         hash =

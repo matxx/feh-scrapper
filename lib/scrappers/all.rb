@@ -66,6 +66,8 @@ module Scrappers
       log_and_launch(:fill_fandom_skills_with_game8_data)
       log_and_launch(:fill_fandom_seals_with_game8_data)
 
+      log_and_launch(:cleanup_exports)
+
       log_and_launch(:export_game8_unit_ratings)
       log_and_launch(:export_game8_skill_ratings)
       # log_and_launch(:export_game8_seal_ratings)
