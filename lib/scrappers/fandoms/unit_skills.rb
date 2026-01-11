@@ -41,7 +41,7 @@ module Scrappers
 
       # exceptions are dealt with later
       MAX_INHERITABLE_SP_COST = {
-        SLOT_WEAPON => 350, # arcane weapons
+        SLOT_WEAPON => 350, # refined arcane weapons
         SLOT_ASSIST => 400,
         SLOT_SPECIAL => 500,
         SLOT_A => 300,
@@ -106,7 +106,6 @@ module Scrappers
 
           is_dragon = unit['WeaponType'].include?('Breath')
           is_melee = self.class::ALL_MELEE.include?(unit['WeaponType'])
-          is_staff = unit['WeaponType'] == self.class::WEAPON_C_ST
           has_dc_seal = is_dragon || is_melee
 
           errors[:units_without_weapon] << unit['WikiName'] if unit[:original_skills_max_sp_by_slot][SLOT_WEAPON].nil?
@@ -117,17 +116,12 @@ module Scrappers
             # (deals with PRF weapons & Chrom PRF assists skills which are the only "500 SP" assist skills)
             original_skill_max_sp = unit[:original_skills_max_sp_by_slot][slot] || 0
 
-            # rubocop:disable Lint/DuplicateBranch
             max_inheritable_sp_cost =
-              if slot == SLOT_B && is_staff
-                # only staff units do not have access to a 400 SP B-skill
-                300
-              elsif slot == SLOT_S && has_dc_seal
+              if slot == SLOT_S && has_dc_seal
                 300
               else
                 MAX_INHERITABLE_SP_COST[slot]
               end
-            # rubocop:enable Lint/DuplicateBranch
 
             unit[:skills_max_sp_by_slot][slot] = [original_skill_max_sp, max_inheritable_sp_cost].max
           end
