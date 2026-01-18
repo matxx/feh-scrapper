@@ -59,7 +59,7 @@ module Scrappers
           'WikiName',
           'TagID',
           'Scategory',
-          # 'UseRange',
+          'UseRange',
           'Icon',
           'RefinePath', # atk|def|res|spd|skill1|skill2|skill1atk|skill2atk
           'Description',
@@ -71,7 +71,7 @@ module Scrappers
           'SP',
           'CanUseMove',
           'CanUseWeapon',
-          # 'Might',
+          'Might',
           # 'StatModifiers',
           'Cooldown',
           'WeaponEffectiveness',
@@ -255,8 +255,8 @@ module Scrappers
           weapons_restrictions =
             if skill['Scategory'] == self.class::SACRED_SEAL
               (
-                s3.all_seals_by_id[skill['TagID']] ||
-                s3.all_seals_by_id[skill['TagID'].gsub(/\AS/, '')]
+                s3.all_skills_by_id[skill['TagID']] ||
+                s3.all_skills_by_id[skill['TagID'].gsub(/\AS/, '')]
               )&.dig('restrictions', 'weapons')
             else
               s3.all_skills_by_id[skill['TagID']]&.dig('restrictions', 'weapons')
@@ -278,6 +278,8 @@ module Scrappers
           is_arcane: true_or_nil(skill['Properties']&.include?('arcane')),
           sp:,
           tier:,
+          range: skill['UseRange'].presence,
+          might: skill['Might'].presence,
 
           has_refine: true_or_nil(skill[:refine_ids].present?),
           refines_max_sp: skill[:refine_ids]&.map { |id| all_skills_by_tag_id[id]['SP'].to_i }&.max,

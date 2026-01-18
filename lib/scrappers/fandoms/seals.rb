@@ -151,8 +151,8 @@ module Scrappers
         if weapons_restrictions == self.class::INVALID_WEAPONS_RESTRICTIONS && s3
           weapons_restrictions =
             (
-              s3.all_seals_by_id[seal['TagID']] ||
-              s3.all_seals_by_id[seal['TagID'].gsub(/\AS/, '')]
+              s3.all_skills_by_id[seal['TagID']] ||
+              s3.all_skills_by_id[seal['TagID'].gsub(/\AS/, '')]
             )&.dig('restrictions', 'weapons')
         end
 

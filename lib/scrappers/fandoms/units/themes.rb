@@ -6,6 +6,7 @@ module Scrappers
       module Themes
         THEME_NEW_YEAR = :new_year
         THEME_DESERT = :desert
+        THEME_ILIA = :ilia
         THEME_DOD = :dod # day of devotion / valentines
         THEME_SPRING = :spring
         THEME_KIDS = :kids
@@ -48,8 +49,10 @@ module Scrappers
               # recurring
               if (month == 12 && day >= 25) || (month == 1 && day <= 5)
                 THEME_NEW_YEAR
-              elsif month == 1 && year >= 2021 && day > 5
+              elsif month == 1 && day > 5 && year.between?(2021, 2025)
                 THEME_DESERT
+              elsif month == 1 && day > 5 && year == 2026
+                THEME_ILIA
               elsif month == 2
                 THEME_DOD
               elsif month == 3
@@ -79,11 +82,11 @@ module Scrappers
                 THEME_HOSTILE_SPRING
               elsif month == 4 && year == 2019
                 THEME_PICNIC
-              elsif month == 8 && [2020, 2021].include?(year)
+              elsif month == 8 && year.between?(2020, 2021)
                 THEME_PIRATES
               elsif month == 9 && year == 2021
                 THEME_S12
-              elsif month == 9 && [2022, 2023, 2024, 2025].include?(year)
+              elsif month == 9 && year.between?(2022, 2025)
                 THEME_NATIONS
               end
           end

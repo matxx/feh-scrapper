@@ -116,6 +116,7 @@ module Scrappers
       'Yearling (Armored)' => 'Yearling (Arm.)',
       'Full Light ＆ Dark' => 'Full Light & Dark',
       'Blood ＆ Thunder' => 'Blood & Thunder',
+      'S/D Crux：Ploy' => 'S/D Crux: Ploy',
       'S/R Crux：Ploy' => 'S/R Crux: Ploy',
     }.freeze
 

@@ -31,7 +31,7 @@ module Scrappers
     end
 
     def fetch_everything
-      log_and_launch(:fetch_seals)
+      # log_and_launch(:fetch_seals)
       log_and_launch(:fetch_skills)
 
       nil

@@ -100,6 +100,8 @@ module Scrappers
               return "NY!#{name}"
             when self.class::THEME_DESERT
               return "De!#{name}"
+            when self.class::THEME_ILIA
+              return "I!#{name}"
             when self.class::THEME_DOD
               return "V!#{name}"
             when self.class::THEME_SPRING
