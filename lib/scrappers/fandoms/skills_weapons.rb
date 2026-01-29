@@ -233,7 +233,7 @@ module Scrappers
       end
 
       def sanitize_weapon_type(skill)
-        return unless skill['Scategory'] == self.class::WEAPON
+        return unless skill['Scategory'] == self.class::SKILL_CAT_WEAPON
 
         can_use = skill['CanUseWeapon'].split(/,[[:space:]]*/)
         can_use.uniq!

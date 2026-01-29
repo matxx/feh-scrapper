@@ -193,7 +193,7 @@ module Scrappers
 
           html_path = page_html_key(kind, item['game8_id'])
           unless file_exist?(html_path)
-            errors[:missing_page_file] << html_path
+            errors[:page_not_released_yet] << html_path
             logger.error "-- skipping extract because file does not exist : #{suffix} (#{html_path})"
             next
           end

@@ -3,11 +3,29 @@
 module Scrappers
   module Fandoms
     module Skills
-      WEAPON = 'weapon'
-      SPECIAL = 'special'
-      PASSIVE_X = 'passivex'
-      SACRED_SEAL = 'sacredseal'
-      CAPTAIN = 'captain'
+      # categories
+      ## from fandom
+      SKILL_CAT_WEAPON = 'weapon'
+      SKILL_CAT_SPECIAL = 'special'
+      SKILL_CAT_PASSIVE_X = 'passivex'
+      SKILL_CAT_SACRED_SEAL = 'sacredseal'
+      SKILL_CAT_CAPTAIN = 'captain'
+      ## custom
+      SKILL_CAT_DUO = 'duo'
+      SKILL_CAT_HARMONIZED = 'harmonized'
+      SKILL_CAT_EMBLEM = 'emblem'
+
+      # move types
+      MOVE_I = 'Infantry'
+      MOVE_A = 'Armored'
+      MOVE_C = 'Cavalry'
+      MOVE_F = 'Flying'
+      ALL_MOVES = [
+        MOVE_I,
+        MOVE_A,
+        MOVE_C,
+        MOVE_F,
+      ].freeze
 
       # as long as "all_skills_by_name" is only used for seals
       # there is no problem with those
@@ -81,7 +99,7 @@ module Scrappers
         skills = retrieve_all_pages('Skills', fields)
         # when a seal exists as a skill, it is not listed in the "Skills" table
         # it only appears in "SacredSealCosts" table
-        seals, others = skills.partition { |s| s['Scategory'] == self.class::SACRED_SEAL }
+        seals, others = skills.partition { |s| s['Scategory'] == self.class::SKILL_CAT_SACRED_SEAL }
         @seals_from_skills = seals
         @all_skills = others
 
@@ -113,7 +131,7 @@ module Scrappers
         @all_skills_by_tag_id = all_skills.index_by { |x| x['TagID'] }
         skills_with_same_tag_id =
           all_skills
-          .reject { |x| x['Scategory'] == CAPTAIN }
+          .reject { |x| x['Scategory'] == SKILL_CAT_CAPTAIN }
           .group_by { |x| x['TagID'] }
           .select { |_, v| v.size > 1 }
         errors[:skills_with_same_tag_id] = skills_with_same_tag_id.keys if skills_with_same_tag_id.any?
@@ -179,7 +197,7 @@ module Scrappers
 
       def relevant_skill?(skill)
         # do not export captain skills
-        return false if skill['Scategory'] == CAPTAIN
+        return false if skill['Scategory'] == SKILL_CAT_CAPTAIN
         # do not export enemy only skills
         return false if skill['Properties']&.include?('enemy_only')
         # do not export enemy only skills (part 2)
@@ -216,13 +234,59 @@ module Scrappers
       end
 
       def skills_as_json
-        (relevant_skills + relevant_seals).map { |skill| skill_as_json(skill) }
+        (relevant_skills + relevant_seals).map { |skill| skill_as_json(skill) } +
+          all_duo_heroes.map { |hero| duo_skill_as_json(hero) }.compact +
+          all_harmonized_heroes.map { |hero| harmonized_skill_as_json(hero) }.compact +
+          all_emblem_heroes.map { |hero| emblem_skill_as_json(hero) }.compact
+      end
+
+      def duo_skill_as_json(hero)
+        owner = all_units_by_pagename[hero['Page']]
+        return (errors[:duo_skill_without_owner] << hero['Page']) if owner.nil?
+
+        custom_skill_as_json(SKILL_CAT_DUO, owner)
+      end
+
+      def harmonized_skill_as_json(hero)
+        owner = all_units_by_pagename[hero['Page']]
+        return (errors[:harmonized_skill_without_owner] << hero['Page']) if owner.nil?
+
+        custom_skill_as_json(SKILL_CAT_HARMONIZED, owner)
+      end
+
+      def emblem_skill_as_json(hero)
+        owner = all_units_by_pagename[hero['Page']]
+        return (errors[:emblem_skill_without_owner] << hero['Page']) if owner.nil?
+
+        custom_skill_as_json(SKILL_CAT_EMBLEM, owner)
+      end
+
+      def custom_skill_as_json(category, owner)
+        owner_page = sanitize_name(owner['Page'])
+        {
+          id: custom_id(category, owner),
+          game8_id: owner[:game8_id],
+          name: owner_page,
+          group_name: owner_page,
+          category:,
+
+          is_prf: true,
+          tier: 1,
+
+          addition_date: owner['AdditionDate'],
+          release_date:  owner['ReleaseDate'],
+          version:       owner[:version],
+        }
+      end
+
+      def custom_id(prefix, page)
+        "#{prefix.upcase}_#{page['TagID']}"
       end
 
       def skill_as_json(skill)
         tier = skill[:tier]
-        sp = skill['SP'].to_i unless skill['Scategory'] == PASSIVE_X
-        cd = skill['Cooldown'] == '-1' ? nil : skill['Cooldown'].to_i if skill['Scategory'] == SPECIAL
+        sp = skill['SP'].to_i unless skill['Scategory'] == SKILL_CAT_PASSIVE_X
+        cd = skill['Cooldown'] == '-1' ? nil : skill['Cooldown'].to_i if skill['Scategory'] == SKILL_CAT_SPECIAL
 
         constants[:skills_max_tier] = tier if tier && constants[:skills_max_tier] < tier
         constants[:skills_max_sp] = sp if sp && constants[:skills_max_sp] < sp
@@ -253,7 +317,7 @@ module Scrappers
         weapons_restrictions = sanitize_weapon_restriction(skill)
         if weapons_restrictions == self.class::INVALID_WEAPONS_RESTRICTIONS && s3
           weapons_restrictions =
-            if skill['Scategory'] == self.class::SACRED_SEAL
+            if skill['Scategory'] == self.class::SKILL_CAT_SACRED_SEAL
               (
                 s3.all_skills_by_id[skill['TagID']] ||
                 s3.all_skills_by_id[skill['TagID'].gsub(/\AS/, '')]
@@ -263,23 +327,31 @@ module Scrappers
             end
         end
 
+        is_prf = skill['Exclusive'] == '1'
+
+        errors[:missing_refine_image] << name if skill[:base_id].present? && skill[:image_url].blank?
+
+        has_name_of_unit = skill['WikiName'].include?('weapon')
+        group_name = sanitize_name(skill['GroupName'])
+        group_name = "#{name} (weapon)" if has_name_of_unit
+
         res = {
           id: skill['TagID'],
           base_id: skill[:base_id],
           game8_id: skill[:game8_id],
           name:,
-          group_name: sanitize_name(skill['GroupName']),
+          group_name:,
           category: skill['Scategory'],
           weapon_type: sanitize_weapon_type(skill),
 
           image_url: skill[:image_url],
 
-          is_prf: true_or_nil(skill['Exclusive'] == '1'),
+          is_prf: true_or_nil(is_prf),
           is_arcane: true_or_nil(skill['Properties']&.include?('arcane')),
           sp:,
           tier:,
-          range: skill['UseRange'].presence,
-          might: skill['Might'].presence,
+          range: skill['UseRange'].presence&.to_i,
+          might: skill['Might'].presence&.to_i,
 
           has_refine: true_or_nil(skill[:refine_ids].present?),
           refines_max_sp: skill[:refine_ids]&.map { |id| all_skills_by_tag_id[id]['SP'].to_i }&.max,
@@ -288,10 +360,16 @@ module Scrappers
           cd:,
           eff: skill['WeaponEffectiveness'].presence&.split(','),
 
-          restrictions: {
-            moves: sanitize_move_restriction(skill),
-            weapons: weapons_restrictions,
-          },
+          restrictions: (
+            if is_prf
+              nil
+            else
+              {
+                moves: sanitize_move_restriction(skill),
+                weapons: weapons_restrictions,
+              }
+            end
+          ),
 
           addition_date: first_owner&.dig('AdditionDate'),
           release_date:  first_owner&.dig('ReleaseDate'),
@@ -301,7 +379,7 @@ module Scrappers
         if skill[:upgrades_wikinames]
           res[:upgrade_ids] = skill[:upgrades_wikinames].map do |name|
             upgrade =
-              if skill['Scategory'] == self.class::SACRED_SEAL
+              if skill['Scategory'] == self.class::SKILL_CAT_SACRED_SEAL
                 all_seals_by_wikiname[name]
               else
                 all_skills_by_wikiname[name]
@@ -314,7 +392,7 @@ module Scrappers
         if skill[:downgrades_wikinames]
           res[:downgrade_ids] = skill[:downgrades_wikinames].map do |name|
             downgrade =
-              if skill['Scategory'] == self.class::SACRED_SEAL
+              if skill['Scategory'] == self.class::SKILL_CAT_SACRED_SEAL
                 all_seals_by_wikiname[name]
               else
                 all_skills_by_wikiname[name]
@@ -327,17 +405,6 @@ module Scrappers
 
         res.compact
       end
-
-      MOVE_I = 'Infantry'
-      MOVE_A = 'Armored'
-      MOVE_C = 'Cavalry'
-      MOVE_F = 'Flying'
-      ALL_MOVES = [
-        MOVE_I,
-        MOVE_A,
-        MOVE_C,
-        MOVE_F,
-      ].freeze
 
       def sanitize_move_restriction(skill, prefix = :skill)
         can_use = skill['CanUseMove'].split(/,[[:space:]]*/)
@@ -359,14 +426,88 @@ module Scrappers
       end
 
       def skill_descriptions_as_json
-        (relevant_skills + relevant_seals).map { |skill| skill_description_as_json(skill) }
+        (relevant_skills + relevant_seals).map { |skill| skill_description_as_json(skill) }.compact +
+          all_duo_heroes.map { |hero| duo_skill_desc_as_json(hero) }.compact +
+          all_harmonized_heroes.map { |hero| harmonized_skill_desc_as_json(hero) }.compact +
+          all_emblem_heroes.map { |hero| emblem_skill_desc_as_json(hero) }.compact
       end
 
       def skill_description_as_json(skill)
+        full = sanitize_description(skill['Description'])
+        return if full.nil?
+
+        parts = full.split('<br><br>【')
+        base = parts[0].presence
+        base_keywords = parts[1..].map { |l| "【#{l}" }.presence
+
+        if (upgrade = all_weapon_upgrades_by_wikiname[skill['WikiName']])
+          base_desc = sanitize_description(upgrade['BaseDesc'])
+          base_parts = base_desc.split('<br><br>【')
+          base = base_parts[0].presence
+          base_keywords = base_parts[1..].map { |l| "【#{l}" }.presence
+
+          upgrade_d = sanitize_description(upgrade['AddedDesc'])
+          upgrade_parts = upgrade_d.split('<br><br>【')
+          upgrade_desc = upgrade_parts[0].presence
+          upgrade_desc_keywords = upgrade_parts[1..].map { |l| "【#{l}" }.presence
+        end
+
+        constants[:keywords] += (base_keywords || []) + (upgrade_desc_keywords || [])
+
         {
           id: skill['TagID'],
-          description: sanitize_description(skill['Description']),
-        }
+          full:,
+          base:,
+          base_keywords:,
+          upgrade: upgrade_desc,
+          upgrade_keywords: upgrade_desc_keywords,
+        }.compact
+      end
+
+      def duo_skill_desc_as_json(hero)
+        owner = all_units_by_pagename[hero['Page']]
+        return (errors[:duo_skill_without_owner_bis] << hero['Page']) if owner.nil?
+
+        custom_skill_desc_as_json(
+          custom_id(SKILL_CAT_DUO, owner),
+          hero['DuoSkill'],
+        )
+      end
+
+      def harmonized_skill_desc_as_json(hero)
+        owner = all_units_by_pagename[hero['Page']]
+        return (errors[:harmonized_skill_without_owner_bis] << hero['Page']) if owner.nil?
+
+        custom_skill_desc_as_json(
+          custom_id(SKILL_CAT_HARMONIZED, owner),
+          hero['HarmonizedSkill'],
+        )
+      end
+
+      def emblem_skill_desc_as_json(hero)
+        owner = all_units_by_pagename[hero['Page']]
+        return (errors[:emblem_skill_without_owner_bis] << hero['Page']) if owner.nil?
+
+        custom_skill_desc_as_json(
+          custom_id(SKILL_CAT_EMBLEM, owner),
+          hero['Effect'],
+        )
+      end
+
+      def custom_skill_desc_as_json(id, desc)
+        full = sanitize_description(desc)
+        parts = full.split('<br><br>【')
+        base = parts[0].presence
+        base_keywords = parts[1..].map { |l| "【#{l}" }.presence
+
+        constants[:keywords] += base_keywords || []
+
+        {
+          id:,
+          full:,
+          base:,
+          base_keywords:,
+        }.compact
       end
 
       def sanitize_description(desc)
@@ -384,7 +525,51 @@ module Scrappers
       end
 
       def skill_availabilities_as_json
-        relevant_skills.map { |skill| skill_availability_as_json(skill) }
+        relevant_skills.map { |skill| skill_availability_as_json(skill) } +
+          all_duo_heroes.map { |hero| duo_skill_avail_as_json(hero) }.compact +
+          all_harmonized_heroes.map { |hero| harmonized_skill_avail_as_json(hero) }.compact +
+          all_emblem_heroes.map { |hero| emblem_skill_avail_as_json(hero) }.compact
+      end
+
+      def duo_skill_avail_as_json(hero)
+        owner = all_units_by_pagename[hero['Page']]
+        return (errors[:duo_skill_without_owner_ter] << hero['Page']) if owner.nil?
+
+        custom_skill_avail_as_json(
+          custom_id(SKILL_CAT_DUO, owner),
+          owner,
+        )
+      end
+
+      def harmonized_skill_avail_as_json(hero)
+        owner = all_units_by_pagename[hero['Page']]
+        return (errors[:harmonized_skill_without_owner_ter] << hero['Page']) if owner.nil?
+
+        custom_skill_avail_as_json(
+          custom_id(SKILL_CAT_HARMONIZED, owner),
+          owner,
+        )
+      end
+
+      def emblem_skill_avail_as_json(hero)
+        owner = all_units_by_pagename[hero['Page']]
+        return (errors[:emblem_skill_without_owner_ter] << hero['Page']) if owner.nil?
+
+        custom_skill_avail_as_json(
+          custom_id(SKILL_CAT_EMBLEM, owner),
+          owner,
+        )
+      end
+
+      def custom_skill_avail_as_json(id, owner)
+        {
+          id:,
+          owner_ids: [owner['TagID']],
+          is_in: obfuscate_keys(owner[:is_in]),
+          self.class::OBFUSCATED_KEYS[:owner_lowest_rarity_when_obtained] =>
+            obfuscate_keys(owner[:lowest_rarity].compact).presence,
+          divine_codes: owner[:divine_codes].compact.presence,
+        }.compact
       end
 
       def skill_availability_as_json(skill)
@@ -404,11 +589,11 @@ module Scrappers
           required_slots: skill[:prefodder]&.transform_values { |n| [1, n].max },
           is_in: obfuscate_keys(skill[:is_in]),
           self.class::OBFUSCATED_KEYS[:owner_lowest_rarity_when_obtained] =>
-            obfuscate_keys(skill[:owner_lowest_rarity_when_obtained].compact),
+            obfuscate_keys(skill[:owner_lowest_rarity_when_obtained].compact).presence,
           self.class::OBFUSCATED_KEYS[:owner_lowest_rarity_for_inheritance] =>
-            obfuscate_keys(skill[:owner_lowest_rarity_for_inheritance].compact),
-          divine_codes: skill[:divine_codes],
-        }
+            obfuscate_keys(skill[:owner_lowest_rarity_for_inheritance].compact).presence,
+          divine_codes: skill[:divine_codes].compact.presence,
+        }.compact
       end
     end
   end

@@ -8,6 +8,8 @@ require 'scrappers/fandoms/chosen_heroes'
 require 'scrappers/fandoms/distributions'
 require 'scrappers/fandoms/divine_codes'
 require 'scrappers/fandoms/duo_heroes'
+require 'scrappers/fandoms/emblem_heroes'
+require 'scrappers/fandoms/harmonized_heroes'
 require 'scrappers/fandoms/images'
 require 'scrappers/fandoms/legendary_heroes'
 require 'scrappers/fandoms/mythic_heroes'
@@ -22,6 +24,7 @@ require 'scrappers/fandoms/units'
 require 'scrappers/fandoms/units_fodder'
 require 'scrappers/fandoms/utils'
 require 'scrappers/fandoms/version_updates'
+require 'scrappers/fandoms/weapon_upgrades'
 
 module Scrappers
   # for all Fandom objects, the source of the data depends on the type of its key
@@ -36,6 +39,8 @@ module Scrappers
     include Scrappers::Fandoms::Distributions
     include Scrappers::Fandoms::DivineCodes
     include Scrappers::Fandoms::DuoHeroes
+    include Scrappers::Fandoms::EmblemHeroes
+    include Scrappers::Fandoms::HarmonizedHeroes
     include Scrappers::Fandoms::Images
     include Scrappers::Fandoms::LegendaryHeroes
     include Scrappers::Fandoms::MythicHeroes
@@ -50,6 +55,7 @@ module Scrappers
     include Scrappers::Fandoms::UnitsFodder
     include Scrappers::Fandoms::Utils
     include Scrappers::Fandoms::VersionUpdates
+    include Scrappers::Fandoms::WeaponUpgrades
 
     attr_reader :client, :now, :errors, :logger, :constants, :s3
 
@@ -96,6 +102,8 @@ module Scrappers
       log_and_launch(:scrap_duo_heroes)
       # log_and_launch(:scrap_resplendent_heroes) # available in unit properties
       log_and_launch(:scrap_chosen_heroes)
+      log_and_launch(:scrap_emblem_heroes)
+      log_and_launch(:scrap_harmonized_heroes)
       log_and_launch(:scrap_legendary_heroes)
       log_and_launch(:scrap_mythic_heroes)
       log_and_launch(:scrap_generic_summon_pool)
@@ -104,6 +112,7 @@ module Scrappers
       log_and_launch(:scrap_banner_focuses)
       log_and_launch(:scrap_distributions)
       log_and_launch(:scrap_version_updates)
+      log_and_launch(:scrap_weapon_upgrades)
 
       log_and_launch(:compute_all_seals)
 
@@ -165,19 +174,20 @@ module Scrappers
     end
 
     def export_constants
-      constants.transform_values! do |v|
-        case v
-        when Set
-          v.to_a.sort
-        when Array
-          v.sort
-        else
-          v
+      res =
+        constants.transform_values do |v|
+          case v
+          when Set
+            v.to_a.sort
+          when Array
+            v.sort
+          else
+            v
+          end
         end
-      end
 
       export_files(
-        'constants.json' => constants,
+        'constants.json' => res,
       )
     end
 
@@ -195,6 +205,7 @@ module Scrappers
 
         units_genders: Set.new,
         games: Set.new,
+        keywords: Set.new,
       }
 
       reset_cached_seals!

@@ -19,7 +19,7 @@ module Scrappers
 
         fields = [
           '_pageName=Page',
-          # 'DuoSkill',
+          'DuoSkill',
           # 'WikiSecondPerson',
           # 'WikiThirdPerson',
           'Duel',

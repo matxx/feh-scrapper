@@ -202,7 +202,10 @@ module Scrappers
       private
 
       def units_skills_as_json
-        all_unit_skills.map { |unit_skill| unit_skill_as_json(unit_skill) }.compact
+        all_unit_skills.map { |unit_skill| unit_skill_as_json(unit_skill) }.compact +
+          all_duo_heroes.map { |hero| duo_unit_skill_as_json(hero) }.compact +
+          all_harmonized_heroes.map { |hero| harmonized_unit_skill_as_json(hero) }.compact +
+          all_emblem_heroes.map { |hero| emblem_unit_skill_as_json(hero) }.compact
       end
 
       def unit_skill_as_json(unit_skill)
@@ -225,6 +228,45 @@ module Scrappers
           skill_id: skill['TagID'],
           default: unit_skill['defaultRarity'].to_i,
           unlock: unit_skill['unlockRarity'].to_i,
+        }
+      end
+
+      def duo_unit_skill_as_json(hero)
+        owner = all_units_by_pagename[hero['Page']]
+        return (errors[:duo_skill_without_owner_forth] << hero['Page']) if owner.nil?
+
+        custom_unit_skill_desc_as_json(
+          owner['TagID'],
+          custom_id(self.class::SKILL_CAT_DUO, owner),
+        )
+      end
+
+      def harmonized_unit_skill_as_json(hero)
+        owner = all_units_by_pagename[hero['Page']]
+        return (errors[:harmonized_skill_without_owner_forth] << hero['Page']) if owner.nil?
+
+        custom_unit_skill_desc_as_json(
+          owner['TagID'],
+          custom_id(self.class::SKILL_CAT_HARMONIZED, owner),
+        )
+      end
+
+      def emblem_unit_skill_as_json(hero)
+        owner = all_units_by_pagename[hero['Page']]
+        return (errors[:emblem_skill_without_owner_forth] << hero['Page']) if owner.nil?
+
+        custom_unit_skill_desc_as_json(
+          owner['TagID'],
+          custom_id(self.class::SKILL_CAT_EMBLEM, owner),
+        )
+      end
+
+      def custom_unit_skill_desc_as_json(unit_id, skill_id)
+        {
+          unit_id:,
+          skill_id:,
+          default: 0,
+          unlock: 1,
         }
       end
     end

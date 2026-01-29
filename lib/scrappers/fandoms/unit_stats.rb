@@ -97,7 +97,7 @@ module Scrappers
           unit[:bst] = bst_from_unit_stats(unit)
         end
 
-        @constants[:units_count] = relevant_units.size
+        constants[:units_count] = relevant_units.size
 
         [
           'hp',
@@ -120,9 +120,9 @@ module Scrappers
               unit[:"rank_#{stat}"] = current_rank
               next if current_rank > 1
 
-              @constants[:"units_max_#{stat}"] ||= unit[:"level40_#{stat}"]
-              @constants[:"units_max_#{stat}_ids"] ||= []
-              @constants[:"units_max_#{stat}_ids"] << unit['TagID']
+              constants[:"units_max_#{stat}"] ||= unit[:"level40_#{stat}"]
+              constants[:"units_max_#{stat}_ids"] ||= []
+              constants[:"units_max_#{stat}_ids"] << unit['TagID']
             end
         end
 
@@ -140,9 +140,9 @@ module Scrappers
             unit[:rank_bst] = current_rank
             next if current_rank > 1
 
-            @constants[:units_max_bst] ||= unit[:bst]
-            @constants[:units_max_bst_ids] ||= []
-            @constants[:units_max_bst_ids] << unit['TagID']
+            constants[:units_max_bst] ||= unit[:bst]
+            constants[:units_max_bst_ids] ||= []
+            constants[:units_max_bst_ids] << unit['TagID']
           end
 
         nil

@@ -457,12 +457,8 @@ module Scrappers
       end
 
       def unit_availability_as_json(unit)
-        {
-          id: unit['TagID'],
-
-          is_in: obfuscate_keys(unit[:is_in]),
-          lowest_rarity: obfuscate_keys(unit[:lowest_rarity].compact),
-          skill_ids: unit[:all_unit_skills].map do |desc|
+        skill_ids =
+          unit[:all_unit_skills].map do |desc|
             skill = get_skill_from_wikiname(desc['skill'])
             if skill.nil?
               errors[:units_skills_without_skill] << [unit['WikiName'], desc]
@@ -470,7 +466,25 @@ module Scrappers
             end
 
             skill['TagID']
-          end.compact.sort,
+          end
+        # rubocop:disable Style/IfUnlessModifier
+        if unit[:properties].include?('duo')
+          skill_ids << custom_id(self.class::SKILL_CAT_DUO, unit)
+        end
+        if unit[:properties].include?('harmonized')
+          skill_ids << custom_id(self.class::HARMONIZED, unit)
+        end
+        if unit[:properties].include?('emblem')
+          skill_ids << custom_id(self.class::SKILL_CAT_EMBLEM, unit)
+        end
+        # rubocop:enable Style/IfUnlessModifier
+
+        {
+          id: unit['TagID'],
+
+          is_in: obfuscate_keys(unit[:is_in]),
+          lowest_rarity: obfuscate_keys(unit[:lowest_rarity].compact),
+          skill_ids: skill_ids.compact.sort,
         }.merge(
           unit.slice(
             :divine_codes,
