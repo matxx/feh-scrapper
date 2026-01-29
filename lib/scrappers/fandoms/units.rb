@@ -472,7 +472,7 @@ module Scrappers
           skill_ids << custom_id(self.class::SKILL_CAT_DUO, unit)
         end
         if unit[:properties].include?('harmonized')
-          skill_ids << custom_id(self.class::HARMONIZED, unit)
+          skill_ids << custom_id(self.class::SKILL_CAT_HARMONIZED, unit)
         end
         if unit[:properties].include?('emblem')
           skill_ids << custom_id(self.class::SKILL_CAT_EMBLEM, unit)
