@@ -266,8 +266,8 @@ module Scrappers
         {
           id: custom_id(category, owner),
           game8_id: owner[:game8_id],
+          fandom_id: owner_page,
           name: owner_page,
-          group_name: owner_page,
           category:,
 
           is_prf: true,
@@ -332,15 +332,16 @@ module Scrappers
         errors[:missing_refine_image] << name if skill[:base_id].present? && skill[:image_url].blank?
 
         has_name_of_unit = skill['WikiName'].include?('weapon')
-        group_name = sanitize_name(skill['GroupName'])
-        group_name = "#{name} (weapon)" if has_name_of_unit
+        fandom_id = sanitize_name(skill['GroupName'])
+        fandom_id = "#{name} (weapon)" if has_name_of_unit
 
         res = {
           id: skill['TagID'],
           base_id: skill[:base_id],
           game8_id: skill[:game8_id],
+          fandom_id:,
+
           name:,
-          group_name:,
           category: skill['Scategory'],
           weapon_type: sanitize_weapon_type(skill),
 

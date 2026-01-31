@@ -341,11 +341,14 @@ module Scrappers
         games = (unit['Origin'] || '').split(',')
         constants[:games] += games
 
+        full_name = sanitize_name(unit['Page'])
+
         {
           id: unit['TagID'],
+          fandom_id: full_name,
           name: sanitize_name(unit['Name']),
           title: sanitize_name(unit['Title']),
-          full_name: sanitize_name(unit['Page']),
+          full_name:,
           abbreviated_name: abbr_name,
           theme: unit[:theme],
 

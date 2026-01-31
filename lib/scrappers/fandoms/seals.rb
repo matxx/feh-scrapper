@@ -159,8 +159,8 @@ module Scrappers
         res = {
           id: seal['TagID'],
           game8_id: seal[:game8_id],
+          fandom_id: seal['GroupName'],
           name: seal['Name'],
-          group_name: seal['GroupName'],
           image_url: seal[:image_url],
           sp:,
           tier:,
