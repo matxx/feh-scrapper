@@ -287,10 +287,14 @@ module Scrappers
         tier = skill[:tier]
         sp = skill['SP'].to_i unless skill['Scategory'] == SKILL_CAT_PASSIVE_X
         cd = skill['Cooldown'] == '-1' ? nil : skill['Cooldown'].to_i if skill['Scategory'] == SKILL_CAT_SPECIAL
+        might = skill['Might'].presence&.to_i
+        range = skill['UseRange'].presence&.to_i
 
         constants[:skills_max_tier] = tier if tier && constants[:skills_max_tier] < tier
         constants[:skills_max_sp] = sp if sp && constants[:skills_max_sp] < sp
         constants[:skills_max_cd] = cd if cd && constants[:skills_max_cd] < cd
+        constants[:skills_max_might] = might if might && constants[:skills_max_might] < might
+        constants[:skills_max_range] = range if range && constants[:skills_max_range] < range
 
         first_owner_detail =
           skill[:owner_details]
@@ -351,8 +355,8 @@ module Scrappers
           is_arcane: true_or_nil(skill['Properties']&.include?('arcane')),
           sp:,
           tier:,
-          range: skill['UseRange'].presence&.to_i,
-          might: skill['Might'].presence&.to_i,
+          range:,
+          might:,
 
           has_refine: true_or_nil(skill[:refine_ids].present?),
           refines_max_sp: skill[:refine_ids]&.map { |id| all_skills_by_tag_id[id]['SP'].to_i }&.max,

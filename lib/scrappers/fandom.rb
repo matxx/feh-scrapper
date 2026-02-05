@@ -199,6 +199,8 @@ module Scrappers
         skills_max_tier: 0,
         skills_max_sp: 0,
         skills_max_cd: 0,
+        skills_max_might: 0,
+        skills_max_range: 0,
 
         # seals_max_tier: 0,
         # seals_max_sp: 0,
