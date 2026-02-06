@@ -197,16 +197,20 @@ module Scrappers
           if unit[:properties].include?('ghb')
             unit[:is_in][:heroic_grails] = true
             unit[:lowest_rarity][:heroic_grails] = 3
+            next
           end
 
-          next unless unit[:properties].include?('tempest')
+          # next unless unit[:properties].include?('tempest')
+          hgs = all_heroic_grails_by_pagename[unit['Page']]
+          next if hgs.nil?
 
+          unit[:properties] << 'tempest' # wiki admins refuse to put it in units' page...
           unit[:is_in][:heroic_grails] = true
 
-          rows = all_heroic_grails_by_pagename[unit['Page']]
-          next (@errors[:hg_not_found] << unit['WikiName']) if rows.nil?
+          # hgs = all_heroic_grails_by_pagename[unit['Page']]
+          # next (@errors[:hg_not_found] << unit['WikiName']) if hgs.nil?
 
-          unit[:lowest_rarity][:heroic_grails] = rows.map { |row| row['Rarity'].to_i }.min
+          unit[:lowest_rarity][:heroic_grails] = hgs.map { |row| row['Rarity'].to_i }.min
         end
 
         current_generic_pool_by_unit_wikiname.each do |wikiname, rows|
