@@ -158,6 +158,22 @@ module Scrappers
         nil
       end
 
+      # https://discord.com/channels/455920842866425874/688125133809778716/1468962076700446844
+      ERROR_IN_RARITY = [
+        'Micaiah Wavecrest Maiden',
+        'Muspell Raging Inferno',
+        'Nina Shadowy Figures',
+        'Nino Spirited Sorcerer',
+        'Robin Tactful Deliverer',
+        'Roy Blazing Bachelors',
+        'Sonya Dazzling Rabbits',
+        'Sophia Prescient Bride',
+        'Soren Hushed Voice',
+        'Tana Soothing Warmth',
+        'Thorr Sun-Kissed Gods',
+        'Ursula Royal-Blue Crow',
+      ].freeze
+
       # TODO: ? extract units received as rewards
       # https://feheroes.fandom.com/wiki/Special:CargoTables/Distributions
 
@@ -284,6 +300,17 @@ module Scrappers
 
           if unit[:is_in][:special_summon_pool] && unit[:lowest_rarity][:special_summon_pool].nil?
             errors[:special_units_without_rarities] << wikiname
+          end
+          if unit[:is_in][:special_summon_pool] &&
+             unit[:lowest_rarity][:special_summon_pool] &&
+             unit[:lowest_rarity][:special_summon_pool] < 4
+            # MONKEY PATCH: some units appear as 3* instead of 5*
+            # TODO: remove this fix when fandom fixes
+            if ERROR_IN_RARITY.include?(wikiname)
+              unit[:lowest_rarity][:special_summon_pool] = 5
+            else
+              errors[:special_units_with_weird_rarity] << [wikiname, unit[:lowest_rarity][:special_summon_pool]]
+            end
           end
           if unit[:lowest_rarity][:special_summon_pool] && !unit[:properties].include?('special')
             errors[:units_in_special_pool_without_property_special] << wikiname
