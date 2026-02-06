@@ -9,7 +9,7 @@ module Scrappers
 
       OBFUSCATED_KEYS = {
         owner_lowest_rarity_when_obtained: :olrwo,
-        owner_lowest_rarity_for_inheritance: :olrfi,
+        # owner_lowest_rarity_for_inheritance: :olrfi,
 
         generic_summon_pool: :gsp,
         special_summon_pool: :ssp,

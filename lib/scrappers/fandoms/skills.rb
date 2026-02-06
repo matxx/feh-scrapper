@@ -595,8 +595,8 @@ module Scrappers
           is_in: obfuscate_keys(skill[:is_in]),
           self.class::OBFUSCATED_KEYS[:owner_lowest_rarity_when_obtained] =>
             obfuscate_keys(skill[:owner_lowest_rarity_when_obtained].compact).presence,
-          self.class::OBFUSCATED_KEYS[:owner_lowest_rarity_for_inheritance] =>
-            obfuscate_keys(skill[:owner_lowest_rarity_for_inheritance].compact).presence,
+          # self.class::OBFUSCATED_KEYS[:owner_lowest_rarity_for_inheritance] =>
+          #   obfuscate_keys(skill[:owner_lowest_rarity_for_inheritance].compact).presence,
           divine_codes: skill[:divine_codes].compact.presence,
         }.compact
       end

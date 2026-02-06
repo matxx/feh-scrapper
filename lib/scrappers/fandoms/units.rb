@@ -522,11 +522,8 @@ module Scrappers
           is_in: obfuscate_keys(unit[:is_in]),
           lowest_rarity: obfuscate_keys(unit[:lowest_rarity].compact),
           skill_ids: skill_ids.compact.sort,
-        }.merge(
-          unit.slice(
-            :divine_codes,
-          ),
-        ).compact
+          divine_codes: unit[:divine_codes].presence,
+        }.compact
       end
 
       def unit_stats_as_json
