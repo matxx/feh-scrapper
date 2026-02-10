@@ -197,14 +197,18 @@ module Scrappers
           if unit[:properties].include?('ghb')
             unit[:is_in][:heroic_grails] = true
             unit[:lowest_rarity][:heroic_grails] = 3
-            next
+            # next
           end
 
-          # next unless unit[:properties].include?('tempest')
+          next unless unit[:properties].include?('tempest')
+
+          # lets mark 5* TT units as TT units
+          # only they are are redeemable in the HG shop
           hgs = all_heroic_grails_by_pagename[unit['Page']]
+          unit[:properties].delete('tempest')
           next if hgs.nil?
 
-          unit[:properties] << 'tempest' # wiki admins refuse to put it in units' page...
+          # unit[:properties] << 'tempest' # wiki admins refuse to put it in units' page...
           unit[:is_in][:heroic_grails] = true
 
           # hgs = all_heroic_grails_by_pagename[unit['Page']]

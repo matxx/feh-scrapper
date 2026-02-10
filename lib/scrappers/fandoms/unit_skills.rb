@@ -169,6 +169,8 @@ module Scrappers
               end
 
               lowest_rarity = unit[:lowest_rarity][key]
+              next (errors[:missing_lowest_rarity] << [unit['WikiName'], key]) if lowest_rarity.nil?
+
               if skill[:owner_lowest_rarity_when_obtained][key].nil? ||
                  lowest_rarity < skill[:owner_lowest_rarity_when_obtained][key]
                 skill[:owner_lowest_rarity_when_obtained][key] = lowest_rarity
