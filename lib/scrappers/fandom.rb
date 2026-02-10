@@ -219,9 +219,10 @@ module Scrappers
       Hash.new { |h, k| h[k] = [] }
     end
 
-    def retrieve_all_pages(table, fields, limit = BATCH_SIZE)
+    def retrieve_all_pages(table, fields, limit: BATCH_SIZE, cycle_limit: nil)
       pages = []
       offset = 0
+      cycle = 1
       loop do
         response =
           begin
@@ -247,6 +248,9 @@ module Scrappers
         break if response.data.size < limit
 
         offset += limit
+        cycle += 1
+        break if cycle_limit && cycle_limit < cycle
+
         sleep 5 # try to avoid rate limits
       end
       pages
