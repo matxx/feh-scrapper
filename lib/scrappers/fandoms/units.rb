@@ -384,10 +384,12 @@ module Scrappers
         {
           id: unit['TagID'],
           fandom_id: full_name,
+
           name: sanitize_name(unit['Name']),
           title: sanitize_name(unit['Title']),
           full_name:,
           abbreviated_name: abbr_name,
+
           theme: unit[:theme],
 
           gender:,
@@ -437,6 +439,7 @@ module Scrappers
         }.merge(
           unit.slice(
             :game8_id,
+            :guide_id,
 
             :image_url_for_portrait,
             :image_url_for_icon_chosen,

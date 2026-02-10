@@ -5,6 +5,7 @@ require 'awesome_print'
 require 'scrappers/base'
 require 'scrappers/fandom'
 require 'scrappers/game8'
+require 'scrappers/guide'
 require 'scrappers/s3'
 
 module Scrappers
@@ -23,8 +24,14 @@ module Scrappers
     attr_accessor(
       :fandom,
       :game8,
+      :guide,
       :s3,
     )
+
+    # fandom => guide
+    GUIDE_TITLE_SUBSTITUTIONS = {
+      'Defrosted Ilian' => 'Defrosted Illian',
+    }.freeze
 
     def initialize(level: Logger::ERROR, game8: {})
       @now = Time.now
@@ -34,6 +41,7 @@ module Scrappers
       @s3     = Scrappers::S3.new(level:)
       @fandom = Scrappers::Fandom.new(level:, s3:)
       @game8  = Scrappers::Game8.new(level:, **game8)
+      @guide  = Scrappers::Guide.new(level:)
 
       boot
       setup_s3
@@ -45,6 +53,7 @@ module Scrappers
       boot
       fandom.reset!
       game8.reset!
+      guide.reset!
       s3.reset!
 
       nil
@@ -52,6 +61,7 @@ module Scrappers
 
     def handle_everything
       game8.log_and_launch(:handle_everything)
+      guide.log_and_launch(:handle_everything)
       fandom.log_and_launch(:handle_everything)
       s3.log_and_launch(:handle_everything)
 
@@ -61,6 +71,12 @@ module Scrappers
       @all_units_by_id = all_units.index_by { |s| s[:id] }
       @all_skills_by_id = all_skills.index_by { |s| s[:id] }
       @all_seals_by_id = all_seals.index_by { |s| s[:id] }
+
+      unless guide.all_units.size == fandom.constants[:units_count]
+        errors[:mismatch_in_units_count] << [guide.all_units.size, fandom.constants[:units_count]]
+      end
+
+      log_and_launch(:fill_fandom_units_with_guide_ids)
 
       log_and_launch(:fill_fandom_units_with_game8_data)
       log_and_launch(:fill_fandom_skills_with_game8_data)
@@ -293,6 +309,7 @@ module Scrappers
       {
         all: errors,
         game8: game8.errors,
+        guide: guide.errors,
         fandom: fandom.errors,
       }
     end
@@ -360,6 +377,26 @@ module Scrappers
           'recommended_plus10',
         ),
       )
+    end
+
+    def sanitize_fandom_name_for_guide(str)
+      str
+        .gsub("'", '’')
+        .gsub(/"([^"]+)"/, '“\1”')
+    end
+
+    def fill_fandom_units_with_guide_ids
+      fandom.all_units.each do |f_unit|
+        next if f_unit[:properties].include?('enemy')
+
+        name  = sanitize_fandom_name_for_guide(f_unit['Name'])
+        title = sanitize_fandom_name_for_guide(f_unit['Title'])
+        title = GUIDE_TITLE_SUBSTITUTIONS[title] || title
+        g_unit = guide.all_units_by_names[[name, title]]
+        next (errors[:guide_unit_not_found] << [f_unit['WikiName'], f_unit['Name'], f_unit['Title']]) if g_unit.nil?
+
+        f_unit[:guide_id] = g_unit[:id]
+      end
     end
 
     def fill_fandom_units_with_game8_data
