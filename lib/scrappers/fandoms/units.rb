@@ -444,6 +444,7 @@ module Scrappers
           unit.slice(
             :game8_id,
             :guide_id,
+            :fehpass_id,
 
             :image_url_for_portrait,
             :image_url_for_icon_chosen,

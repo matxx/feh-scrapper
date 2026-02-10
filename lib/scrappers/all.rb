@@ -5,7 +5,7 @@ require 'awesome_print'
 require 'scrappers/base'
 require 'scrappers/fandom'
 require 'scrappers/game8'
-require 'scrappers/guide'
+require 'scrappers/pages'
 require 'scrappers/s3'
 
 module Scrappers
@@ -24,7 +24,7 @@ module Scrappers
     attr_accessor(
       :fandom,
       :game8,
-      :guide,
+      :pages,
       :s3,
     )
 
@@ -41,7 +41,7 @@ module Scrappers
       @s3     = Scrappers::S3.new(level:)
       @fandom = Scrappers::Fandom.new(level:, s3:)
       @game8  = Scrappers::Game8.new(level:, **game8)
-      @guide  = Scrappers::Guide.new(level:)
+      @pages  = Scrappers::Pages.new(level:)
 
       boot
       setup_s3
@@ -53,15 +53,15 @@ module Scrappers
       boot
       fandom.reset!
       game8.reset!
-      guide.reset!
+      pages.reset!
       s3.reset!
 
       nil
     end
 
     def handle_everything
+      pages.log_and_launch(:handle_everything)
       game8.log_and_launch(:handle_everything)
-      guide.log_and_launch(:handle_everything)
       fandom.log_and_launch(:handle_everything)
       s3.log_and_launch(:handle_everything)
 
@@ -72,11 +72,16 @@ module Scrappers
       @all_skills_by_id = all_skills.index_by { |s| s[:id] }
       @all_seals_by_id = all_seals.index_by { |s| s[:id] }
 
-      unless guide.all_units.size == fandom.constants[:units_count]
-        errors[:mismatch_in_units_count] << [guide.all_units.size, fandom.constants[:units_count]]
-      end
+      cnt1 = fandom.constants[:units_count]
+      cnt2 = pages.all_guides.size
+      errors[:mismatch_in_units_count] << { fandom: cnt1, page: cnt2 } unless cnt1 == cnt2
+
+      cnt1 = fandom.all_units.count { |x| x[:properties].include?('resplendent') }
+      cnt2 = pages.all_respls.size
+      errors[:mismatch_in_respls_count] << { fandom: cnt1, page: cnt2 } unless cnt1 == cnt2
 
       log_and_launch(:fill_fandom_units_with_guide_ids)
+      log_and_launch(:fill_fandom_units_with_respl_ids)
 
       log_and_launch(:fill_fandom_units_with_game8_data)
       log_and_launch(:fill_fandom_skills_with_game8_data)
@@ -308,8 +313,8 @@ module Scrappers
     def errors_report
       {
         all: errors,
+        pages: pages.errors,
         game8: game8.errors,
-        guide: guide.errors,
         fandom: fandom.errors,
       }
     end
@@ -392,10 +397,22 @@ module Scrappers
         name  = sanitize_fandom_name_for_guide(f_unit['Name'])
         title = sanitize_fandom_name_for_guide(f_unit['Title'])
         title = GUIDE_TITLE_SUBSTITUTIONS[title] || title
-        g_unit = guide.all_units_by_names[[name, title]]
-        next (errors[:guide_unit_not_found] << [f_unit['WikiName'], f_unit['Name'], f_unit['Title']]) if g_unit.nil?
+        p_unit = pages.all_guides_by_names[[name, title]]
+        next (errors[:guide_unit_not_found] << [f_unit['WikiName'], f_unit['Name'], f_unit['Title']]) if p_unit.nil?
 
-        f_unit[:guide_id] = g_unit[:id]
+        f_unit[:guide_id] = p_unit[:id]
+      end
+    end
+
+    def fill_fandom_units_with_respl_ids
+      fandom.all_units.each do |f_unit|
+        next if f_unit[:properties].include?('enemy')
+        next unless f_unit[:properties].include?('resplendent')
+
+        p_unit = pages.all_respls_by_names[[f_unit['Name'], f_unit['Title']]]
+        next (errors[:respl_unit_not_found] << [f_unit['WikiName'], f_unit['Name'], f_unit['Title']]) if p_unit.nil?
+
+        f_unit[:fehpass_id] = p_unit[:id]
       end
     end
 
