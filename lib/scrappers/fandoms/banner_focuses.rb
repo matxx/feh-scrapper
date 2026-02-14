@@ -40,8 +40,13 @@ module Scrappers
 
       def banners_as_json
         all_banner_focuses_by_pagename.map do |name, rows|
+          sanitized_name =
+            name
+            .gsub('&quot;', '"')
+            .gsub('&amp;', '&')
+            .gsub('A Monstrous Harvest', 'Treat Fiends') # banner has been renamed after its first appearance
           {
-            name: name.gsub('&quot;', '"').gsub('&amp;', '&'),
+            name: sanitized_name,
             unit_ids: rows.map do |row|
               unit = all_units_by_wikiname[row['Unit']]
               if unit.nil?
