@@ -44,7 +44,7 @@ module Scrappers
             name
             .gsub('&quot;', '"')
             .gsub('&amp;', '&')
-            .gsub('A Monstrous Harvest', 'Treat Fiends') # banner has been renamed after its first appearance
+            .gsub('A Monstrous Harvest', 'A Monstrous Harvest / Treat Fiends') # banner has been renamed after its first appearance
           {
             name: sanitized_name,
             unit_ids: rows.map do |row|
