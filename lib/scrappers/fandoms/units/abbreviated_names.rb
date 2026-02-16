@@ -31,6 +31,8 @@ module Scrappers
               const_get(:INT_ID_D_ELINCIA) => 'D!Elincia',
               const_get(:INT_ID_H_B_IKE) => 'H!B!Ike',
               const_get(:INT_ID_H_B_LYN) => 'H!B!Lyn',
+              const_get(:INT_ID_H_B_CELICA) => 'H!B!Celica',
+              const_get(:INT_ID_H_B_HECTOR) => 'H!B!Hector',
 
               const_get(:INT_ID_CAMILLA_ADRIFT) => 'Ad!Camilla',
               const_get(:INT_ID_CORRIN_M_ADRIFT) => 'Ad!Corrin(M)',

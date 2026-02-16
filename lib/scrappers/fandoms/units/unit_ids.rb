@@ -8,11 +8,15 @@ module Scrappers
         INT_ID_D_ELINCIA = 1303
         INT_ID_H_B_IKE = 1315
         INT_ID_H_B_LYN = 1316
+        INT_ID_H_B_CELICA = 1348
+        INT_ID_H_B_HECTOR = 1349
         INT_IDS_OF_FOCUS_ONLY_UNITS = [
           INT_ID_ANNIVERSARY_MARTH,
           INT_ID_D_ELINCIA,
           INT_ID_H_B_IKE,
           INT_ID_H_B_LYN,
+          INT_ID_H_B_CELICA,
+          INT_ID_H_B_HECTOR,
         ].freeze
 
         INT_ID_NY_CORRIN_M = 200
