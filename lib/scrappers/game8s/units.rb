@@ -268,6 +268,11 @@ module Scrappers
             # header missing
             ivs = [nil, 'Spd', nil, 'Res']
             plus10 = [nil, 'Spd']
+          when '580792'
+            # https://game8.co/games/fire-emblem-heroes/archives/580792#hl_2
+            # 2 banes options
+            ivs = [nil, 'Def', nil, 'HP']
+            plus10 = [nil, 'Def']
           else
             # ex : https://game8.co/games/fire-emblem-heroes/archives/279315#hl_2
             # ex : https://game8.co/games/fire-emblem-heroes/archives/267280#hl_2
