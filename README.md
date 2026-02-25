@@ -12,6 +12,8 @@ Extract data from Fandom and Game8 and export it as JSON files.
 1. unit tests
 1. get all images from sprites
 
+1. reverse engineer FEH exchanges ? (<https://www.reddit.com/r/FireEmblemHeroes/comments/6oqm74/network_decoding_of_feheroes_data/>)
+
 ### QoL
 
 ### Fixes

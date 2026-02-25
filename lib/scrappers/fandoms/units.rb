@@ -458,6 +458,7 @@ module Scrappers
             :clash_score,
             :visible_bst,
             :max_score,
+            :skills_max_sp,
           ),
         ).compact
       end
