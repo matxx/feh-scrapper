@@ -70,11 +70,13 @@ module Scrappers
         INT_ID_TIKI_A_SU = 146
         INT_ID_TIKI_A_B = 841
         INT_ID_TIKI_A_BR = 950
+        INT_ID_TIKI_A_M = 1351
         INT_IDS_OF_ADULTS = [
           INT_ID_TIKI_A,
           INT_ID_TIKI_A_SU,
           INT_ID_TIKI_A_B,
           INT_ID_TIKI_A_BR,
+          INT_ID_TIKI_A_M,
         ].freeze
 
         INT_ID_AZURA_Y = 312

@@ -398,7 +398,9 @@ module Scrappers
         title = sanitize_fandom_name_for_guide(f_unit['Title'])
         title = GUIDE_TITLE_SUBSTITUTIONS[title] || title
         p_unit = pages.all_guides_by_names[[name, title]]
-        next (errors[:guide_unit_not_found] << [f_unit['WikiName'], f_unit['Name'], f_unit['Title']]) if p_unit.nil?
+        if p_unit.nil?
+          next (errors[:guide_unit_not_found] << [f_unit['WikiName'], f_unit['Name'], f_unit['Title', name, title]])
+        end
 
         f_unit[:guide_id] = p_unit[:id]
       end
