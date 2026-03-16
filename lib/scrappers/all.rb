@@ -82,6 +82,7 @@ module Scrappers
 
       log_and_launch(:fill_fandom_units_with_guide_ids)
       log_and_launch(:fill_fandom_units_with_respl_ids)
+      log_and_launch(:fix_fandom_units_versions)
 
       log_and_launch(:fill_fandom_units_with_game8_data)
       log_and_launch(:fill_fandom_skills_with_game8_data)
@@ -399,7 +400,7 @@ module Scrappers
         title = GUIDE_TITLE_SUBSTITUTIONS[title] || title
         p_unit = pages.all_guides_by_names[[name, title]]
         if p_unit.nil?
-          next (errors[:guide_unit_not_found] << [f_unit['WikiName'], f_unit['Name'], f_unit['Title', name, title]])
+          next (errors[:guide_unit_not_found] << [f_unit['WikiName'], f_unit['Name'], f_unit['Title'], name, title])
         end
 
         f_unit[:guide_id] = p_unit[:id]
@@ -415,6 +416,23 @@ module Scrappers
         next (errors[:respl_unit_not_found] << [f_unit['WikiName'], f_unit['Name'], f_unit['Title']]) if p_unit.nil?
 
         f_unit[:fehpass_id] = p_unit[:id]
+      end
+    end
+
+    def fix_fandom_units_versions
+      return if pages.all_versions.empty?
+
+      fandom.all_units.each do |f_unit|
+        next if f_unit[:version].nil?
+        next if pages.all_versions.last[:date] > f_unit[:release_date]
+
+        v = pages.all_versions.find { |version| version[:date] <= f_unit[:release_date] }
+        if v.nil?
+          errors[:f_unit_without_version] << f_unit['WikiName']
+          next
+        end
+
+        f_unit[:version] = v[:version_short]
       end
     end
 

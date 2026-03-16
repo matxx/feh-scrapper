@@ -2,6 +2,9 @@
 
 module Scrappers
   module Fandoms
+    # the wiki staff can be quite late to create the last versions updates
+    # https://feheroes.fandom.com/wiki/What's_in_Store_for_the_10.1.0_Update_(Notification)
+    # so, it is mostly useful for early versions
     module VersionUpdates
       attr_reader(
         :all_version_updates,
@@ -49,7 +52,7 @@ module Scrappers
           end
 
           unit[:release_date] = unit['ReleaseDate'].to_date
-          v = sorted_version_updates.find { |v| v[:release_date] <= unit[:release_date] }
+          v = sorted_version_updates.find { |version| version[:release_date] <= unit[:release_date] }
           if v.nil?
             errors[:units_without_version] << unit['WikiName']
             next

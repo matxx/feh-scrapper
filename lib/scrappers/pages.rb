@@ -15,6 +15,7 @@ module Scrappers
       :all_guides_by_names,
       :all_respls,
       :all_respls_by_names,
+      :all_versions,
     )
 
     def initialize(level: Logger::ERROR)
@@ -41,6 +42,7 @@ module Scrappers
     def scrap_everything
       log_and_launch(:scrap_guides)
       log_and_launch(:scrap_respls)
+      log_and_launch(:scrap_versions)
 
       nil
     end
@@ -109,6 +111,56 @@ module Scrappers
     def reset_all_respls!
       @all_respls = nil
       @all_respls_by_names = nil
+    end
+
+    def scrap_versions
+      return if all_versions
+
+      # url = 'https://fire-emblem-heroes.com/en/topics/'
+      url = 'https://fire-emblem-heroes.com/en/include/topics_detail.html'
+      # contains all versions >= 7
+
+      html = URI.parse(url).open.read
+      dom = Nokogiri::HTML.parse(html)
+
+      @all_versions = []
+      dom.xpath("//p[@class='heading']/#{xpath_text_containing('Update')}").each do |header|
+        m1 = header.text.match(/\AWhat's in Store for the (\d+)\.(\d+)\.(\d+) Update\Z/i)
+        next (errors[:v_header_not_matching] = el.text.strip) if m1.nil?
+
+        article = header.ancestors.find { |el| el.classes.include?('article') }
+        next (errors[:v_no_article_ancestor] = el.text.strip) if article.nil?
+
+        m2 = article.attr('id').match(/\Adetail-(\d{4})(\d{2})(\d{2})\Z/i)
+        next (errors[:v_article_date_not_matching] = el.text.strip) if m2.nil?
+
+        all_versions << {
+          version: "#{m1[1]}.#{m1[2]}.#{m1[3]}",
+          version_short: "#{m1[1]}.#{m1[2]}",
+          date_str: "#{m2[1]}-#{m2[2]}-#{m2[3]}",
+          date: Date.new(m2[1].to_i, m2[2].to_i, m2[3].to_i),
+        }
+      end
+
+      all_versions.sort_by! { |v| v[:date_str] }
+      all_versions.reverse!
+
+      nil
+    end
+
+    def xpath_text_containing(str)
+      <<~XPATH.strip
+        text()[
+          contains(
+            translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'),
+            '#{str.downcase}'
+          )
+        ]
+      XPATH
+    end
+
+    def reset_all_versions!
+      @all_versions = nil
     end
 
     def inspect
