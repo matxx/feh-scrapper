@@ -273,6 +273,11 @@ module Scrappers
             # 2 banes options
             ivs = [nil, 'Def', nil, 'HP']
             plus10 = [nil, 'Def']
+          when '587246'
+            # https://game8.co/games/fire-emblem-heroes/archives/587246#hl_2
+            # 2 banes options
+            ivs = [nil, 'Def', nil, 'Res']
+            plus10 = [nil, 'Def']
           else
             # ex : https://game8.co/games/fire-emblem-heroes/archives/279315#hl_2
             # ex : https://game8.co/games/fire-emblem-heroes/archives/267280#hl_2
