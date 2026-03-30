@@ -6,7 +6,7 @@ module Scrappers
   class S3 < Base
     attr_reader :now, :logger, :all_seals_by_id, :all_skills_by_id
 
-    COMMIT = 'ae7da5f967db85b4a75f828d367719ab2c297a66'
+    COMMIT = 'c952be048802aebc04286283d77bfa3c8bfd3943'
     DIR = "https://data.feh-peeler.com/commits/#{COMMIT}".freeze
 
     def initialize(level: Logger::ERROR)
