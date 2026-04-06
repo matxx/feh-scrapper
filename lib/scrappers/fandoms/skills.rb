@@ -523,6 +523,9 @@ module Scrappers
           .gsub('&lt;', '<')
           .gsub('&gt;', '>')
           .gsub('&amp;', '&')
+          # added my wiki staff to "format" the description...
+          # (Dragon Ice/Flame, Nimble/Sturdy Beast)
+          .gsub('<br>&nbsp;&nbsp;&nbsp;&nbsp;', '')
           # must be after `&amp;` transformer
           # used to make lists easier to see
           # ex : https://feheroes.fandom.com/wiki/C_Time_Traveler
