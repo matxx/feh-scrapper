@@ -140,6 +140,7 @@ module Scrappers
       'Blood ＆ Thunder' => 'Blood & Thunder',
       'S/D Crux：Ploy' => 'S/D Crux: Ploy',
       'S/R Crux：Ploy' => 'S/R Crux: Ploy',
+      'The Plan：Part II' => 'The Plan: Part II',
     }.freeze
 
     GAME8_SKILLS_TO_IGNORE = [
