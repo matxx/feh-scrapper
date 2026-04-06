@@ -104,13 +104,7 @@ module Scrappers
             skills.map { |unit_skill| get_skill_from_wikiname(unit_skill['skill'])['SP'].to_i }.max
           end
 
-          is_dragon = unit['WeaponType'].include?('Breath')
-          is_melee = self.class::ALL_MELEE.include?(unit['WeaponType'])
-          has_dc_seal = is_dragon || is_melee
-
-          is_tome = unit['WeaponType'].include?('Tome')
-          is_staff = unit['WeaponType'] == self.class::WEAPON_C_ST
-          has_cc_seal = is_tome || is_staff
+          is_missing_dc_seal = unit['WeaponType'].include?('Beast')
 
           errors[:units_without_weapon] << unit['WikiName'] if unit[:original_skills_max_sp_by_slot][SLOT_WEAPON].nil?
 
@@ -121,7 +115,7 @@ module Scrappers
             original_skill_max_sp = unit[:original_skills_max_sp_by_slot][slot] || 0
 
             max_inheritable_sp_cost =
-              if slot == SLOT_S && (has_dc_seal || has_cc_seal)
+              if slot == SLOT_S && !is_missing_dc_seal
                 300
               else
                 MAX_INHERITABLE_SP_COST[slot]
