@@ -253,6 +253,13 @@ module Scrappers
       "<#{self.class} @now=#{now}>"
     end
 
+    def reset_all_files
+      delete_files_in(data_html_path)
+      delete_files_in(data_json_path)
+
+      nil
+    end
+
     def reset_detailed_files
       delete_files_in("#{data_json_path}/detailed")
 
