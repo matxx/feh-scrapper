@@ -196,7 +196,7 @@ module Scrappers
           end
           if unit[:properties].include?('ghb')
             unit[:is_in][:heroic_grails] = true
-            unit[:lowest_rarity][:heroic_grails] = 3
+            unit[:lowest_rarity][:heroic_grails] = 4 # only care about the shop, ignore rewards
             # next
           end
 
