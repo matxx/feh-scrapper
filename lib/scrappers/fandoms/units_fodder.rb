@@ -4,6 +4,8 @@ module Scrappers
   module Fandoms
     module UnitsFodder
       MODE_HEROIC_GRAILS = 'hg'
+      MODE_HEROIC_GRAILS_4 = 'hg4'
+      MODE_HEROIC_GRAILS_5 = 'hg5'
       MODE_DIVINE_CODES = 'dc'
       MODE_GENERIC_POOL_4 = 'g4'
       MODE_GENERIC_POOL_45 = 'gsr'
@@ -14,6 +16,8 @@ module Scrappers
       MODES_IN_ORDER = [
         MODE_GENERIC_POOL_4,
         MODE_HEROIC_GRAILS,
+        MODE_HEROIC_GRAILS_4,
+        MODE_HEROIC_GRAILS_5,
         MODE_DIVINE_CODES,
         MODE_SPECIAL_POOL_4,
         MODE_GENERIC_POOL_45,
@@ -65,6 +69,22 @@ module Scrappers
               else
                 downgrades_prefodder(skill, downgrades, key_prefodder) + 1
               end
+          end
+
+          skill[:prefodder_one_mode][MODE_HEROIC_GRAILS_4] =
+            downgrades_prefodder(skill, downgrades, MODE_HEROIC_GRAILS_4) + 1
+          skill[:prefodder_one_mode][MODE_HEROIC_GRAILS_5] =
+            downgrades_prefodder(skill, downgrades, MODE_HEROIC_GRAILS_5) + 1
+          if skill[:is_in][:heroic_grails]
+            rarity = skill[:owner_lowest_rarity_when_obtained][:heroic_grails]
+            case rarity
+            when 4
+              skill[:prefodder_one_mode][MODE_HEROIC_GRAILS_4] = 0
+            when 5
+              skill[:prefodder_one_mode][MODE_HEROIC_GRAILS_5] = 0
+            else
+              errors[:skill_fodder_with_hg_weird_rarity] << [skill['WikiName'], :rarity]
+            end
           end
 
           skill[:prefodder_one_mode][MODE_GENERIC_POOL_4] =
