@@ -24,6 +24,7 @@ module Scrappers
         THEME_THIEVES = :thieves
         THEME_S12 = :s12
         THEME_NATIONS = :nations
+        THEME_CHEERLEADER = :cheerleaders
 
         # https://feheroes.fandom.com/wiki/Module:SpecialHeroList#L-8
         def fill_units_with_themes
@@ -61,8 +62,12 @@ module Scrappers
                 THEME_KIDS
               elsif month == 5
                 THEME_WEDDING
-              elsif [6, 7].include?(month)
+              elsif month == 6
                 THEME_SUMMER
+              elsif month == 7 && year <= 2025 # rubocop:disable Lint/DuplicateBranch
+                THEME_SUMMER
+              elsif month == 7 && year == 2026
+                THEME_CHEERLEADER
               elsif month == 10
                 THEME_HALLOWEEN
               elsif month == 11 && year >= 2020

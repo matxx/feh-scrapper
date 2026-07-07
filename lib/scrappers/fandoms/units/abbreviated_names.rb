@@ -29,10 +29,7 @@ module Scrappers
             {
               const_get(:INT_ID_ANNIVERSARY_MARTH) => '35!Marth',
               const_get(:INT_ID_D_ELINCIA) => 'D!Elincia',
-              const_get(:INT_ID_H_B_IKE) => 'H!B!Ike',
-              const_get(:INT_ID_H_B_LYN) => 'H!B!Lyn',
-              const_get(:INT_ID_H_B_CELICA) => 'H!B!Celica',
-              const_get(:INT_ID_H_B_HECTOR) => 'H!B!Hector',
+              const_get(:INT_ID_D_SIGURD) => 'D!Sigurd',
 
               const_get(:INT_ID_CAMILLA_ADRIFT) => 'Ad!Camilla',
               const_get(:INT_ID_CORRIN_M_ADRIFT) => 'Ad!Corrin(M)',
@@ -94,6 +91,22 @@ module Scrappers
 
             # prefixes
 
+            ## traits
+
+            name = "Ai!#{name}" if unit[:properties].include?('aided')
+            name = "As!#{name}" if unit[:properties].include?('ascended')
+            name = "At!#{name}" if unit[:properties].include?('attuned')
+            name = "E!#{name}" if unit[:properties].include?('emblem')
+            name = "R!#{name}" if unit[:properties].include?('rearmed')
+            name = "Et!#{name}" if unit[:properties].include?('entwined')
+
+            name = "B!#{name}" if unit[:properties].include?('brave')
+            name = "F!#{name}" if unit[:properties].include?('fallen')
+
+            name = "C!#{name}" if unit[:properties].include?('chosen')
+            name = "L!#{name}" if unit[:properties].include?('legendary')
+            name = "M!#{name}" if unit[:properties].include?('mythic')
+
             ## seasonals
 
             case unit[:theme]
@@ -117,6 +130,8 @@ module Scrappers
               return "We!#{name}"
             when self.class::THEME_SUMMER
               return "Su!#{name}"
+            when self.class::THEME_CHEERLEADER
+              return "Ch!#{name}"
             when self.class::THEME_HALLOWEEN
               return "H!#{name}"
             when self.class::THEME_NINJAS
@@ -146,22 +161,6 @@ module Scrappers
               return "IT!#{name}" if unit['ReleaseDate']&.start_with?('2024')
               return "Fe!#{name}" if unit['ReleaseDate']&.start_with?('2025')
             end
-
-            ## traits
-
-            return "Ai!#{name}" if unit[:properties].include?('aided')
-            return "As!#{name}" if unit[:properties].include?('ascended')
-            return "At!#{name}" if unit[:properties].include?('attuned')
-            return "E!#{name}" if unit[:properties].include?('emblem')
-            return "R!#{name}" if unit[:properties].include?('rearmed')
-            return "Et!#{name}" if unit[:properties].include?('entwined')
-
-            return "B!#{name}" if unit[:properties].include?('brave')
-            return "F!#{name}" if unit[:properties].include?('fallen')
-
-            return "C!#{name}" if unit[:properties].include?('chosen')
-            return "L!#{name}" if unit[:properties].include?('legendary')
-            return "M!#{name}" if unit[:properties].include?('mythic')
 
             return "D!#{name}" if unit[:properties].include?('duo')
             return "H!#{name}" if unit[:properties].include?('harmonized')

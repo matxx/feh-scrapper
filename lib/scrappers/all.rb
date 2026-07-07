@@ -138,6 +138,7 @@ module Scrappers
       'Yearling (Armored)' => 'Yearling (Arm.)',
       'Full Light ＆ Dark' => 'Full Light & Dark',
       'Blood ＆ Thunder' => 'Blood & Thunder',
+      'A/R Crux：Ploy' => 'A/R Crux: Ploy',
       'S/D Crux：Ploy' => 'S/D Crux: Ploy',
       'S/R Crux：Ploy' => 'S/R Crux: Ploy',
       'The Plan：Part II' => 'The Plan: Part II',
