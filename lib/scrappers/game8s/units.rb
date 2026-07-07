@@ -181,9 +181,11 @@ module Scrappers
             'recommended_bane' => nil,
             'recommended_plus10' => 'res',
           )
-        when '571438'
+        when '571438', '605699'
           # TODO: handle several recommended "no merge" builds...
           # https://game8.co/games/fire-emblem-heroes/archives/571438
+          # TODO: handle multiple IVs
+          # https://game8.co/games/fire-emblem-heroes/archives/605699
           return base.merge(
             'recommended_boon' => 'res',
             'recommended_bane' => 'def',
