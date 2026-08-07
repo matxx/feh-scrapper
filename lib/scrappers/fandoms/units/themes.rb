@@ -85,6 +85,8 @@ module Scrappers
                 THEME_THIEVES
               elsif month == 1 && year == 2019 && day > 5
                 THEME_HOSTILE_SPRING
+              elsif month == 8 && [2026].include?(year) # rubocop:disable Lint/DuplicateBranch
+                THEME_HOSTILE_SPRING
               elsif month == 4 && year == 2019
                 THEME_PICNIC
               elsif month == 8 && year.between?(2020, 2021)
