@@ -159,6 +159,8 @@ module Scrappers
 
       # TODO: unit tests
       def sanitize_weapon_restriction(skill, prefix = :skill)
+        return { can_not_use: [WEAPON_A_TO, WEAPON_A_BR, WEAPON_C] } if skill['GroupName'] == 'Arms Shield'
+
         tmp_can_use = skill['CanUseWeapon'].split(/,[[:space:]]*/)
         tmp_can_use.uniq!
 
