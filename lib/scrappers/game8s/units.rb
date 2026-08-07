@@ -173,6 +173,14 @@ module Scrappers
             'recommended_bane' => nil,
             'recommended_plus10' => 'spd',
           )
+        when '608816'
+          # TODO: handle several recommended "no merge" builds...
+          # https://game8.co/games/fire-emblem-heroes/archives/608816
+          return base.merge(
+            'recommended_boon' => 'def',
+            'recommended_bane' => 'hp',
+            'recommended_plus10' => 'def',
+          )
         when '537827'
           # TODO: handle several recommended "no merge" builds...
           # https://game8.co/games/fire-emblem-heroes/archives/537827
@@ -180,6 +188,14 @@ module Scrappers
             'recommended_boon' => nil,
             'recommended_bane' => nil,
             'recommended_plus10' => 'res',
+          )
+        when '608814'
+          # TODO: handle several recommended "no merge" builds...
+          # https://game8.co/games/fire-emblem-heroes/archives/608814
+          return base.merge(
+            'recommended_boon' => nil,
+            'recommended_bane' => 'hp',
+            'recommended_plus10' => nil,
           )
         when '571438', '605699'
           # TODO: handle several recommended "no merge" builds...
