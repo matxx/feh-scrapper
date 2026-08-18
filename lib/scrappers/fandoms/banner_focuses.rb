@@ -44,6 +44,7 @@ module Scrappers
             name
             .gsub('&quot;', '"')
             .gsub('&amp;', '&')
+            .gsub(/ \(Focus\)\Z/, '')
             .gsub('A Monstrous Harvest', 'A Monstrous Harvest / Treat Fiends') # banner has been renamed after its first appearance
           {
             name: sanitized_name,
