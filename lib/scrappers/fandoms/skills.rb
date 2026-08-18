@@ -296,18 +296,32 @@ module Scrappers
         constants[:skills_max_might] = might if might && constants[:skills_max_might] < might
         constants[:skills_max_range] = range if range && constants[:skills_max_range] < range
 
+        addition_date = nil
+        release_date = nil
+        version = nil
+
         first_owner_detail =
           skill[:owner_details]
-          &.reject { |us| us['additionDate'].nil? }
+          &.reject { |us| us['WikiName'].include?('ENEMY') }
+          &.reject { |us| us['WikiName'].include?('Kiran') }
+          &.reject { |us| us['additionDate'].blank? }
           &.min_by { |us| us['additionDate'] }
         if first_owner_detail
           unit = all_units_by_wikiname[first_owner_detail['WikiName']]
           if unit.nil?
             errors[:owner_not_found] << first_owner_detail['WikiName']
           else
-            first_owner = unit
+            addition_date = unit['AdditionDate']
+            release_date  = unit['ReleaseDate']
+            version       = unit[:version]
           end
+        elsif skill['Scategory'] != SKILL_CAT_SACRED_SEAL
+          errors[:no_owner] << { cat: skill['Scategory'], name: skill['Name'] }
         end
+        # TODO: create & store release dates in JSON for seals or skills without owners
+        # addition_date
+        # release_date
+        # version
 
         name = sanitize_name(skill['Name'])
         if name == 'Falchion'
@@ -376,9 +390,9 @@ module Scrappers
             end
           ),
 
-          addition_date: first_owner&.dig('AdditionDate'),
-          release_date:  first_owner&.dig('ReleaseDate'),
-          version:       first_owner&.dig(:version),
+          addition_date:,
+          release_date:,
+          version:,
         }
 
         if skill[:upgrades_wikinames]
