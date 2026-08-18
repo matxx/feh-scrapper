@@ -189,8 +189,8 @@ module Scrappers
           unit[:divine_codes] = Hash.new { |h, k| h[k] = [] }
           unit[:properties] = (unit['Properties'] || '').split(',')
 
-          if unit[:properties].intersect?(FIVE_STAR_FOCUS_ONLY_UNIT_PROPERTIES) ||
-             self.class::INT_IDS_OF_FOCUS_ONLY_UNITS.include?(unit[:int_id])
+          if self.class::INT_IDS_OF_FOCUS_ONLY_UNITS.include?(unit[:int_id]) ||
+             (unit[:properties].intersect?(FIVE_STAR_FOCUS_ONLY_UNIT_PROPERTIES) && !unit[:properties].include?('special'))
             unit[:is_in][:focus_only] = true
             unit[:lowest_rarity][:focus_only] = 5
           end
