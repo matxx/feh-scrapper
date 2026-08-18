@@ -131,7 +131,7 @@ module Scrappers
             when self.class::THEME_SUMMER
               return "Su!#{name}"
             when self.class::THEME_CHEERLEADER
-              return "Ch!#{name}"
+              return "Che!#{name}"
             when self.class::THEME_HALLOWEEN
               return "H!#{name}"
             when self.class::THEME_NINJAS
