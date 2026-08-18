@@ -598,20 +598,21 @@ module Scrappers
       # => diff between release dates (and not versions)
       # https://feheroes.fandom.com/wiki/Module:MaxStatsTable#L-61
       def max_dragonflowers(unit)
-        # version 3.2
         if unit['ReleaseDate'] < '2019-02-07' && unit['MoveType'] == self.class::MOVE_I
-          8
+          9
         elsif unit['ReleaseDate'] < '2020-08-18' # CYL4
-          7
+          8
         elsif unit['ReleaseDate'] < '2021-08-17' # CYL5
-          6
+          7
         elsif unit['ReleaseDate'] < '2022-08-17' # CYL6
-          5
+          6
         elsif unit['ReleaseDate'] < '2023-08-16' # CYL7
-          4
+          5
         elsif unit['ReleaseDate'] < '2024-08-16' # CYL8
-          3
+          4
         elsif unit['ReleaseDate'] < '2025-08-15' # CYL9
+          3
+        elsif unit['ReleaseDate'] < '2026-08-17' # CYL10
           2
         else
           1
