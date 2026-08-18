@@ -283,6 +283,26 @@ module Scrappers
         "#{prefix.upcase}_#{page['TagID']}"
       end
 
+      SKILLS_WITHOUT_OWNERS = {
+        SKILL_CAT_WEAPON => {
+          'Keen Gronnwolf' => {
+            addition_date: '2017-12-02',
+            release_date:  '2017-12-02',
+            version:       '2.0',
+          },
+          'Slaying Spear' => {
+            addition_date: '2018-09-14',
+            release_date:  '2018-09-14',
+            version:       '2.9',
+          },
+          'Atlas+' => {
+            addition_date: '2020-03-31',
+            release_date:  '2020-03-31',
+            version:       '4.3',
+          },
+        },
+      }.freeze
+
       def skill_as_json(skill)
         tier = skill[:tier]
         sp = skill['SP'].to_i unless skill['Scategory'] == SKILL_CAT_PASSIVE_X
@@ -316,12 +336,32 @@ module Scrappers
             version       = unit[:version]
           end
         elsif skill['Scategory'] != SKILL_CAT_SACRED_SEAL
-          errors[:no_owner] << { cat: skill['Scategory'], name: skill['Name'] }
+          data =
+            if skill['Name'].include?('Keen Blárwolf') || skill['Name'].include?('Keen Rauðrwolf')
+              # 3 same tomes in 3 different colors
+              # but only one got an owner (the green)
+              # all wiki pages got created on 2017-11-17
+              # but since green gets the owner dates
+              # lets use those for all three
+              SKILLS_WITHOUT_OWNERS[SKILL_CAT_WEAPON]['Keen Gronnwolf']
+            elsif skill['Name'].include?('Armorsmasher') || skill['Name'].include?('Slaying Hammer')
+              # 3 same weapons in 3 different colors
+              # but only one got an owner (the lance/blue)
+              # all wiki pages got created on 2017-11-17
+              # but since lance/blue gets the owner dates
+              # lets use those for all three
+              SKILLS_WITHOUT_OWNERS[SKILL_CAT_WEAPON]['Slaying Spear']
+            else
+              SKILLS_WITHOUT_OWNERS.dig(skill['Scategory'], skill['Name'])
+            end
+          if data.nil?
+            errors[:no_owner] << { cat: skill['Scategory'], wikiname: skill['WikiName'] }
+          else
+            addition_date = data[:addition_date]
+            release_date  = data[:release_date]
+            version       = data[:version]
+          end
         end
-        # TODO: create & store release dates in JSON for seals or skills without owners
-        # addition_date
-        # release_date
-        # version
 
         name = sanitize_name(skill['Name'])
         if name == 'Falchion'
