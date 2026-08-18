@@ -135,10 +135,8 @@ module Scrappers
                 titles:,
               )
             rescue MediawikiApi::ApiError => e
-              raise e unless e.message.include?('ratelimited')
+              raise e unless retry_wiki_error?(e)
 
-              logger.error '--- rate limit exceeded : going to sleep'
-              sleep 5
               retry
             end
 

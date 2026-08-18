@@ -219,6 +219,28 @@ module Scrappers
       Hash.new { |h, k| h[k] = [] }
     end
 
+    def retry_wiki_error?(error)
+      if error.message.include?('unexpected HTTP response (503)')
+        logger.error '--- unexpected HTTP response (503) : retrying in a few'
+        sleep 2
+        return true
+      end
+
+      if error.message.include?('unexpected HTTP response (522)')
+        logger.error '--- unexpected HTTP response (522) : retrying in a few'
+        sleep 2
+        return true
+      end
+
+      if error.message.include?('ratelimited')
+        logger.error '--- rate limit exceeded : going to sleep'
+        sleep 5
+        return true
+      end
+
+      false
+    end
+
     def retrieve_all_pages(table, fields, limit: BATCH_SIZE, cycle_limit: nil)
       pages = []
       offset = 0
@@ -235,10 +257,8 @@ module Scrappers
               limit:,
             )
           rescue MediawikiApi::ApiError => e
-            raise e unless e.message.include?('ratelimited')
+            raise e unless retry_wiki_error?(e)
 
-            logger.error '--- rate limit exceeded : going to sleep'
-            sleep 5
             retry
           end
         # logger.warn "--- number of results : #{response.data.size}"
