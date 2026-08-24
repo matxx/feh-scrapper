@@ -110,6 +110,7 @@ module Scrappers
       log_and_launch(:scrap_special_summon_pool)
       log_and_launch(:scrap_divine_codes)
       log_and_launch(:scrap_banner_focuses)
+      log_and_launch(:scrap_summoning_events)
       log_and_launch(:scrap_distributions)
       log_and_launch(:scrap_version_updates)
       log_and_launch(:scrap_weapon_upgrades)
