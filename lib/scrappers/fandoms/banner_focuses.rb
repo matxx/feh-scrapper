@@ -93,7 +93,7 @@ module Scrappers
               unit['TagID']
             end.uniq.compact.sort,
           }
-        end.sort_by { |banner| banner[:start_time] || '' }
+        end.sort_by { |banner| [banner[:start_time] || '', banner[:name]] }
       end
     end
   end
