@@ -154,6 +154,176 @@ RSpec.describe Scrappers::Fandoms::SkillsWeapons do
 
       expect(host.errors[:skill_with_weird_weapon_restrictions]).to be_empty
     end
+
+    context 'with real Duel Flying skills' do
+      it 'R Duel Flying 3 can only be used by Red units' do
+        skill = {
+          'GroupName' => 'R Duel Flying',
+          'CanUseWeapon' => 'Red Sword,  Red Bow,  Red Dagger,  Red Tome,  Red Breath,  Red Beast',
+          'WikiName' => 'R Duel Flying 3',
+          'Name' => 'R Duel Flying 3',
+        }
+
+        expect(host.sanitize_weapon_restriction(skill)).to eq(can_use: [described_class::WEAPON_R])
+      end
+
+      it 'B Duel Flying 3 can only be used by Blue units' do
+        skill = {
+          'GroupName' => 'B Duel Flying',
+          'CanUseWeapon' => 'Blue Lance,  Blue Bow,  Blue Dagger,  Blue Tome,  Blue Breath,  Blue Beast',
+          'WikiName' => 'B Duel Flying 3',
+          'Name' => 'B Duel Flying 3',
+        }
+
+        expect(host.sanitize_weapon_restriction(skill)).to eq(can_use: [described_class::WEAPON_B])
+      end
+
+      it 'G Duel Flying 3 can only be used by Green units' do
+        skill = {
+          'GroupName' => 'G Duel Flying',
+          'CanUseWeapon' => 'Green Axe,  Green Bow,  Green Dagger,  Green Tome,  Green Breath,  Green Beast',
+          'WikiName' => 'G Duel Flying 3',
+          'Name' => 'G Duel Flying 3',
+        }
+
+        expect(host.sanitize_weapon_restriction(skill)).to eq(can_use: [described_class::WEAPON_G])
+      end
+
+      it 'C Duel Flying 3 can only be used by Colorless units' do
+        skill = {
+          'GroupName' => 'C Duel Flying',
+          'CanUseWeapon' => 'Colorless Bow,  Colorless Dagger,  Colorless Tome,  Colorless Staff,  ' \
+                            'Colorless Breath,  Colorless Beast',
+          'WikiName' => 'C Duel Flying 3',
+          'Name' => 'C Duel Flying 3',
+        }
+
+        expect(host.sanitize_weapon_restriction(skill)).to eq(can_use: [described_class::WEAPON_C])
+      end
+    end
+
+    context 'with real Feud skills' do
+      it 'Red Feud 3 cannot be used by Green units' do
+        skill = {
+          'GroupName' => 'Red Feud',
+          'CanUseWeapon' => 'Red Sword,  Blue Lance,  Red Bow,  Blue Bow,  Colorless Bow,  Red Dagger,  ' \
+                            'Blue Dagger,  Colorless Dagger,  Red Tome,  Blue Tome,  Colorless Tome,  ' \
+                            'Colorless Staff,  Red Breath,  Blue Breath,  Colorless Breath,  Red Beast,  ' \
+                            'Blue Beast,  Colorless Beast',
+          'WikiName' => 'Red Feud 3',
+          'Name' => 'Red Feud 3',
+        }
+
+        expect(host.sanitize_weapon_restriction(skill)).to eq(can_not_use: [described_class::WEAPON_G])
+      end
+
+      it 'Blue Feud 3 cannot be used by Red units' do
+        skill = {
+          'GroupName' => 'Blue Feud',
+          'CanUseWeapon' => 'Blue Lance,  Green Axe,  Blue Bow,  Green Bow,  Colorless Bow,  Blue Dagger,  ' \
+                            'Green Dagger,  Colorless Dagger,  Blue Tome,  Green Tome,  Colorless Tome,  ' \
+                            'Colorless Staff,  Blue Breath,  Green Breath,  Colorless Breath,  Blue Beast,  ' \
+                            'Green Beast,  Colorless Beast',
+          'WikiName' => 'Blue Feud 3',
+          'Name' => 'Blue Feud 3',
+        }
+
+        expect(host.sanitize_weapon_restriction(skill)).to eq(can_not_use: [described_class::WEAPON_R])
+      end
+
+      it 'Green Feud 3 cannot be used by Blue units' do
+        skill = {
+          'GroupName' => 'Green Feud',
+          'CanUseWeapon' => 'Red Sword,  Green Axe,  Red Bow,  Green Bow,  Colorless Bow,  Red Dagger,  ' \
+                            'Green Dagger,  Colorless Dagger,  Red Tome,  Green Tome,  Colorless Tome,  ' \
+                            'Colorless Staff,  Red Breath,  Green Breath,  Colorless Breath,  Red Beast,  ' \
+                            'Green Beast,  Colorless Beast',
+          'WikiName' => 'Green Feud 3',
+          'Name' => 'Green Feud 3',
+        }
+
+        expect(host.sanitize_weapon_restriction(skill)).to eq(can_not_use: [described_class::WEAPON_B])
+      end
+
+      it 'C Feud 3 has no restriction' do
+        skill = {
+          'GroupName' => 'C Feud',
+          'CanUseWeapon' => described_class::ALL_WEAPONS.join(', '),
+          'WikiName' => 'C Feud 3',
+          'Name' => 'C Feud 3',
+        }
+
+        expect(host.sanitize_weapon_restriction(skill)).to eq(none: true)
+      end
+    end
+
+    context 'can_use with a class of weapons' do
+      it 'Counter Dull can be used by melee units' do
+        skill = {
+          'GroupName' => 'Counter Dull',
+          'CanUseWeapon' => 'Red Sword,  Blue Lance,  Green Axe',
+          'WikiName' => 'Counter Dull',
+          'Name' => 'Counter Dull',
+        }
+
+        expect(host.sanitize_weapon_restriction(skill)).to eq(can_use: [described_class::WEAPON_A_MELEE])
+      end
+
+      it 'Waning Shot can be used by bow units' do
+        skill = {
+          'GroupName' => 'Waning Shot',
+          'CanUseWeapon' => 'Red Bow,  Blue Bow,  Green Bow,  Colorless Bow',
+          'WikiName' => 'Waning Shot',
+          'Name' => 'Waning Shot',
+        }
+
+        expect(host.sanitize_weapon_restriction(skill)).to eq(can_use: [described_class::WEAPON_A_BO])
+      end
+
+      it 'Lookout Rush can be used by dagger units' do
+        skill = {
+          'GroupName' => 'Lookout Rush',
+          'CanUseWeapon' => 'Red Dagger,  Blue Dagger,  Green Dagger,  Colorless Dagger',
+          'WikiName' => 'Lookout Rush',
+          'Name' => 'Lookout Rush',
+        }
+
+        expect(host.sanitize_weapon_restriction(skill)).to eq(can_use: [described_class::WEAPON_A_DA])
+      end
+
+      it 'Demonic Force can be used by tome units' do
+        skill = {
+          'GroupName' => 'Demonic Force',
+          'CanUseWeapon' => 'Red Tome,  Blue Tome,  Green Tome,  Colorless Tome',
+          'WikiName' => 'Demonic Force',
+          'Name' => 'Demonic Force',
+        }
+
+        expect(host.sanitize_weapon_restriction(skill)).to eq(can_use: [described_class::WEAPON_A_TO])
+      end
+
+      it 'Distant Breath can be used by breath (dragon) units' do
+        skill = {
+          'GroupName' => 'Distant Breath',
+          'CanUseWeapon' => 'Red Breath,  Blue Breath,  Green Breath,  Colorless Breath',
+          'WikiName' => 'Distant Breath',
+          'Name' => 'Distant Breath',
+        }
+
+        expect(host.sanitize_weapon_restriction(skill)).to eq(can_use: [described_class::WEAPON_A_BR])
+      end
+
+      it 'Dark Beast Agility can be used by beast units' do
+        skill = {
+          'GroupName' => 'Dark Beast Agility',
+          'CanUseWeapon' => 'Red Beast,  Blue Beast,  Green Beast,  Colorless Beast',
+          'WikiName' => 'Dark Beast Agility',
+          'Name' => 'Dark Beast Agility',
+        }
+
+        expect(host.sanitize_weapon_restriction(skill)).to eq(can_use: [described_class::WEAPON_A_BE])
+      end
+    end
   end
 
   describe '#sanitize_weapon_type' do
