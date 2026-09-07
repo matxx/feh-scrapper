@@ -157,7 +157,6 @@ module Scrappers
         WEAPON_C_BE,
       ].freeze
 
-      # TODO: unit tests
       def sanitize_weapon_restriction(skill, prefix = :skill)
         return { can_not_use: [WEAPON_A_TO, WEAPON_A_BR, WEAPON_C] } if skill['GroupName'] == 'Arms Shield'
 

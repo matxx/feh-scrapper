@@ -8,6 +8,7 @@ gem 'aws-sdk-s3', '~> 1'
 gem 'diffy'
 gem 'http'
 gem 'nokogiri'
+gem 'rspec', '~> 3.13'
 gem 'rubocop', '~> 1.66.1'
 
 gem 'activesupport'
