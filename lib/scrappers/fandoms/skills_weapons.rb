@@ -157,74 +157,33 @@ module Scrappers
         WEAPON_C_BE,
       ].freeze
 
-      def sanitize_weapon_restriction(skill, prefix = :skill)
-        return { can_not_use: [WEAPON_A_TO, WEAPON_A_BR, WEAPON_C] } if skill['GroupName'] == 'Arms Shield'
+      # Paired with their one-word/one-phrase label, in the fixed order
+      # `summarize_weapons` checks and lists them in.
+      COLOR_GROUPS = [ALL_REDS, ALL_BLUES, ALL_GREENS, ALL_COLORLESS].freeze
+      COLOR_LABELS = [WEAPON_R, WEAPON_B, WEAPON_G, WEAPON_C].freeze
 
+      FAMILY_GROUPS = [ALL_BOWS, ALL_DAGGERS, ALL_TOMES, ALL_BREATHES, ALL_BEASTS].freeze
+      FAMILY_LABELS = [WEAPON_A_BO, WEAPON_A_DA, WEAPON_A_TO, WEAPON_A_BR, WEAPON_A_BE].freeze
+
+      # Same as FAMILY_GROUPS/FAMILY_LABELS, minus Tome: a tome user's color is fixed
+      # for good on obtention (no cross-color transfer), so CanUseWeapon listing only
+      # one tome color is the norm, not a weird/inconsistent restriction worth flagging
+      # (unlike an uneven color split for bows/daggers/breaths/beasts).
+      WEIRD_RESTRICTION_GROUPS = [ALL_BOWS, ALL_DAGGERS, ALL_BREATHES, ALL_BEASTS].freeze
+      WEIRD_RESTRICTION_LABELS = [WEAPON_A_BO, WEAPON_A_DA, WEAPON_A_BR, WEAPON_A_BE].freeze
+
+      def sanitize_weapon_restriction(skill, prefix = :skill)
         tmp_can_use = skill['CanUseWeapon'].split(/,[[:space:]]*/)
         tmp_can_use.uniq!
 
         errors[:"#{prefix}_with_unknown_weapon_restrictions"] << skill['WikiName'] if (tmp_can_use - ALL_WEAPONS).any?
 
         return { none: true } if tmp_can_use.length == WEAPONS_COUNT
-        return { can_not_use: [WEAPON_C_ST] } if (ALL_WEAPONS - tmp_can_use) == [WEAPON_C_ST]
 
-        {
-          ALL_REDS => WEAPON_R,
-          ALL_BLUES => WEAPON_B,
-          ALL_GREENS => WEAPON_G,
-          ALL_COLORLESS => WEAPON_C,
-        }.each do |array, elem|
-          return { can_use: [elem] } if tmp_can_use.sort == array.sort
+        flag_weird_weapon_restrictions(skill, tmp_can_use, prefix)
 
-          if !array.intersect?(tmp_can_use) && (tmp_can_use + array).length == WEAPONS_COUNT
-            return { can_not_use: [elem] }
-          end
-        end
-
-        can_use = []
-        can_not_use = []
-
-        if (ALL_MELEE - tmp_can_use).empty?
-          can_use << WEAPON_A_MELEE
-        elsif !ALL_MELEE.intersect?(tmp_can_use)
-          can_not_use << WEAPON_A_MELEE
-        else
-          can_use << WEAPON_R_SW if tmp_can_use.include?(WEAPON_R_SW)
-          can_use << WEAPON_B_LA if tmp_can_use.include?(WEAPON_B_LA)
-          can_use << WEAPON_G_AX if tmp_can_use.include?(WEAPON_G_AX)
-        end
-
-        if tmp_can_use.include?(WEAPON_C_ST)
-          can_use << WEAPON_C_ST
-        else
-          can_not_use << WEAPON_C_ST
-        end
-
-        if (ALL_TOMES - tmp_can_use).empty?
-          can_use << WEAPON_A_TO
-        elsif !ALL_TOMES.intersect?(tmp_can_use)
-          can_not_use << WEAPON_A_TO
-        else
-          can_use << WEAPON_R_TO if tmp_can_use.include?(WEAPON_R_TO)
-          can_use << WEAPON_B_TO if tmp_can_use.include?(WEAPON_B_TO)
-          can_use << WEAPON_G_TO if tmp_can_use.include?(WEAPON_G_TO)
-          can_use << WEAPON_C_TO if tmp_can_use.include?(WEAPON_C_TO)
-        end
-
-        {
-          ALL_BOWS => WEAPON_A_BO,
-          ALL_DAGGERS => WEAPON_A_DA,
-          ALL_BREATHES => WEAPON_A_BR,
-          ALL_BEASTS => WEAPON_A_BE,
-        }.each do |array, elem|
-          if (array - tmp_can_use).empty?
-            can_use << elem
-          elsif !array.intersect?(tmp_can_use)
-            can_not_use << elem
-          elsif !skill['Name'].include?('Cancel Affinity')
-            errors[:"#{prefix}_with_weird_weapon_restrictions"] << [skill['WikiName'], array, elem]
-          end
-        end
+        can_use = summarize_weapons(tmp_can_use)
+        can_not_use = summarize_weapons(ALL_WEAPONS - tmp_can_use)
 
         if can_use.length <= can_not_use.length
           { can_use: }
@@ -248,6 +207,76 @@ module Scrappers
         return can_use[0] if can_use.size == 1
 
         errors[:not_sanitizable_weapon_type] << skill['WikiName']
+      end
+
+      private
+
+      # Logs a "weird restriction" warning when a skill uses some, but not all, of a
+      # weapon family (bow/dagger/breath/beast) across colors, in a way that isn't
+      # explained by a color being entirely excluded (see `weird_family?`). Cancel
+      # Affinity skills are exempt outright: they're expected to single out one
+      # color within a family on purpose, while every color stays otherwise usable
+      # via the other families — a pattern `weird_family?` can't tell apart from a
+      # genuinely inconsistent restriction. The raw CanUseWeapon is included last so
+      # a weird-restrictions export is debuggable without going back to the source
+      # data.
+      def flag_weird_weapon_restrictions(skill, tmp_can_use, prefix)
+        return if skill['GroupName'] == 'Cancel Affinity'
+
+        WEIRD_RESTRICTION_GROUPS.each_with_index do |array, index|
+          next unless weird_family?(array, tmp_can_use)
+
+          errors[:"#{prefix}_with_weird_weapon_restrictions"] <<
+            [skill['WikiName'], array, WEIRD_RESTRICTION_LABELS[index], skill['CanUseWeapon']]
+        end
+      end
+
+      # True when `family` (e.g. ALL_BOWS, listed Red/Blue/Green/Colorless like
+      # COLOR_GROUPS) is present for some, but not all, of the colors that have ANY
+      # presence at all in `weapons`. Colors entirely absent from `weapons` are
+      # ignored: a gap there is just a side effect of that whole color being
+      # excluded (Feud, Duel, Triangle Adept, Axebreaker/Swordbreaker...), not a
+      # genuinely inconsistent restriction.
+      def weird_family?(family, weapons)
+        relevant = COLOR_GROUPS.zip(family).select { |color_group, _member| color_group.intersect?(weapons) }
+        return false if relevant.empty?
+
+        relevant.map { |_color_group, member| weapons.include?(member) }.uniq.length > 1
+      end
+
+      # Describes `weapons` as the shortest meaningful list of labels: a full color
+      # (e.g. "Red"), a full weapon-type family across colors (e.g. "All Bow"), "All
+      # Melee" (the sword/lance/axe trio), and finally any leftover single weapons.
+      # Colors are checked first, then Melee, then the other families — each against
+      # the full `weapons` set, so overlapping groups (e.g. "Red" and "All Bow" both
+      # covering Red Bow) can both legitimately apply. This is what lets a skill that
+      # mixes a fully-excluded color with fully-excluded weapon families (e.g. "cannot
+      # use Red, or any Bow, Dagger, or Tome") resolve to a short, meaningful list
+      # instead of one entry per leftover weapon.
+      def summarize_weapons(weapons)
+        labels = []
+        covered = []
+
+        COLOR_GROUPS.each_with_index do |group, index|
+          next unless (group - weapons).empty?
+
+          labels << COLOR_LABELS[index]
+          covered.concat(group)
+        end
+
+        if (ALL_MELEE - weapons).empty?
+          labels << WEAPON_A_MELEE
+          covered.concat(ALL_MELEE)
+        end
+
+        FAMILY_GROUPS.each_with_index do |group, index|
+          next unless (group - weapons).empty?
+
+          labels << FAMILY_LABELS[index]
+          covered.concat(group)
+        end
+
+        labels + (ALL_WEAPONS & (weapons - covered))
       end
     end
   end

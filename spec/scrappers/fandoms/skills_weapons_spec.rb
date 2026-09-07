@@ -22,14 +22,14 @@ RSpec.describe Scrappers::Fandoms::SkillsWeapons do
   subject(:host) { SkillsWeaponsHost.new }
 
   describe '#sanitize_weapon_restriction' do
-    it 'returns the hardcoded restriction for the Arms Shield group, even without CanUseWeapon' do
-      skill = { 'GroupName' => 'Arms Shield', 'WikiName' => 'Some Arms Shield' }
+    # Every example in this file is a regression test against false-positive
+    # weird-restriction errors, except the one below that's specifically about
+    # producing one — so assert it's empty everywhere else, instead of relying on
+    # each example to remember to check it.
+    after do |example|
+      next if example.metadata[:expects_weird_restriction_error]
 
-      result = host.sanitize_weapon_restriction(skill)
-
-      expect(result).to eq(
-        can_not_use: [described_class::WEAPON_A_TO, described_class::WEAPON_A_BR, described_class::WEAPON_C],
-      )
+      expect(host.errors[:skill_with_weird_weapon_restrictions]).to be_empty
     end
 
     it 'records an error when CanUseWeapon contains an unrecognized weapon' do
@@ -127,10 +127,17 @@ RSpec.describe Scrappers::Fandoms::SkillsWeapons do
       expect(host.sanitize_weapon_restriction(skill)).to eq(can_use: [described_class::WEAPON_R_SW])
     end
 
-    it 'records a weird-restriction error when only part of a horizontal group is usable' do
+    it 'records a weird-restriction error, with the raw CanUseWeapon, when a family singles out a ' \
+       'still-otherwise-usable color', :expects_weird_restriction_error do
+      # Red is fully usable and Blue is usable everywhere except its Bow: since
+      # neither color is entirely excluded, that gap can't be explained away, unlike
+      # a Feud/Duel/Triangle Adept-style whole-color exclusion.
+      can_use = described_class::ALL_REDS + (described_class::ALL_BLUES - [described_class::WEAPON_B_BO])
+      can_use_weapon = can_use.join(', ')
+
       skill = {
         'GroupName' => 'Whatever',
-        'CanUseWeapon' => [described_class::WEAPON_R_BO, described_class::WEAPON_B_BO].join(', '),
+        'CanUseWeapon' => can_use_weapon,
         'WikiName' => 'Some Skill',
         'Name' => 'Some Skill',
       }
@@ -138,16 +145,46 @@ RSpec.describe Scrappers::Fandoms::SkillsWeapons do
       host.sanitize_weapon_restriction(skill)
 
       expect(host.errors[:skill_with_weird_weapon_restrictions]).to eq(
-        [['Some Skill', described_class::ALL_BOWS, described_class::WEAPON_A_BO]],
+        [['Some Skill', described_class::ALL_BOWS, described_class::WEAPON_A_BO, can_use_weapon]],
       )
     end
 
     it 'does not record a weird-restriction error for Cancel Affinity skills' do
       skill = {
-        'GroupName' => 'Whatever',
+        'GroupName' => 'Cancel Affinity',
         'CanUseWeapon' => [described_class::WEAPON_R_BO, described_class::WEAPON_B_BO].join(', '),
         'WikiName' => 'Cancel Affinity (Bow)',
         'Name' => 'Cancel Affinity (Bow)',
+      }
+
+      host.sanitize_weapon_restriction(skill)
+
+      expect(host.errors[:skill_with_weird_weapon_restrictions]).to be_empty
+    end
+
+    it 'does not record a weird-restriction error for a partial Tome color split' do
+      skill = {
+        'GroupName' => 'Whatever',
+        'CanUseWeapon' => described_class::WEAPON_R_TO,
+        'WikiName' => 'Argent Aura',
+        'Name' => 'Argent Aura',
+      }
+
+      host.sanitize_weapon_restriction(skill)
+
+      expect(host.errors[:skill_with_weird_weapon_restrictions]).to be_empty
+    end
+
+    it 'does not record a weird-restriction error for a skill excluding one entire color' do
+      # e.g. Triangle Adept, Axebreaker, Swordbreaker: every family they touch is
+      # incomplete only because Colorless is entirely excluded, which isn't weird.
+      can_use = described_class::ALL_WEAPONS - described_class::ALL_COLORLESS
+
+      skill = {
+        'GroupName' => 'Whatever',
+        'CanUseWeapon' => can_use.join(', '),
+        'WikiName' => 'Some Triangle Skill',
+        'Name' => 'Some Triangle Skill',
       }
 
       host.sanitize_weapon_restriction(skill)
@@ -322,6 +359,123 @@ RSpec.describe Scrappers::Fandoms::SkillsWeapons do
         }
 
         expect(host.sanitize_weapon_restriction(skill)).to eq(can_use: [described_class::WEAPON_A_BE])
+      end
+    end
+
+    context 'with real skills mixing weapon and color families' do
+      it 'Azure Impetus cannot be used by Red, Bow, Dagger, Tome, or Colorless Staff units' do
+        can_use = described_class::ALL_WEAPONS
+        can_use -= described_class::ALL_REDS
+        can_use -= described_class::ALL_BOWS
+        can_use -= described_class::ALL_DAGGERS
+        can_use -= described_class::ALL_TOMES
+        can_use -= [described_class::WEAPON_C_ST]
+
+        skill = {
+          'GroupName' => 'Whatever',
+          'CanUseWeapon' => can_use.join(', '),
+          'WikiName' => 'Azure Impetus',
+          'Name' => 'Azure Impetus',
+        }
+
+        expect(host.sanitize_weapon_restriction(skill)).to eq(
+          can_not_use: [
+            described_class::WEAPON_R,
+            described_class::WEAPON_A_BO,
+            described_class::WEAPON_A_DA,
+            described_class::WEAPON_A_TO,
+            described_class::WEAPON_C_ST,
+          ],
+        )
+      end
+
+      it 'Crimson Impetus cannot be used by Green, Bow, Dagger, Tome, or Colorless Staff units' do
+        can_use = described_class::ALL_WEAPONS
+        can_use -= described_class::ALL_GREENS
+        can_use -= described_class::ALL_BOWS
+        can_use -= described_class::ALL_DAGGERS
+        can_use -= described_class::ALL_TOMES
+        can_use -= [described_class::WEAPON_C_ST]
+
+        skill = {
+          'GroupName' => 'Whatever',
+          'CanUseWeapon' => can_use.join(', '),
+          'WikiName' => 'Crimson Impetus',
+          'Name' => 'Crimson Impetus',
+        }
+
+        expect(host.sanitize_weapon_restriction(skill)).to eq(
+          can_not_use: [
+            described_class::WEAPON_G,
+            described_class::WEAPON_A_BO,
+            described_class::WEAPON_A_DA,
+            described_class::WEAPON_A_TO,
+            described_class::WEAPON_C_ST,
+          ],
+        )
+      end
+
+      it 'Vivace can be used by melee, breath, and beast units' do
+        can_use = described_class::ALL_WEAPONS
+        can_use -= described_class::ALL_BOWS
+        can_use -= described_class::ALL_DAGGERS
+        can_use -= described_class::ALL_TOMES
+        can_use -= [described_class::WEAPON_C_ST]
+
+        skill = {
+          'GroupName' => 'Whatever',
+          'CanUseWeapon' => can_use.join(', '),
+          'WikiName' => 'Vivace',
+          'Name' => 'Vivace',
+        }
+
+        expect(host.sanitize_weapon_restriction(skill)).to eq(
+          can_use: [
+            described_class::WEAPON_A_MELEE,
+            described_class::WEAPON_A_BR,
+            described_class::WEAPON_A_BE,
+          ],
+        )
+      end
+
+      it 'Arms Shield 4 cannot be used by Colorless, Tome, or Breath units' do
+        skill = {
+          'GroupName' => 'Arms Shield',
+          'CanUseWeapon' => 'Red Sword,  Blue Lance,  Green Axe,  Red Bow,  Blue Bow,  Green Bow,  ' \
+                            'Red Dagger,  Blue Dagger,  Green Dagger,  Red Beast,  Blue Beast,  Green Beast',
+          'WikiName' => 'Arms Shield 4',
+          'Name' => 'Arms Shield 4',
+        }
+
+        expect(host.sanitize_weapon_restriction(skill)).to eq(
+          can_not_use: [described_class::WEAPON_C, described_class::WEAPON_A_TO, described_class::WEAPON_A_BR],
+        )
+      end
+    end
+
+    context 'with a real Cancel Affinity skill' do
+      it 'Cancel Affinity 3 can be used by melee, breath, beast, and colorless bow/dagger/tome units' do
+        skill = {
+          'GroupName' => 'Cancel Affinity',
+          'CanUseWeapon' => 'Red Sword,  Blue Lance,  Green Axe,  Colorless Bow,  Colorless Dagger,  ' \
+                            'Colorless Tome,  Red Breath,  Blue Breath,  Green Breath,  Colorless Breath,  ' \
+                            'Red Beast,  Blue Beast,  Green Beast,  Colorless Beast',
+          'WikiName' => 'Cancel Affinity 3',
+          'Name' => 'Cancel Affinity 3',
+        }
+
+        result = host.sanitize_weapon_restriction(skill)
+
+        expect(result).to eq(
+          can_use: [
+            described_class::WEAPON_A_MELEE,
+            described_class::WEAPON_A_BR,
+            described_class::WEAPON_A_BE,
+            described_class::WEAPON_C_BO,
+            described_class::WEAPON_C_DA,
+            described_class::WEAPON_C_TO,
+          ],
+        )
       end
     end
   end
