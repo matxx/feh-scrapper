@@ -157,10 +157,11 @@ module Scrappers
             when self.class::THEME_S12
               return "S12!#{name}"
             when self.class::THEME_NATIONS
-              return "FT!#{name}" if unit['ReleaseDate']&.start_with?('2022')
-              return "WT!#{name}" if unit['ReleaseDate']&.start_with?('2023')
-              return "IT!#{name}" if unit['ReleaseDate']&.start_with?('2024')
-              return "Fe!#{name}" if unit['ReleaseDate']&.start_with?('2025')
+              return "FT!#{name}" if unit['ReleaseDate']&.start_with?('2022') # Fire Tribe
+              return "WT!#{name}" if unit['ReleaseDate']&.start_with?('2023') # Wind Tribe
+              return "IT!#{name}" if unit['ReleaseDate']&.start_with?('2024') # Ice Tribe
+              return "Fe!#{name}" if unit['ReleaseDate']&.start_with?('2025') # Ferox
+              return "Sa!#{name}" if unit['ReleaseDate']&.start_with?('2026') # Sacae
             end
 
             return "D!#{name}" if unit[:properties].include?('duo')

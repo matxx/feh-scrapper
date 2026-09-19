@@ -93,7 +93,7 @@ module Scrappers
                 THEME_PIRATES
               elsif month == 9 && year == 2021
                 THEME_S12
-              elsif month == 9 && year.between?(2022, 2025)
+              elsif month == 9 && year.between?(2022, 2026)
                 THEME_NATIONS
               end
           end
