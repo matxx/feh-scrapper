@@ -50,8 +50,8 @@ module Scrappers
       private
 
       def heroic_grails_as_json
-        all_heroic_grails
-          .sort_by { |d| [d['StartTime'], d['TagID']] }
+        list =
+          all_heroic_grails
           .map do |row|
             unit = all_units_by_pagename[row['Unit']]
             if unit.nil?
@@ -64,7 +64,10 @@ module Scrappers
               unit_id: unit['TagID'],
               rarity: row['Rarity'].to_i,
             }
-          end.compact
+          end
+        list
+          .compact
+          .sort_by { |d| [d[:start_time], d[:unit_id]] }
       end
     end
   end
