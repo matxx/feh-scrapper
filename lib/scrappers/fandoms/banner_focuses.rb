@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'active_support/core_ext/string/conversions'
+
 module Scrappers
   module Fandoms
     module BannerFocuses
@@ -65,35 +67,70 @@ module Scrappers
       private
 
       def banners_as_json
-        all_banner_focuses_by_pagename.map do |name, rows|
-          sanitized_name =
-            name
-            .gsub('&quot;', '"')
-            .gsub('&amp;', '&')
-            .gsub(/ \(Focus\)\Z/, '')
-            .gsub('A Monstrous Harvest', 'A Monstrous Harvest / Treat Fiends') # banner has been renamed after its first appearance
+        banners =
+          all_banner_focuses_by_pagename.map do |name, rows|
+            sanitized_name =
+              name
+              .gsub('&quot;', '"')
+              .gsub('&amp;', '&')
+              .gsub(/ \(Focus\)\Z/, '')
+              .gsub('A Monstrous Harvest', 'A Monstrous Harvest / Treat Fiends') # banner has been renamed after its first appearance
 
-          events = rows.map { |row| row['WikiName'] }.uniq.filter_map do |wikiname|
-            event = all_summoning_events_by_wikiname[wikiname]
-            @errors[:banner_focus_summoning_event_not_found] << wikiname if event.nil?
-            event
-          end
-
-          {
-            name: sanitized_name,
-            start_time: events.map { |event| event['StartTime'] }.min,
-            end_time: events.map { |event| event['EndTime'] }.max,
-            unit_ids: rows.map do |row|
-              unit = all_units_by_wikiname[row['Unit']]
-              if unit.nil?
-                @errors[:unit_on_banner_focus_not_found] << row
+            events = rows.map { |row| row['WikiName'] }.uniq.filter_map do |wikiname|
+              event = all_summoning_events_by_wikiname[wikiname]
+              if event.nil?
+                @errors[:banner_focus_summoning_event_not_found] << wikiname
                 next
               end
 
-              unit['TagID']
-            end.uniq.compact.sort,
-          }
-        end.sort_by { |banner| [banner[:start_time] || '', banner[:name]] }
+              # "Free Summon" lasts for more than a year
+              # and current ones do not have an end_time
+              next event if wikiname.include?('Free Summon')
+
+              # lasted for 6 months
+              next event if wikiname == 'Hero Fest Starter Support 20170810'
+
+              start_time = event['StartTime']&.to_time
+              end_time = event['EndTime']&.to_time
+              if start_time && end_time
+                duration = (end_time - start_time) / 3_600 / 24
+                # "summer 1" and "GW Hero Fest CYL" (each year)
+                # last for ~ 45 days
+                @errors[:banner_focus_summoning_event_too_long] << event if duration > 60
+              else
+                @errors[:banner_focus_summoning_event_missing_start_or_end_time] << event
+              end
+
+              event
+            end
+            events.sort_by! { |event| [event['StartTime'] || '', event['EndTime'] || ''] }
+
+            first_event = events.first
+            reruns = events[1..].map do |event|
+              {
+                start_time: event['StartTime'],
+                end_time: event['EndTime'],
+              }
+            end.presence
+
+            {
+              name: sanitized_name,
+              start_time: first_event&.[]('StartTime'),
+              end_time: first_event&.[]('EndTime'),
+              reruns:,
+              unit_ids: rows.map do |row|
+                unit = all_units_by_wikiname[row['Unit']]
+                if unit.nil?
+                  @errors[:unit_on_banner_focus_not_found] << row
+                  next
+                end
+
+                unit['TagID']
+              end.uniq.compact.sort,
+            }.compact
+          end
+
+        banners.sort_by { |banner| [banner[:start_time] || '', banner[:name]] }
       end
     end
   end
