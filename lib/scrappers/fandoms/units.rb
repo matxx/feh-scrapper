@@ -55,6 +55,7 @@ module Scrappers
       UNIT_KIND_MYTHIC = 'MYTHIC'
       UNIT_KIND_REARMED = 'REARMED'
       UNIT_KIND_ENTWINED = 'ENTWINED'
+      UNIT_KIND_VISTA = 'VISTA'
 
       FIVE_STAR_FOCUS_ONLY_UNIT_KINDS = [
         UNIT_KIND_AIDED,
@@ -66,6 +67,7 @@ module Scrappers
         UNIT_KIND_MYTHIC,
         UNIT_KIND_REARMED,
         UNIT_KIND_ENTWINED,
+        UNIT_KIND_VISTA,
       ].freeze
       # UNIT_TRAITS = [
       #   UNIT_KIND_AIDED,
@@ -91,6 +93,7 @@ module Scrappers
         UNIT_KIND_MYTHIC => 'mythic',
         UNIT_KIND_REARMED => 'rearmed',
         UNIT_KIND_ENTWINED => 'entwined',
+        UNIT_KIND_VISTA => 'vista',
         # 'refresher'
         # 'tempest'
         # 'ghb'
@@ -436,6 +439,7 @@ module Scrappers
           is_emblem:     true_or_nil(unit[:properties].include?('emblem')),
           is_aided:      true_or_nil(unit[:properties].include?('aided')),
           is_entwined:   true_or_nil(unit[:properties].include?('entwined')),
+          is_vista:      true_or_nil(unit[:properties].include?('vista')),
 
           is_refresher:  true_or_nil(unit[:properties].include?('refresher')),
 

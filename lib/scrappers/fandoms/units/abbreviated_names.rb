@@ -99,6 +99,7 @@ module Scrappers
             name = "E!#{name}" if unit[:properties].include?('emblem')
             name = "R!#{name}" if unit[:properties].include?('rearmed')
             name = "Et!#{name}" if unit[:properties].include?('entwined')
+            name = "Vi!#{name}" if unit[:properties].include?('vista')
 
             name = "B!#{name}" if unit[:properties].include?('brave')
             name = "F!#{name}" if unit[:properties].include?('fallen')
