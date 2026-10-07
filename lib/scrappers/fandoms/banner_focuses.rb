@@ -115,6 +115,7 @@ module Scrappers
 
             {
               name: sanitized_name,
+              fandom_id: escape_url_part(name),
               start_time: first_event&.[]('StartTime'),
               end_time: first_event&.[]('EndTime'),
               reruns:,

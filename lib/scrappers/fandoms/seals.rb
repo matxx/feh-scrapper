@@ -159,7 +159,7 @@ module Scrappers
         res = {
           id: seal['TagID'],
           game8_id: seal[:game8_id],
-          fandom_id: seal['GroupName'],
+          fandom_id: escape_url_part(seal['GroupName'].tr('/', '_')),
           name: seal['Name'],
           image_url: seal[:image_url],
           sp:,

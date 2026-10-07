@@ -388,15 +388,13 @@ module Scrappers
         games = (unit['Origin'] || '').split(',')
         constants[:games] += games
 
-        full_name = sanitize_name(unit['Page'])
-
         {
           id: unit['TagID'],
-          fandom_id: full_name,
+          fandom_id: escape_url_part(unit['Page']),
 
           name: sanitize_name(unit['Name']),
           title: sanitize_name(unit['Title']),
-          full_name:,
+          full_name: sanitize_name(unit['Page']),
           abbreviated_name: abbr_name,
 
           theme: unit[:theme],
@@ -443,7 +441,7 @@ module Scrappers
 
           is_refresher:  true_or_nil(unit[:properties].include?('refresher')),
 
-          addition_date: unit['AdditionDate'],
+          # addition_date: unit['AdditionDate'],
           release_date: unit['ReleaseDate'],
           version: unit[:version],
         }.merge(
@@ -460,7 +458,7 @@ module Scrappers
             :bst,
             :duel_score,
             :clash_score,
-            :visible_bst,
+            # :visible_bst,
             :max_score,
             :skills_max_sp,
           ),

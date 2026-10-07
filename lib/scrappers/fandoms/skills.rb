@@ -262,12 +262,11 @@ module Scrappers
       end
 
       def custom_skill_as_json(category, owner)
-        owner_page = sanitize_name(owner['Page'])
         {
           id: custom_id(category, owner),
           game8_id: owner[:game8_id],
-          fandom_id: owner_page,
-          name: owner_page,
+          fandom_id: escape_url_part(owner['Page']),
+          name: sanitize_name(owner['Page']),
           category:,
 
           is_prf: true,
@@ -390,14 +389,14 @@ module Scrappers
         errors[:missing_refine_image] << name if skill[:base_id].present? && skill[:image_url].blank?
 
         has_name_of_unit = skill['WikiName'].include?('weapon')
-        fandom_id = sanitize_name(skill['GroupName'])
+        fandom_id = skill['GroupName'].tr('/', '_')
         fandom_id = "#{name} (weapon)" if has_name_of_unit
 
         res = {
           id: skill['TagID'],
           base_id: skill[:base_id],
           game8_id: skill[:game8_id],
-          fandom_id:,
+          fandom_id: escape_url_part(fandom_id),
 
           name:,
           category: skill['Scategory'],

@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'active_support/inflector/transliterate'
+require 'erb'
 
 module Scrappers
   module Fandoms
@@ -96,6 +97,13 @@ module Scrappers
 
       def true_or_nil(bool)
         bool ? true : nil
+      end
+
+      # ex: "Light & Shadow: Part 2" => "Light_%26_Shadow%3A_Part_2"
+      def escape_url_part(str)
+        return if str.nil?
+
+        ERB::Util.url_encode(str.tr(' ', '_'))
       end
     end
   end
