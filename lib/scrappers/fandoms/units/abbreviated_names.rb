@@ -15,6 +15,7 @@ module Scrappers
               'Alear',
               'Byleth',
               'Corrin',
+              'Eshmel',
               'Grima',
               'Kana',
               'Kris',
@@ -66,6 +67,8 @@ module Scrappers
               const_get(:INT_ID_CATRIA_SOV) => 'SoV',
               const_get(:INT_ID_PALLA_SOV) => 'SoV',
               const_get(:INT_ID_EST_SOV) => 'SoV',
+
+              const_get(:INT_ID_SEIDR_MYTHIC) => 'D', # Defense
             }.freeze,
           )
 

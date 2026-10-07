@@ -72,6 +72,8 @@ module Scrappers
         INT_ID_PALLA_SOV = 667
         INT_ID_EST_SOV = 829
 
+        INT_ID_SEIDR_MYTHIC = 1419
+
         INT_ID_TIKI_A = 95
         INT_ID_TIKI_A_SU = 146
         INT_ID_TIKI_A_B = 841
